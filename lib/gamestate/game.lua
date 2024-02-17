@@ -44,6 +44,8 @@ local function init(args)
     JM.GameObject:init_state(State, data.world)
     State.game_objects = {}
 
+    
+
     data.player = Kid:new(nil, nil, 1)
     State:add_object(data.player)
 
