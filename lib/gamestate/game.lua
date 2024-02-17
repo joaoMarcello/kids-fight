@@ -46,6 +46,9 @@ local function init(args)
 
     data.player = Kid:new(nil, nil, 1)
     State:add_object(data.player)
+
+    JM.Physics:newBody(data.world, 0, 0, SCREEN_WIDTH, 16 * 2, "static")
+    JM.Physics:newBody(data.world, 0, SCREEN_HEIGHT - 16, SCREEN_WIDTH, 16, "static")
 end
 
 local function textinput(t)
@@ -102,6 +105,7 @@ local function update(dt)
 end
 
 local function draw(cam)
+    data.world:draw(true, nil, cam)
     State:draw_game_object(cam)
 end
 
