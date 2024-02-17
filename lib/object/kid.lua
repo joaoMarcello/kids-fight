@@ -21,7 +21,7 @@ function Kid:new(x, y, id)
     local x = x or (16 * 5)
     local y = y or (16 * 2)
 
-    local obj = GC:new(x, y, 16, 32, nil, 10, "dynamic", nil)
+    local obj = GC:new(x, y, 16, 1, nil, 10, "dynamic", nil)
     setmetatable(obj, self)
     return Kid.__constructor__(obj, id)
 end
@@ -55,6 +55,7 @@ function Kid:__constructor__(id)
     bd2.use_ledge_hop = false
     bd2.allowed_air_dacc = true
     bd2.coef_resis_x = 0
+    bd2.type = bd2.Types.ghost
     self.body2 = bd2
 
     --
@@ -79,15 +80,20 @@ function Kid:remove()
 end
 
 function Kid:keypressed(key)
-    -- local P1 = self.controller
-    -- local Button = P1.Button
+    local P1 = self.controller
+    local Button = P1.Button
 
-    -- local x_axis = P1:pressed(Button.left_stick_x, key)
-    -- local y_axis = P1:pressed(Button.left_stick_y, key)
+    if P1:pressed(Button.A, key) then
+        self:jump()
+    end
+end
 
-    -- if type(x_axis) == "number" and type(y_axis) == "number" then
-    --     self:move(x_axis, y_axis)
-    -- end
+function Kid:jump()
+    local bd2 = self.body2
+    if bd2.speed_y == 0 then
+        self.is_jump = true
+        return bd2:jump(16 * 2, -1)
+    end
 end
 
 ---@param x -1|1|0
@@ -99,10 +105,30 @@ function Kid:move(x, y)
     return bd:apply_force(ACC * x, ACC * y)
 end
 
+function Kid:keep_on_bounds()
+    local bd = self.body
+    local bd2 = self.body2
+
+    local px, py = 0, (SCREEN_HEIGHT - bd.h)
+    local pr = 16 * 7
+
+    bd:refresh(math.min(math.max(px, bd.x), pr), math.min(py, bd.y))
+    if bd.x == 0 and bd.speed_x < 0
+        or (bd.x == pr and bd.speed_x > 0)
+    then
+        bd.speed_x = 0
+    end
+    if bd.y == py and bd.speed_y > 0 then
+        bd.speed_y = 0
+    end
+    bd2:refresh(bd.x)
+end
+
 function Kid:update(dt)
     local P1 = self.controller
     local Button = P1.Button
-    local bd = self.body
+    local bd = self.body   --shadow
+    local bd2 = self.body2 -- player body
 
     local x_axis = P1:pressing(Button.left_stick_x)
     local y_axis = P1:pressing(Button.left_stick_y)
@@ -126,6 +152,24 @@ function Kid:update(dt)
             bd.dacc_y = DACC
         end
     end
+
+    if self.is_jump then
+        bd2:refresh(nil, bd2.y + bd.amount_y)
+
+        if bd2.speed_y >= 0.0 and bd2:bottom() >= bd:bottom() then
+            bd2:refresh(nil, bd:bottom() - bd2.h)
+            bd2.speed_y = 0.0
+            self.is_jump = false
+        end
+    else
+        if not self.is_jump then
+            bd2:refresh(nil, bd:bottom() - bd2.h)
+            bd2.speed_y = 0.0
+        end
+    end
+
+    self:keep_on_bounds()
+    -- bd2:refresh(bd.x)
 end
 
 ---@param self Kid
@@ -133,10 +177,17 @@ local my_draw = function(self)
     local lgx = love.graphics
     lgx.setColor(1, 0, 0)
     lgx.rectangle("fill", self:rect())
+
+    lgx.setColor(0, 0, 1)
+    lgx.rectangle("line", self.body2:rect())
 end
 
 function Kid:draw()
     GC.draw(self, my_draw)
+
+    love.graphics.setColor(0, 0, 0)
+    love.graphics.print(tostring(self.body2.speed_y), self.x, self.y - 32)
+    love.graphics.print(string.format("%.2f %.2f", self.body.amount_x, self.body.amount_y), self.x, self.y - 48)
 end
 
 return Kid
