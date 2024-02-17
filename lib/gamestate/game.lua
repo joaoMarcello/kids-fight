@@ -44,9 +44,7 @@ local function init(args)
     JM.GameObject:init_state(State, data.world)
     State.game_objects = {}
 
-    
-
-    data.player = Kid:new(nil, nil, 1)
+    data.player = Kid:new(nil, SCREEN_HEIGHT * 0.5, 1)
     State:add_object(data.player)
 
     JM.Physics:newBody(data.world, 0, 0, SCREEN_WIDTH, 16 * 2, "static")
