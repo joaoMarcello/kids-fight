@@ -38,7 +38,7 @@ function love.load()
 
     local P1 = JM.ControllerManager.P1
     local Button = P1.Button
-    P1.button_to_key[P1.Button.A] = { 'space', 'up', 'w' }
+    P1.button_to_key[P1.Button.A] = { 'space' }
     P1.button_to_key[P1.Button.X] = { 'f', 'e', 'j' }
     P1.button_to_key[P1.Button.B] = { 'escape', 'backspace' }
     P1.button_to_key[P1.Button.R] = { 'f', 'rshift' }
