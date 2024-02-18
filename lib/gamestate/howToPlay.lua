@@ -71,9 +71,7 @@ local restart_game = function()
     Game:restaure_canvas()
     Game:init()
     local data_ = Game:__get_data__()
-    data_.player.ia_mode = true
-    data_.x_time_fish = JM_Utils.E * 2 * 0.1
-    data_.time_game = 100
+    -- data_.player.ia_mode = true
 end
 
 local function init(args)
@@ -318,7 +316,9 @@ local function update(dt)
     JM.Sound:unlock()
 
     local data_ = Game:__get_data__()
-    if data_.player.hp <= 3 or data_.time_game > 135 then
+    if data_.player.hp <= 3
+    -- or data_.time_game > 135
+    then
         restart_game()
     end
 
@@ -357,7 +357,7 @@ end
 local draw_arrow = function(self)
     local font = JM:get_font("pix8")
     font:push()
-    font:set_color(JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("d96c21")))
+    font:set_color(JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("352e99")))
     font:print(" :arw_head_fr:", self.x, self.y)
     font:pop()
 end
@@ -430,7 +430,7 @@ local function draw(cam)
     font:set_color(Utils:get_rgba(Utils:hex_to_rgba_float("665c57")))
     font:printf(string.format("%d/%d", box.cur_screen, box.amount_screens), x + w, y + h - 8, 16, "right")
 
-    font:set_color(Utils:get_rgba(Utils:hex_to_rgba_float("d96c21")))
+    font:set_color(Utils:get_rgba(Utils:hex_to_rgba_float("352e99")))
     font:printx("<effect=flickering, speed=1>press [enter] to play", 0, SCREEN_HEIGHT - 14, SCREEN_WIDTH - 8,
         "right")
 
