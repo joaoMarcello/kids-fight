@@ -17,6 +17,7 @@ local States = {
     dead = 3,
     atk = 4,
     idle = 5,
+    runAway = 6,
 }
 
 ---@enum Kid.AnimaStates
@@ -27,6 +28,7 @@ local AnimaState = {
     jump = 4,
     fall = 5,
     atk = 6,
+    walk = 7,
 }
 
 local tile = _G.TILE or 16
@@ -64,25 +66,27 @@ Kid.__index = Kid
 Kid.Gender = Gender
 Kid.is_kid = true
 
-function Kid:new(x, y, gender, direction)
+function Kid:new(x, y, gender, direction, is_enemy)
     gender = gender or Gender.girl
     local x = x or (16 * 5)
     local y = y or (16 * 2)
 
     local obj = GC:new(x, y, 14, 3, nil, 10, "dynamic", nil)
     setmetatable(obj, self)
-    return Kid.__constructor__(obj, gender, direction or 1)
+    return Kid.__constructor__(obj, gender, direction or 1, is_enemy)
 end
 
-function Kid:__constructor__(gender, direction)
+function Kid:__constructor__(gender, direction, is_enemy)
     self.ox = self.w * 0.5
     self.oy = self.h
 
     self.gender = gender
-    self.is_enemy = false
+    self.is_enemy = is_enemy or false
     self.direction = direction
 
-    self.stones = gender == Gender.girl and MAX_STONE or 1000
+    self.stones = not self.is_enemy and math.floor(MAX_STONE * 0.5) or 1000
+    self.max_stones = not self.is_enemy and MAX_STONE or math.huge
+
     self.hp = HP_MAX
     self.hp_init = self.hp
     self.time_invincible = 0.0
@@ -205,7 +209,7 @@ function Kid:is_dead()
 end
 
 function Kid:add_stone()
-    if self.stones < MAX_STONE then
+    if self.stones < self.max_stones then
         self.stones = self.stones + 1
         return true
     end
