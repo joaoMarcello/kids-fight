@@ -334,6 +334,9 @@ function Kid:update(dt)
     end
 
     if self.is_jump then
+        bd.max_speed_x = MAX_SPEED * 0.5
+        bd.max_speed_y = MAX_SPEED * 0.5
+
         bd2:refresh(nil, bd2.y + bd.amount_y)
 
         if bd2.speed_y >= 0.0 and bd2:bottom() >= bd.y then
@@ -345,6 +348,8 @@ function Kid:update(dt)
         if not self.is_jump then
             bd2:refresh(nil, bd.y - bd2.h)
             bd2.speed_y = 0.0
+            bd.max_speed_x = MAX_SPEED
+            bd.max_speed_y = MAX_SPEED
         end
     end
 
