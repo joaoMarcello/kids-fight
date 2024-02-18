@@ -49,6 +49,8 @@ local function init(args)
 
     JM.Physics:newBody(data.world, 0, 0, SCREEN_WIDTH, 16 * 2, "static")
     JM.Physics:newBody(data.world, 0, SCREEN_HEIGHT - 16, SCREEN_WIDTH, 16, "static")
+
+    State:add_object(Kid:new(16 * 12, SCREEN_HEIGHT * 0.5, Kid.Gender.boy, -1))
 end
 
 local function textinput(t)
@@ -62,6 +64,10 @@ local function keypressed(key)
     end
 
     data.player:keypressed(key)
+
+    if key == 'u' then
+        data.player:damage(1, nil)
+    end
 end
 
 local function keyreleased(key)
