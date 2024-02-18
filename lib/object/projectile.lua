@@ -54,6 +54,7 @@ function Projectile:__constructor__(id, bottom, direction, mult)
     bd.lock_resistance_y = true
     bd.allowed_gravity = false
     bd.allowed_air_dacc = false
+    bd:set_holder(self)
     self.body2 = bd
 
     --
@@ -76,8 +77,14 @@ function Projectile:remove()
     self.body2 = nil
 end
 
+function Projectile:on_ground()
+    local bd = self.body   -- projectile collider
+    local bd2 = self.body2 -- the projectile shadow
+    return bd:bottom() == bd2.y
+end
+
 function Projectile:update(dt)
-    local bd = self.body
+    local bd = self.body   -- projectile collider
     local bd2 = self.body2 -- the projectile shadow
 
     if self.time_force ~= 0 then
@@ -108,17 +115,38 @@ function Projectile:update(dt)
     bd2:refresh(bd.x)
     --==============================================================
 
-    ---@type Kid
-    local kid = self.gamestate:__get_data__().player
-    local kbd = kid.body2
-    if bd:check_collision(kbd.x, kbd:bottom() - 16, kbd.w, 16)
-        and kid:distance() <= 8
-    then
-        local success = kid:add_stone()
-        if success then
-            return self:remove()
+    local items = self.world:get_items_in_cell_obj(bd.x, bd.y, bd.w, bd.h, bd.empty_table())
+    if items then
+        for item, _ in next, items do
+            ---@type JM.Physics.Collide
+            local item = item
+            ---@type Kid|nil
+            local kid = item.holder
+
+            if kid and kid.is_kid then
+                local kbd = kid.body2
+                if bd:check_collision(kbd.x, kbd:bottom() - 16, kbd.w, 16)
+                    and kid:distance() <= 8
+                then
+                    if self:on_ground() then
+                        local success = kid:add_stone()
+                        if success then
+                            return self:remove()
+                        end
+                        ---
+                    else
+                        if self.direction ~= kid.direction then
+                            local success = kid:damage(1, self)
+                            if success then
+                                return self:remove()
+                            end
+                        end
+                    end
+                end
+            end
         end
     end
+
 
     self.x, self.y = bd.x, bd.y
 end
@@ -137,7 +165,7 @@ function Projectile:draw()
     GC.draw(self, my_draw)
 
     love.graphics.setColor(0, 0, 0)
-    love.graphics.print(string.format("%.2f", self.body.speed_x), self.body.x, self.body.y - 16)
+    -- love.graphics.print(string.format("%.2f", self.body.speed_x), self.body.x, self.body.y - 16)
 end
 
 return Projectile
