@@ -1,12 +1,37 @@
 local GC = _G.JM.BodyObject
 local Phys = JM.Physics
+local Utils = JM.Utils
 local Projectile = require "lib.object.projectile"
 
-local TILE = _G.TILE or 16
+---@enum Kid.Gender
+local Gender = {
+    girl = 1,
+    boy = 2,
+}
+
+---@enum Kid.States
+local States = {
+    normal = 1,
+    preparing = 2,
+    dead = 3,
+}
+
+---@enum Kid.AnimaStates
+local AnimaState = {
+    idle = 1,
+    run = 2,
+    dead = 3,
+    jump = 4,
+    fall = 5,
+}
+
+local tile = _G.TILE or 16
 local ACC = (16 * 12 * 60) --16 * 12  f = m * a   a = f / m
 local MAX_SPEED = 16 * 7
 local DACC = ACC * 2
 local MAX_STONE = 15
+local HP_MAX = 10
+local INVICIBLE_DURATION = 1
 
 ---@param self Kid
 local function throw_stone(self)
@@ -29,25 +54,32 @@ end
 ---@class Kid : BodyObject
 local Kid = setmetatable({}, GC)
 Kid.__index = Kid
+Kid.Gender = Gender
+Kid.is_kid = true
 
-function Kid:new(x, y, id, direction)
-    id = id or 1
+function Kid:new(x, y, gender, direction)
+    gender = gender or Gender.girl
     local x = x or (16 * 5)
     local y = y or (16 * 2)
 
     local obj = GC:new(x, y, 14, 3, nil, 10, "dynamic", nil)
     setmetatable(obj, self)
-    return Kid.__constructor__(obj, id, direction or 1)
+    return Kid.__constructor__(obj, gender, direction or 1)
 end
 
-function Kid:__constructor__(id, direction)
+function Kid:__constructor__(gender, direction)
     self.ox = self.w * 0.5
     self.oy = self.h
 
-    self.id = id
+    self.gender = gender
+    self.is_enemy = false
     self.direction = direction
 
-    self.stones = MAX_STONE
+    self.stones = gender == Gender.girl and MAX_STONE or 5
+    self.hp = HP_MAX
+    self.time_invincible = 0.0
+
+    self:set_state(States.normal)
 
     self.controller = JM.ControllerManager.P1
 
@@ -73,6 +105,7 @@ function Kid:__constructor__(id, direction)
     bd2.allowed_air_dacc = true
     bd2.coef_resis_x = 0
     bd2.type = bd2.Types.ghost
+    bd2:set_holder(self)
     self.body2 = bd2 -- body2 is the actual player collider
 
     self.atk_action = throw_stone
@@ -98,6 +131,14 @@ function Kid:remove()
     self.body2 = nil
 end
 
+function Kid:set_state(new_state)
+    if self.state == new_state then return end
+    self.state = new_state
+    self.time_state = 0.0
+
+    return true
+end
+
 function Kid:keypressed(key)
     local P1 = self.controller
     local Button = P1.Button
@@ -108,6 +149,25 @@ function Kid:keypressed(key)
     elseif P1:pressed(Button.X, key) then
         return self:attack()
     end
+end
+
+function Kid:damage(value, obj)
+    value = value or 1
+    if self:is_dead() or self.time_invincible ~= 0.0 then return false end
+
+    self.hp = Utils:clamp(self.hp - value, 0, HP_MAX)
+    self.time_invincible = INVICIBLE_DURATION
+
+    if self.hp == 0 then
+        self:set_state(States.dead)
+    else
+    end
+
+    return true
+end
+
+function Kid:is_dead()
+    return self.hp <= 0
 end
 
 function Kid:add_stone()
@@ -146,6 +206,11 @@ function Kid:keep_on_bounds()
     local px, py = 0, (SCREEN_HEIGHT - bd.h)
     local pr = 16 * 7
 
+    if self.direction < 0 then
+        px = 16 * 12
+        pr = SCREEN_WIDTH
+    end
+
     bd:refresh(math.min(math.max(px, bd.x), pr), math.min(py, bd.y))
     if bd.x == 0 and bd.speed_x < 0
         or (bd.x == pr and bd.speed_x > 0)
@@ -165,14 +230,48 @@ function Kid:distance()
     return (bd.y - bd2:bottom())
 end
 
+---@param self Kid
+local function movement(self, dt)
+    local P1 = self.controller
+    local Button = P1.Button
+
+    if self.gender == Gender.girl then
+        return P1:pressing(Button.left_stick_x),
+            P1:pressing(Button.left_stick_y)
+    else
+        return -1, 0
+    end
+end
+
+local args_flick = { speed = 0.06 }
+
 function Kid:update(dt)
+    GC.update(self, dt)
+
     local P1 = self.controller
     local Button = P1.Button
     local bd = self.body   --shadow
     local bd2 = self.body2 -- player body
 
-    local x_axis = P1:pressing(Button.left_stick_x)
-    local y_axis = P1:pressing(Button.left_stick_y)
+    local x_axis, y_axis = movement(self, dt)
+    self.time_state = self.time_state + dt
+
+    if self.time_invincible ~= 0 and not self:is_dead()
+        and not self.gamestate:is_paused()
+    then
+        self:apply_effect('flickering', args_flick)
+    else
+        local eff = self.eff_actives and self.eff_actives['flickering']
+        if eff then
+            eff.__remove = true
+            self.eff_actives['flickering'] = nil
+            self:set_visible(true)
+        end
+    end
+
+    if self.time_invincible ~= 0 then
+        self.time_invincible = Utils:clamp(self.time_invincible - dt, 0, INVICIBLE_DURATION)
+    end
 
     if type(x_axis) == "number" and type(y_axis) == "number" then
         if bd.speed_x > 0 and x_axis == -1
@@ -210,6 +309,15 @@ function Kid:update(dt)
     end
 
     self:keep_on_bounds()
+
+    if self.gender == Gender.boy then
+        self.temp = self.temp or 3
+        self.temp = self.temp - dt
+        if self.temp <= 0 then
+            self.temp = 3
+            self:attack()
+        end
+    end
     self.x, self.y = bd.x, bd.y
 end
 
@@ -227,8 +335,8 @@ function Kid:draw()
     GC.draw(self, my_draw)
 
     love.graphics.setColor(0, 0, 0)
-    love.graphics.print(tostring(self.body2.speed_y), self.x, self.y - 32)
-    love.graphics.print(string.format("%.2f %.2f", self.body.amount_x, self.body.amount_y), self.x, self.y - 48)
+    love.graphics.print(tostring(self.hp), self.x, self.y - 32)
+    -- love.graphics.print(string.format("%.2f %.2f", self.body.amount_x, self.body.amount_y), self.x, self.y - 48)
 end
 
 return Kid
