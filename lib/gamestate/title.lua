@@ -832,7 +832,7 @@ local function draw(cam)
     then
         font:push()
         font:set_color(color)
-        font:printf("[up/down] move\t :bt_a: select\t :bt_b: back", 8, TILE * 10, SCREEN_WIDTH, "center")
+        font:printf("[up/down] move\t [space] select\t [esc] back", 8, TILE * 10, SCREEN_WIDTH, "center")
         font:pop()
         ---
     elseif state ~= States.data
