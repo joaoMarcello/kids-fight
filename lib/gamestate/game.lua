@@ -27,6 +27,10 @@ local State = JM.Scene:new {
 ---@class GameState.Game.Data
 local data = {}
 
+function data.play_song()
+
+end
+
 --============================================================================
 
 function State:__get_data__()
