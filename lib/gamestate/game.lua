@@ -147,7 +147,31 @@ local function touchreleased(id, x, y, dx, dy, pressure)
 end
 
 local function gamepadpressed(joystick, button)
+    local P1 = data.player.controller
+    local Button = P1.Button
 
+    if P1:pressed(Button.A, joystick, button) then
+        State:keypressed('space')
+    elseif P1:pressed(Button.B, joystick, button) then
+        State:keypressed('escape')
+    elseif P1:pressed(Button.start, joystick, button) then
+        State:keypressed('enter')
+    elseif P1:pressed(Button.dpad_left, joystick, button) then
+        State:keypressed('left')
+    elseif P1:pressed(Button.dpad_right, joystick, button) then
+        State:keypressed('right')
+    elseif P1:pressed(Button.dpad_up, joystick, button) then
+        State:keypressed('up')
+    elseif P1:pressed(Button.dpad_down, joystick, button) then
+        State:keypressed('down')
+    elseif P1:pressed(Button.X, joystick, button)
+        or P1:pressed(Button.L, joystick, button)
+        or P1:pressed(Button.R, joystick, button)
+    then
+        State:keypressed('f')
+    end
+
+    P1:switch_to_joystick()
 end
 
 local function gamepadreleased(joystick, button)
@@ -155,6 +179,24 @@ local function gamepadreleased(joystick, button)
 end
 
 local function gamepadaxis(joystick, axis, value)
+    local P1 = data.player.controller
+    local Button = P1.Button
+
+    local x_axis = P1:pressed(Button.left_stick_x, joystick, axis, value)
+    if x_axis == 1 then
+        State:keypressed('right')
+    elseif x_axis == -1 then
+        State:keypressed('left')
+    end
+
+    local y_axis = P1:pressed(Button.left_stick_y, joystick, axis, value)
+    if y_axis == 1 then
+        State:keypressed('down')
+    elseif y_axis == -1 then
+        State:keypressed('up')
+    end
+
+    P1:switch_to_joystick()
 end
 
 local function resize(w, h)
