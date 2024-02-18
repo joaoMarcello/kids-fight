@@ -13,6 +13,11 @@ local ACC = (16 * 12 * 60)
 local MAX_SPEED = 16 * 7
 local DACC = ACC * 0.5
 
+---@type love.Image|any
+local IMG
+
+local QUADS
+
 ---@class Projectile : BodyObject
 local Projectile = setmetatable({}, GC)
 Projectile.Type = Types
@@ -35,7 +40,7 @@ end
 
 function Projectile:__constructor__(id, bottom, direction, mult)
     self.type = id
-    self.time_force = 0.5
+    self.time_force = 0.85 --0.5
     self.direction = direction
 
     local bd = self.body
@@ -48,6 +53,9 @@ function Projectile:__constructor__(id, bottom, direction, mult)
     bd.mass = bd.mass * 0.25
     bd.speed_x = (MAX_SPEED * mult) * self.direction
 
+    self.ox = bd.w * 0.5
+    self.oy = bd.h * 0.5
+
     bd = Phys:newBody(self.world, bd.x, bottom, bd.w, 2, "dynamic")
     bd.lock_friction_x = true
     bd.lock_resistance_x = true
@@ -57,6 +65,8 @@ function Projectile:__constructor__(id, bottom, direction, mult)
     bd:set_holder(self)
     self.body2 = bd
 
+    self.lifetime = 5.0
+
     --
     self.update = Projectile.update
     self.draw = Projectile.draw
@@ -64,11 +74,20 @@ function Projectile:__constructor__(id, bottom, direction, mult)
 end
 
 function Projectile:load()
-
+    local lgx = love.graphics
+    IMG = IMG or love.graphics.newImage("/data/img/projectiles.png")
+    local w, h = IMG:getDimensions()
+    QUADS = QUADS or {
+        [Types.stone] = lgx.newQuad(0, 0, 16, 16, w, h),
+    }
 end
 
-function Projectile:init()
-
+function Projectile:finish()
+    if IMG then
+        IMG:release()
+    end
+    IMG = nil
+    QUADS = nil
 end
 
 function Projectile:remove()
@@ -87,7 +106,10 @@ function Projectile:get_shadow()
     return self.body2
 end
 
+local flick_args = { speed = 0.07 }
 function Projectile:update(dt)
+    GC.update(self, dt)
+
     local bd = self.body   -- projectile collider
     local bd2 = self.body2 -- the projectile shadow
 
@@ -117,6 +139,15 @@ function Projectile:update(dt)
         bd:apply_force(DACC * -bd:direction_x())
     end
     bd2:refresh(bd.x)
+
+    if self:on_ground() then
+        self.lifetime = self.lifetime - dt
+        if self.lifetime <= 0 then
+            return self:remove()
+        elseif self.lifetime <= 1.6 then
+            self:apply_effect("flickering", flick_args)
+        end
+    end
     --==============================================================
 
     local items = self.world:get_items_in_cell_obj(bd.x, bd.y, bd.w, bd.h, bd.empty_table())
@@ -171,11 +202,17 @@ end
 ---@param self Projectile
 local function my_draw(self)
     local lgx = love.graphics
-    lgx.setColor(1, 1, 0)
-    lgx.rectangle("line", self:rect())
+    -- lgx.setColor(1, 1, 0)
+    -- lgx.rectangle("line", self:rect())
 
-    lgx.setColor(1, 0, 0)
-    lgx.rectangle("fill", self.body2:rect())
+    -- lgx.setColor(1, 0, 0)
+    -- lgx.rectangle("fill", self.body2:rect())
+
+    lgx.setColor(1, 1, 1)
+    ---@type love.Quad
+    local quad = QUADS[self.type]
+    local vx, vy, vw, vh = quad:getViewport()
+    lgx.draw(IMG, quad, self.x + self.w * 0.5, self.y + self.h * 0.5, 0, 1, 1, vw * 0.5, vh * 0.5)
 end
 
 function Projectile:draw()
