@@ -87,8 +87,9 @@ function Kid:__constructor__(gender, direction, is_enemy)
     self.stones = not self.is_enemy and math.floor(MAX_STONE * 0.5) or 1000
     self.max_stones = not self.is_enemy and MAX_STONE or math.huge
 
-    self.hp = HP_MAX
+    self.hp = self.is_enemy and 5 or HP_MAX
     self.hp_init = self.hp
+    -- self.hp = 2
     self.time_invincible = 0.0
 
     self:set_state(States.normal)
@@ -108,7 +109,7 @@ function Kid:__constructor__(gender, direction, is_enemy)
     bd.allowed_air_dacc = true
     bd.coef_resis_x = 0
 
-    local bd2 = Phys:newBody(self.world, bd.x, bd.y, bd.w, 24, "dynamic")
+    local bd2 = Phys:newBody(self.world, bd.x, bd.y - 24, bd.w, 24, "dynamic")
     bd2.allowed_gravity = true
     bd2.lock_friction_x = true
     bd2.lock_resistance_x = true
@@ -129,12 +130,13 @@ function Kid:__constructor__(gender, direction, is_enemy)
     self.anima_idle = animas["idle"]:copy()
     ---@type JM.Anima
     self.cur_anima = self.anima_idle
-
+    self.cur_anima:set_flip_x(self.direction == -1)
     --
     self.update = Kid.update
     self.draw = Kid.draw
 
-    self:update(1 / 60)
+    -- self:update(1 / 60)
+    self:keep_on_bounds()
     return self
 end
 
@@ -274,9 +276,15 @@ local function movement(self, dt)
     local P1 = self.controller
     local Button = P1.Button
 
-    if self.gender == Gender.girl then
-        return P1:pressing(Button.left_stick_x),
-            P1:pressing(Button.left_stick_y)
+    if not self.is_enemy then
+        local x = P1:pressing(Button.dpad_right) and 1 or 0
+        x = (x == 0 and P1:pressing(Button.dpad_left) and -1) or x
+        x = (x == 0 and tonumber(P1:pressing(Button.left_stick_x))) or x
+
+        local y = P1:pressing(Button.dpad_up) and -1 or 0
+        y = (y == 0 and P1:pressing(Button.dpad_down) and 1) or y
+        y = (y == 0 and tonumber(P1:pressing(Button.left_stick_y))) or y
+        return x, y
     else
         return -1, 0
     end
@@ -296,6 +304,7 @@ function Kid:update(dt)
     local x_axis, y_axis = movement(self, dt)
     self.time_state = self.time_state + dt
 
+    -- flick when invincible
     if self.time_invincible ~= 0 and not self:is_dead()
         and not self.gamestate:is_paused()
     then
@@ -334,8 +343,8 @@ function Kid:update(dt)
     end
 
     if self.is_jump then
-        bd.max_speed_x = MAX_SPEED * 0.5
-        bd.max_speed_y = MAX_SPEED * 0.5
+        bd.max_speed_x = MAX_SPEED * 0.75
+        bd.max_speed_y = MAX_SPEED * 0.75
 
         bd2:refresh(nil, bd2.y + bd.amount_y)
 
@@ -355,7 +364,7 @@ function Kid:update(dt)
 
     self:keep_on_bounds()
 
-    if self.gender == Gender.boy then
+    if self.is_enemy then
         self.temp = self.temp or 3
         self.temp = self.temp - dt
         if self.temp <= 0 then
