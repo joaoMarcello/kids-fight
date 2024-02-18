@@ -23,7 +23,7 @@ if not _G.WEB then
     outline = JM.Shader:get_exclusive_shader("outline")
 end
 
-local color_outline = { 5, .66, 1 }
+local color_outline = { 6, 1, 0.5 }
 --=========================================================================
 ---@param self DisplayHP2
 local function init_action(self, dt)
