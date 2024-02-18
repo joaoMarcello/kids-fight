@@ -83,6 +83,10 @@ function Projectile:on_ground()
     return bd:bottom() == bd2.y
 end
 
+function Projectile:get_shadow()
+    return self.body2
+end
+
 function Projectile:update(dt)
     local bd = self.body   -- projectile collider
     local bd2 = self.body2 -- the projectile shadow
@@ -135,11 +139,24 @@ function Projectile:update(dt)
                         end
                         ---
                     else
-                        if self.direction ~= kid.direction then
-                            local success = kid:damage(1, self)
-                            if success then
-                                return self:remove()
-                            end
+                        -- if self.direction ~= kid.direction then
+                        --     local cond = math.abs(kid:get_shadow():bottom() - bd2.y) <= 32
+                        --     local success = cond and kid:damage(1, self)
+                        --     if success then
+                        --         return self:remove()
+                        --     end
+                        -- end
+                    end
+                end
+
+                if not self:on_ground()
+                    and bd:check_collision(kbd:rect())
+                then
+                    if self.direction ~= kid.direction then
+                        local cond = math.abs(kid:get_shadow():bottom() - bd2.y) <= 16
+                        local success = cond and kid:damage(1, self)
+                        if success then
+                            return self:remove()
                         end
                     end
                 end
