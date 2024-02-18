@@ -79,7 +79,8 @@ end
 local function init(args)
     restart_game()
 
-    data.text = string.format("Throw stones on your enemies<next>Move:\tA/D\nJump:\tW/up\nAttack:\tF/J<next>Done")
+    data.text = string.format(
+        "Throw stones on your enemies<next>Move:\tA/D or left/right\nJump:\tspace\nAttack:\tF/J/E<next>Done")
 
     local font = JM:get_font("pix8")
     font:push()
