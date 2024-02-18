@@ -31,12 +31,27 @@ function State:__get_data__()
     return data
 end
 
+local imgs
 local function load()
     Kid:load()
+
+    local lgx = love.graphics
+    imgs = imgs or {
+        ["field"] = lgx.newImage("/data/img/background.png"),
+        ["street_down"] = lgx.newImage("/data/img/back_down.png"),
+        ["street_up"] = lgx.newImage("/data/img/back_up.png"),
+    }
 end
 
 local function finish()
     Kid:finish()
+
+    if imgs then
+        imgs["field"]:release()
+        imgs["street_down"]:release()
+        imgs["street_up"]:release()
+    end
+    imgs = nil
 end
 
 local function init(args)
@@ -47,7 +62,7 @@ local function init(args)
     data.player = Kid:new(nil, SCREEN_HEIGHT * 0.5, 1)
     State:add_object(data.player)
 
-    JM.Physics:newBody(data.world, 0, 0, SCREEN_WIDTH, 16 * 2, "static")
+    JM.Physics:newBody(data.world, 0, 0, SCREEN_WIDTH, 16 * 3, "static")
     JM.Physics:newBody(data.world, 0, SCREEN_HEIGHT - 16, SCREEN_WIDTH, 16, "static")
 
     State:add_object(Kid:new(16 * 12, SCREEN_HEIGHT * 0.5, Kid.Gender.boy, -1))
@@ -111,8 +126,31 @@ local function update(dt)
 end
 
 local function draw(cam)
-    data.world:draw(true, nil, cam)
-    State:draw_game_object(cam)
+    local lgx = love.graphics
+    lgx.setColor(1, 1, 1)
+    lgx.draw(imgs["field"])
+
+    -- data.world:draw(true, nil, cam)
+
+    local list = State.game_objects
+    for i = 1, #list do
+        ---@type GameObject|BodyObject|Kid|Projectile|any
+        local obj = list[i]
+        if not obj.__remove and obj.get_shadow and obj.is_visible then
+            local s = obj:get_shadow()
+            local x, y, w, h = s:rect()
+            lgx.setColor(0, 0, 0, 0.5)
+            lgx.ellipse("fill", x + w * 0.5, y, w, 4)
+        end
+    end
+
+    lgx.setColor(1, 1, 1)
+    lgx.draw(imgs["street_up"])
+
+    State:draw_game_object(cam, true)
+
+    lgx.setColor(1, 1, 1)
+    lgx.draw(imgs["street_down"])
 end
 
 --============================================================================
