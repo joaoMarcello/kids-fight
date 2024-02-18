@@ -15,6 +15,8 @@ local States = {
     normal = 1,
     preparing = 2,
     dead = 3,
+    atk = 4,
+    idle = 5,
 }
 
 ---@enum Kid.AnimaStates
@@ -24,15 +26,19 @@ local AnimaState = {
     dead = 3,
     jump = 4,
     fall = 5,
+    atk = 6,
 }
 
 local tile = _G.TILE or 16
 local ACC = (16 * 12 * 60) --16 * 12  f = m * a   a = f / m
-local MAX_SPEED = 16 * 7
+local MAX_SPEED = 16 * 4.5
 local DACC = ACC * 2
 local MAX_STONE = 15
 local HP_MAX = 10
 local INVICIBLE_DURATION = 1
+
+local imgs
+local animas
 
 ---@param self Kid
 local function throw_stone(self)
@@ -115,6 +121,11 @@ function Kid:__constructor__(gender, direction)
 
     self.displayHP = DisplayHP:new(self)
 
+    ---@type JM.Anima
+    self.anima_idle = animas["idle"]:copy()
+    ---@type JM.Anima
+    self.cur_anima = self.anima_idle
+
     --
     self.update = Kid.update
     self.draw = Kid.draw
@@ -125,6 +136,17 @@ end
 function Kid:load()
     Projectile:load()
     DisplayHP:load()
+
+    local lgx = love.graphics
+    local Anima = JM.Anima
+
+    imgs = imgs or {
+        ["idle"] = lgx.newImage("/data/img/kid_01.png"),
+    }
+
+    animas = animas or {
+        ["idle"] = Anima:new { img = imgs["idle"], frames = 1 },
+    }
 end
 
 function Kid:finish()
@@ -331,6 +353,10 @@ function Kid:update(dt)
             self:attack()
         end
     end
+
+    self.cur_anima:update(dt)
+    self.cur_anima:set_flip_x(self.direction == -1)
+
     self.x, self.y = bd.x, bd.y
 end
 
@@ -338,17 +364,19 @@ end
 local my_draw = function(self)
     local lgx = love.graphics
     lgx.setColor(1, 0, 0)
-    lgx.rectangle("fill", self:rect())
+    -- lgx.rectangle("fill", self:rect())
 
     lgx.setColor(0, 0, 1)
-    lgx.rectangle("line", self.body2:rect())
+    -- lgx.rectangle("line", self.body2:rect())
+
+    self.cur_anima:draw_rec(self.body2:rect())
 end
 
 function Kid:draw()
     GC.draw(self, my_draw)
 
-    love.graphics.setColor(0, 0, 0)
-    love.graphics.print(tostring(self.hp), self.x, self.y - 32)
+    -- love.graphics.setColor(0, 0, 0)
+    -- love.graphics.print(tostring(self.hp), self.x, self.y - 32)
 
     self.displayHP:draw()
     -- love.graphics.print(string.format("%.2f %.2f", self.body.amount_x, self.body.amount_y), self.x, self.y - 48)
