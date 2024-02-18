@@ -96,11 +96,30 @@ local function keypressed(key)
         State.camera:toggle_world_bounds()
     end
 
-    data.player:keypressed(key)
+    local P1 = data.player.controller
+    local Button = P1.Button
+    P1:switch_to_keyboard()
 
-    if key == 'u' then
-        data.player:damage(1, nil)
+    if (P1:pressed(Button.start, key) or P1:pressed(Button.B, key))
+    then
+        JM.Sound:pause()
+        _G.Play_sfx("pause", true)
+
+        local audio = JM.Sound:get_current_song()
+        if audio then
+            -- audio.source:pause()
+            audio:set_volume(audio.init_volume * 0.15)
+        end
+
+        return State:change_gamestate(require "lib.gamestate.pause", {
+            skip_finish = true,
+            skip_transition = true,
+            keep_canvas = true,
+            save_prev = true,
+        })
     end
+
+    data.player:keypressed(key)
 end
 
 local function keyreleased(key)
