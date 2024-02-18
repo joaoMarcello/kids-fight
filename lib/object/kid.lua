@@ -2,6 +2,7 @@ local GC = _G.JM.BodyObject
 local Phys = JM.Physics
 local Utils = JM.Utils
 local Projectile = require "lib.object.projectile"
+local DisplayHP = require "lib.object.displayHP"
 
 ---@enum Kid.Gender
 local Gender = {
@@ -77,6 +78,7 @@ function Kid:__constructor__(gender, direction)
 
     self.stones = gender == Gender.girl and MAX_STONE or 1000
     self.hp = HP_MAX
+    self.hp_init = self.hp
     self.time_invincible = 0.0
 
     self:set_state(States.normal)
@@ -105,10 +107,13 @@ function Kid:__constructor__(gender, direction)
     bd2.allowed_air_dacc = true
     bd2.coef_resis_x = 0
     bd2.type = bd2.Types.ghost
+    bd2.mass = bd2.mass * 0.75
     bd2:set_holder(self)
     self.body2 = bd2 -- body2 is the actual player collider
 
     self.atk_action = throw_stone
+
+    self.displayHP = DisplayHP:new(self)
 
     --
     self.update = Kid.update
@@ -119,10 +124,12 @@ end
 
 function Kid:load()
     Projectile:load()
+    DisplayHP:load()
 end
 
 function Kid:finish()
     Projectile:finish()
+    DisplayHP:finish()
 end
 
 function Kid:remove()
@@ -161,6 +168,7 @@ function Kid:damage(value, obj)
     if self.hp == 0 then
         self:set_state(States.dead)
     else
+        self.displayHP:show()
     end
 
     return true
@@ -251,6 +259,7 @@ local args_flick = { speed = 0.06 }
 
 function Kid:update(dt)
     GC.update(self, dt)
+    self.displayHP:update(dt)
 
     local P1 = self.controller
     local Button = P1.Button
@@ -340,6 +349,8 @@ function Kid:draw()
 
     love.graphics.setColor(0, 0, 0)
     love.graphics.print(tostring(self.hp), self.x, self.y - 32)
+
+    self.displayHP:draw()
     -- love.graphics.print(string.format("%.2f %.2f", self.body.amount_x, self.body.amount_y), self.x, self.y - 48)
 end
 
