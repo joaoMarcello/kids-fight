@@ -62,7 +62,11 @@ function Display:update(dt)
 end
 
 function Display:my_draw()
-    if self.w <= 0 then return end
+    if self.w <= 0
+    -- or not self.kid.is_enemy
+    then
+        return
+    end
     local lgx = love.graphics
     local Utils = JM_Utils
 
