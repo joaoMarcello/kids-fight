@@ -134,6 +134,7 @@ function Kid:__constructor__(gender, direction, is_enemy)
     self.update = Kid.update
     self.draw = Kid.draw
 
+    self:update(1 / 60)
     return self
 end
 
