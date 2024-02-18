@@ -142,8 +142,8 @@ end
 local __init__ = {
     [States.options] = function()
         data.container = Container:new {
-            x = TILE, y = TILE, w = 128, h = 180,
-            space_vertical = 8,
+            x = TILE, y = TILE * 2.5, w = 128, h = 180,
+            space_vertical = 12,
             on_focus = true,
         }
         data.container:set_type("vertical_list")
@@ -180,7 +180,7 @@ local __init__ = {
             or Component:new {
                 w = BT_WIDTH, h = BT_HEIGHT,
                 on_focus = false,
-                text = 'Credits',
+                text = 'About',
                 draw = draw,
             }
 
@@ -712,7 +712,7 @@ local __draw__ = {
     [States.pressToPlay] = function(self, cam)
         font:push()
         font:set_color(JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("332424")))
-        font:printx("<effect=flickering, speed=1>Press [enter] to play", 0, 16 * 8, SCREEN_WIDTH,
+        font:printx("<effect=ghost, min=0.1, max=1.15>Press [enter] to play", 0, 16 * 8, SCREEN_WIDTH,
             "center")
 
         font:printf("2024, JM", 0, 16 * 9, SCREEN_WIDTH, "center")
