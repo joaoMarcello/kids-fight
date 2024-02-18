@@ -75,7 +75,7 @@ function Kid:__constructor__(gender, direction)
     self.is_enemy = false
     self.direction = direction
 
-    self.stones = gender == Gender.girl and MAX_STONE or 5
+    self.stones = gender == Gender.girl and MAX_STONE or 1000
     self.hp = HP_MAX
     self.time_invincible = 0.0
 
@@ -164,6 +164,10 @@ function Kid:damage(value, obj)
     end
 
     return true
+end
+
+function Kid:get_shadow()
+    return self.body
 end
 
 function Kid:is_dead()
