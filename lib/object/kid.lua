@@ -18,6 +18,7 @@ local States = {
     atk = 4,
     idle = 5,
     runAway = 6,
+    goingTo = 7,
 }
 
 ---@enum Kid.AnimaStates
@@ -35,12 +36,14 @@ local tile = _G.TILE or 16
 local ACC = (16 * 12 * 60) --16 * 12  f = m * a   a = f / m
 local MAX_SPEED = 16 * 4.5
 local DACC = ACC * 2
-local MAX_STONE = 15
+local MAX_STONE = 10
 local HP_MAX = 10
 local INVICIBLE_DURATION = 1
 
 local imgs
 local animas
+
+local random = love.math.random
 
 ---@param self Kid
 local function throw_stone(self)
@@ -66,17 +69,19 @@ Kid.__index = Kid
 Kid.Gender = Gender
 Kid.is_kid = true
 
-function Kid:new(x, y, gender, direction, is_enemy)
+function Kid:new(x, y, gender, direction, is_enemy, move_type)
     gender = gender or Gender.girl
     local x = x or (16 * 5)
     local y = y or (16 * 2)
 
     local obj = GC:new(x, y, 14, 3, nil, 10, "dynamic", nil)
     setmetatable(obj, self)
-    return Kid.__constructor__(obj, gender, direction or 1, is_enemy)
+    return Kid.__constructor__(obj, gender, direction or 1, is_enemy, move_type)
 end
 
-function Kid:__constructor__(gender, direction, is_enemy)
+local conf_stretch = { speed_x = 0.3, speed_y = 0.3, decay_speed_x = 0.5, decay_speed_y = 0.5 }
+
+function Kid:__constructor__(gender, direction, is_enemy, move_type)
     self.ox = self.w * 0.5
     self.oy = self.h
 
@@ -135,6 +140,22 @@ function Kid:__constructor__(gender, direction, is_enemy)
     self.update = Kid.update
     self.draw = Kid.draw
 
+    self.time_throw = 1 + 2 * random()
+
+    if self.is_enemy then
+        self.time_jump = 0.0
+        self.time_jump_interval = 2
+        self.time_move_y = (math.pi * 0.5) * random(4)
+        self.time_move_x = (math.pi * 0.5) * random(4)
+        self.anchor_x = self.x
+        self.anchor_y = 16 * 6 --self.y
+        self.target_pos_x = self.x
+        self.target_pos_y = self.y
+        self.move_type = move_type or 1
+        self:update(0)
+    end
+
+
     -- self:update(1 / 60)
     self:keep_on_bounds()
     return self
@@ -167,10 +188,30 @@ function Kid:remove()
     self.body2 = nil
 end
 
+function Kid:set_target_position(x, y)
+    self.target_pos_x = x or self.target_pos_x
+    self.target_pos_y = y or self.target_pos_y
+end
+
+function Kid:is_on_target_position()
+    if self.state ~= States.goingTo then return false end
+    local bd = self.body
+    return bd.x == self.target_pos_x and bd.y == self.target_pos_y
+end
+
 function Kid:set_state(new_state)
     if self.state == new_state then return end
     self.state = new_state
     self.time_state = 0.0
+
+    if new_state == States.goingTo then
+        self.time_going = 0.0
+        local bd = self.body
+        self.diff_x = bd.x - self.target_pos_x
+        self.diff_y = bd.y - self.target_pos_y
+        self.init_x = bd.x
+        self.init_y = bd.y
+    end
 
     return true
 end
@@ -187,6 +228,12 @@ function Kid:keypressed(key)
     end
 end
 
+---@param self Kid
+local function pause_action(dt, self)
+    self:set_visible(true)
+    self.gamestate.camera:update(dt)
+end
+
 function Kid:damage(value, obj)
     value = value or 1
     if self:is_dead() or self.time_invincible ~= 0.0 then return false end
@@ -196,8 +243,22 @@ function Kid:damage(value, obj)
 
     if self.hp == 0 then
         self:set_state(States.dead)
+
+        if not self.is_enemy then
+            self.gamestate.camera:shake_x(3, 0.08, 0.5)
+            self.gamestate.camera:shake_y(2, 0.08, 0.4)
+        end
     else
+        if not self.is_enemy then
+            self.gamestate.camera:shake_x(3, 0.08, 0.5)
+            self.gamestate.camera:shake_y(3, 0.08, 0.3)
+        end
+
         self.displayHP:show()
+    end
+
+    if not self.is_enemy then
+        self.gamestate:pause(self:is_dead() and 1.3 or 0.2, pause_action, self)
     end
 
     return true
@@ -220,6 +281,7 @@ function Kid:add_stone()
 end
 
 function Kid:attack()
+    if self:is_dead() then return false end
     return self:atk_action()
 end
 
@@ -227,6 +289,7 @@ function Kid:jump()
     local bd2 = self.body2
     if bd2.speed_y == 0 then
         self.is_jump = true
+        self:remove_effect("stretchSquash")
         return bd2:jump(16 * 2, -1)
     end
 end
@@ -249,7 +312,7 @@ function Kid:keep_on_bounds()
 
     if self.direction < 0 then
         px = 16 * 12
-        pr = SCREEN_WIDTH
+        pr = SCREEN_WIDTH - bd2.w - 2
     end
 
     bd:refresh(math.min(math.max(px, bd.x), pr), math.min(py, bd.y))
@@ -272,9 +335,57 @@ function Kid:distance()
 end
 
 ---@param self Kid
+local function auto_jump(self, dt)
+    if not self.is_jump then
+        self.time_jump = self.time_jump + dt
+        if self.time_jump >= self.time_jump_interval then
+            self.time_jump = 0.0
+            self.time_jump_interval = random(2)
+            -- self.time_jump_interval = 0.3
+            self.body2.speed_y = 0.0
+            self:keypressed('space')
+        end
+    end
+end
+
+---@param self Kid
+local function goingTo(self, dt)
+    local bd = self.body
+    local diff_x = self.diff_x
+    local diff_y = self.diff_y
+
+    local v = math.sin(self.time_going)
+
+    self:set_position(self.init_x - diff_x * v, self.init_y - diff_y * v)
+
+    local domain = math.pi * 0.5
+    self.time_going = Utils:clamp(
+        self.time_going + (domain / 1.5) * dt,
+        0, domain
+    )
+
+    if self:is_on_target_position() then
+        if self:is_dead() then
+            self:set_state(States.dead)
+        else
+            self:set_state(States.normal)
+        end
+    end
+
+    return 0, 0
+end
+
+---@param self Kid
 local function movement(self, dt)
     local P1 = self.controller
     local Button = P1.Button
+
+    local state = self.state
+    if state == States.dead then
+        return 0, 0
+    elseif state == States.goingTo and not self.is_enemy then
+        return goingTo(self, dt)
+    end
 
     if not self.is_enemy then
         local x = P1:pressing(Button.dpad_right) and 1 or 0
@@ -286,8 +397,58 @@ local function movement(self, dt)
         y = (y == 0 and tonumber(P1:pressing(Button.left_stick_y))) or y
         return x, y
     else
-        return -1, 0
+        local x = 0
+        local y = 0
+
+        auto_jump(self, dt)
+
+        if self.move_type == 1 then
+            if not self.is_jump then
+                self.time_move_y = self.time_move_y + dt
+            end
+            local vy = 40 * math.sin(self.time_move_y)
+
+            self:set_position(nil, self.anchor_y + vy)
+            --
+        elseif self.move_type == 2 then
+            if self.state == States.normal then
+                if self.time_state >= 1 then
+                    self:set_target_position(16 * random(12, 16), 16 * random(4, 9))
+                    self:set_state(States.goingTo)
+                end
+            else
+                return goingTo(self, dt)
+            end
+            ---
+        else
+            if not self.is_jump then
+                self.time_move_y = self.time_move_y + dt
+                self.time_move_x = self.time_move_x + ((math.pi) / 5.0) * dt
+            end
+
+            local vy = 40 * math.sin(self.time_move_y)
+            local vx = 28 * math.sin(self.time_move_x)
+
+            self:set_position(self.anchor_x + vx, self.anchor_y + vy)
+        end
+
+
+        return x, y
     end
+end
+
+function Kid:set_position(x, y)
+    local bd = self.body
+    local bd2 = self.body2
+
+    x = x or bd.x
+    y = y or bd.y
+
+    local diff_y = bd.y - bd2:bottom()
+
+    bd:refresh(x, y)
+    bd2:refresh(bd.x, bd.y - bd2.h - diff_y)
+    self.x, self.y = bd.x, bd.y
 end
 
 local args_flick = { speed = 0.06 }
@@ -352,6 +513,7 @@ function Kid:update(dt)
             bd2:refresh(nil, bd.y - bd2.h)
             bd2.speed_y = 0.0
             self.is_jump = false
+            self:apply_effect("stretchSquash", conf_stretch, true)
         end
     else
         if not self.is_jump then
@@ -365,10 +527,9 @@ function Kid:update(dt)
     self:keep_on_bounds()
 
     if self.is_enemy then
-        self.temp = self.temp or 3
-        self.temp = self.temp - dt
-        if self.temp <= 0 then
-            self.temp = 3
+        self.time_throw = self.time_throw - dt
+        if self.time_throw <= 0 then
+            self.time_throw = 1 + 3 * random()
             self:attack()
         end
     end
@@ -383,10 +544,10 @@ end
 local my_draw = function(self)
     local lgx = love.graphics
     lgx.setColor(1, 0, 0)
-    -- lgx.rectangle("fill", self:rect())
+    lgx.rectangle("fill", self:rect())
 
     lgx.setColor(0, 0, 1)
-    -- lgx.rectangle("line", self.body2:rect())
+    lgx.rectangle("line", self.body2:rect())
 
     self.cur_anima:draw_rec(self.body2:rect())
 end
