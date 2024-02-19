@@ -81,7 +81,11 @@ local function init(args)
     JM.Physics:newBody(data.world, 0, SCREEN_HEIGHT - 16, SCREEN_WIDTH, 16, "static")
 
     ---@type Kid
-    local k = State:add_object(Kid:new(16 * 12, SCREEN_HEIGHT * 0.5, Kid.Gender.boy, -1, true))
+    local k = State:add_object(Kid:new(16 * 13, 16 * 7, Kid.Gender.boy, -1, true, 1))
+    -- k:set_position(16 * 14, 16 * 9)
+
+    k = State:add_object(Kid:new(16 * 12, 16 * 4, Kid.Gender.boy, -1, true, 2))
+    k = State:add_object(Kid:new(16 * 15, 16 * 9, Kid.Gender.boy, -1, true, 3))
 
     data.displayHP = DisplayHP:new(data.player)
 end
