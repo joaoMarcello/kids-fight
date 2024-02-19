@@ -206,6 +206,9 @@ end
 function Kid:set_target_position(x, y)
     self.target_pos_x = x or self.target_pos_x
     self.target_pos_y = y or self.target_pos_y
+
+    self.target_pos_x = math.floor(self.target_pos_x)
+    self.target_pos_y = math.floor(self.target_pos_y)
 end
 
 function Kid:is_on_target_position()
@@ -503,10 +506,38 @@ local function movement(self, dt)
                             16 * random(4, 9)
                         )
                     else
-                        self:set_target_position(
-                            16 * random(2, 8),
-                            16 * random(4, 9)
-                        )
+                        if self.stones <= 0 then
+                            local list = self.gamestate.game_objects
+                            local found = false
+                            for i = 1, #list do
+                                ---@type Projectile|any
+                                local obj = list[i]
+
+                                if obj.is_projectile
+                                    and not obj.__remove
+                                    and obj:on_ground()
+                                then
+                                    self:set_target_position(
+                                        Utils:clamp(obj.x, 0, 16 * 7),
+                                        obj.y + obj.h * 0.5
+                                    )
+                                    found = true
+                                    break
+                                end
+                            end
+
+                            if not found then
+                                self:set_target_position(
+                                    16 * random(2, 7),
+                                    16 * random(4, 9)
+                                )
+                            end
+                        else
+                            self:set_target_position(
+                                16 * random(2, 7),
+                                16 * random(4, 9)
+                            )
+                        end
                     end
                     self:set_state(States.goingTo)
                 end
