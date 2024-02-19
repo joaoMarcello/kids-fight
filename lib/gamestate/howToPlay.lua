@@ -71,7 +71,9 @@ local restart_game = function()
     Game:restaure_canvas()
     Game:init()
     local data_ = Game:__get_data__()
-    -- data_.player.ia_mode = true
+    data_.player.ia_mode = true
+    data_.player.move_type = 2
+    data_.player.move_delay = 0.5
 end
 
 local function init(args)
