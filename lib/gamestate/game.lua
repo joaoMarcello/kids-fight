@@ -128,6 +128,37 @@ function data:set_state(new_state)
     return true
 end
 
+function data:leader_is_dead()
+    if not self.leader then return false end
+    return self.leader:is_dead()
+end
+
+function data:remove_all_projectiles()
+    local list = State.game_objects
+    for i = 1, #list do
+        ---@type Projectile|any
+        local obj = list[i]
+        if obj.is_projectile and not obj:on_ground() then
+            obj:remove()
+        end
+    end
+end
+
+function data:enemy_victory()
+    local list = data.kids
+    for i = 1, #list do
+        ---@type Kid
+        local k = list[i]
+        if not k:is_dead() then
+            k:set_state(Kid.State.victory)
+        end
+    end
+end
+
+function data:player_victory()
+    data.player:set_state(Kid.State.victory)
+end
+
 --============================================================================
 
 function State:__get_data__()
@@ -172,6 +203,8 @@ end
 
 local function load_wave(value)
     value = value or 1
+    data.wave_number = value
+    data:set_state(States.waveIsComing)
 
     if data.kids then
         local list = data.kids
@@ -189,7 +222,7 @@ local function load_wave(value)
 
     if value == 1 then
         ---@type Kid
-        local k = data.leader or State:add_object(Kid:new(SCREEN_WIDTH, 16 * 7, Kid.Gender.boy, -1, true, 1))
+        local k = State:add_object(Kid:new(SCREEN_WIDTH, 16 * 7, Kid.Gender.boy, -1, true, 2))
         k:set_position(SCREEN_WIDTH, 16 * 7)
         k:set_target_position(16 * 12)
         k:set_state(k.State.preparing)
@@ -199,11 +232,14 @@ local function load_wave(value)
         table.insert(data.kids, k)
         data.leader = k
 
-        k = State:add_object(Kid:new(16 * 12, 16 * 4, Kid.Gender.boy, -1, true, 2))
-        k:set_position(SCREEN_WIDTH, 16 * 4)
-        k:set_target_position(16 * 14, 16 * 4)
+        ---@type Kid
+        k = State:add_object(Kid:new(16 * 12, 16 * 9, Kid.Gender.boy, -1, true, 1))
+        k:set_position(SCREEN_WIDTH, 16 * 9)
+        k:set_target_position(16 * 14, 16 * 9)
         k:set_state(k.State.preparing)
         k.goingTo_speed = 0.75
+        k.anchor_y = 16 * 9 - k.move_y_value
+        k.time_move_y = math.pi * 0.5
         table.insert(data.kids, k)
 
         -- ---@type Kid
@@ -229,7 +265,88 @@ local function load_wave(value)
         -- table.insert(data.kids, k)
         ---
     elseif value == 2 then
+        if data.leader then
+            data.leader:ressurect()
+        end
+
+        ---@type Kid
+        local k = data.leader or State:add_object(Kid:new(SCREEN_WIDTH, 16 * 7, Kid.Gender.boy, -1, true, 1))
+        -- k:set_position(SCREEN_WIDTH, 16 * 7)
+        k:set_target_position(16 * 12, 16 * 7)
+        k:set_state(k.State.preparing)
+        k.time_move_y = 0.0
+        k.anchor_y = 16 * 7
+        k.goingTo_speed = 1.5
+        table.insert(data.kids, k)
+        data.leader = k
+
+        ---@type Kid
+        k = State:add_object(Kid:new(16 * 15, 16 * 9, Kid.Gender.boy, -1, true, 3))
+        k:set_position(SCREEN_WIDTH, 16 * 9)
+        k:set_target_position(16 * 14, 16 * 9)
+        k:set_state(k.State.preparing)
+        k.goingTo_speed = 2
+        k.anchor_y = 16 * 9 - k.move_y_value
+        k.time_move_y = math.pi * 0.5
+        k.anchor_x = 16 * 14
+        k.time_move_x = 0.0
+        table.insert(data.kids, k)
+
+        ---@type Kid
+        k = State:add_object(Kid:new(16 * 17, 16 * 5, Kid.Gender.boy, -1, true, 1))
+        k:set_position(SCREEN_WIDTH, 16 * 5)
+        k:set_target_position(16 * 17, 16 * 5)
+        k:set_state(k.State.preparing)
+        k.goingTo_speed = 2
+        k.anchor_y = 16 * 5 + k.move_y_value
+        k.time_move_y = -math.pi * 0.5
+        table.insert(data.kids, k)
+        ---
     else
+        if data.leader then
+            data.leader:ressurect()
+        end
+
+        ---@type Kid
+        local k = data.leader or State:add_object(Kid:new(SCREEN_WIDTH, 16 * 7, Kid.Gender.boy, -1, true, 1))
+        -- k:set_position(SCREEN_WIDTH, 16 * 7)
+        k:set_target_position(16 * 12, 16 * 7)
+        k:set_state(k.State.preparing)
+        k.time_move_y = 0.0
+        k.anchor_y = 16 * 7
+        k.goingTo_speed = 1.5
+        table.insert(data.kids, k)
+        data.leader = k
+
+        k = State:add_object(Kid:new(16 * 12, 16 * 4, Kid.Gender.boy, -1, true, 2))
+        k:set_position(SCREEN_WIDTH, 16 * 4)
+        k:set_target_position(16 * 14, 16 * 4)
+        k:set_state(k.State.preparing)
+        k.goingTo_speed = 0.75
+        table.insert(data.kids, k)
+
+        ---@type Kid
+        k = State:add_object(Kid:new(16 * 15, 16 * 9, Kid.Gender.boy, -1, true, 3))
+        k:set_position(SCREEN_WIDTH, 16 * 9)
+        k:set_target_position(16 * 14, 16 * 9)
+        k:set_state(k.State.preparing)
+        k.goingTo_speed = 2
+        k.anchor_y = 16 * 9 - k.move_y_value
+        k.time_move_y = math.pi * 0.5
+        k.anchor_x = 16 * 14
+        k.time_move_x = 0.0
+        table.insert(data.kids, k)
+
+        ---@type Kid
+        k = State:add_object(Kid:new(16 * 17, 16 * 5, Kid.Gender.boy, -1, true, 1))
+        k:set_position(SCREEN_WIDTH, 16 * 5)
+        k:set_target_position(16 * 17, 16 * 5)
+        k:set_state(k.State.preparing)
+        k.goingTo_speed = 2
+        k.anchor_y = 16 * 5 + k.move_y_value
+        k.time_move_y = -math.pi * 0.5
+        table.insert(data.kids, k)
+        ---
     end
 end
 
@@ -238,6 +355,7 @@ local function init(args)
     args = args or {}
 
     data.time_game = 0
+    data.countdown_time = nil
 
     data.world = JM.Physics:newWorld { tile = TILE }
     JM.GameObject:init_state(State, data.world)
@@ -381,8 +499,24 @@ local function resize(w, h)
 end
 
 local function game_logic(dt)
-    if data:wave_is_over() then
+    local state = data.gamestate
+    if state == States.game then
+        if data:wave_is_over() then
+            load_wave(data.wave_number + 1)
+            data:set_state(States.waveIsComing)
 
+            local player = data.player
+            player:set_target_position(16 * 7, 16 * 7)
+            player:set_state(Kid.State.preparing)
+            player.goingTo_speed = 1.5
+        end
+        ---
+    elseif state == States.waveIsComing then
+        if not data.countdown_time
+            and data:all_kids_on_position()
+        then
+            data:start_countdown(3.6)
+        end
     end
 end
 
@@ -395,29 +529,12 @@ local function update(dt)
         end
     end
 
-    -- if data.time_game >= 2 then
-    --     for i = 1, #data.kids do
-    --         ---@type Kid
-    --         local k = data.kids[i]
-    --         if k
-    --             and k.state == Kid.State.idle
-    --             and k:is_on_target_position()
-    --         then
-    --             k:set_state(Kid.State.normal)
-    --         end
-    --     end
-
-    --     if data.player.state == Kid.State.idle
-    --         and data.player:is_on_target_position()
-    --     then
-    --         data.player:set_state(Kid.State.normal)
-    --     end
-    -- end
-
     data.world:update(dt)
     State:update_game_objects(dt)
 
     data.displayHP:update(dt)
+
+    game_logic(dt)
 end
 
 local sort_draw = function(a, b)
@@ -483,6 +600,19 @@ local function draw(cam)
         font:printf("WAVE IS OVER", 0, 16 * 4, SCREEN_WIDTH, "center")
     end
     data.displayHP:draw()
+
+    font:print("<color>LEADER", data.leader.x, data.leader.y - 48)
+
+    do
+        local countdown_time = data.countdown_time
+        if countdown_time and countdown_time > 0 then
+            if countdown_time > 1 then
+                font:printf(string.format("WAVE START IN\n%d", data.countdown_time), 0, 16 * 4, SCREEN_WIDTH, "center")
+            else
+                font:printx("<effect=scream>FIGHT", 0, 16 * 4, SCREEN_WIDTH, "center")
+            end
+        end
+    end
 end
 
 --============================================================================

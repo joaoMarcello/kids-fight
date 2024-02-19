@@ -19,6 +19,7 @@ local States = {
     idle = 5,
     runAway = 6,
     goingTo = 7,
+    victory = 8,
 }
 
 ---@enum Kid.AnimaStates
@@ -30,6 +31,7 @@ local AnimaState = {
     fall = 5,
     atk = 6,
     walk = 7,
+    victory = 8,
 }
 
 local tile = _G.TILE or 16
@@ -94,7 +96,7 @@ function Kid:__constructor__(gender, direction, is_enemy, move_type)
     self.stones = not self.is_enemy and math.floor(MAX_STONE * 0.5) or 1000
     self.max_stones = not self.is_enemy and MAX_STONE or math.huge
 
-    self.hp = self.is_enemy and 5 or HP_MAX
+    self.hp = self.is_enemy and 3 or HP_MAX
     self.hp_init = self.hp
     -- self.hp = 2
     self.time_invincible = 0.0
@@ -196,6 +198,11 @@ function Kid:remove()
     self.body2 = nil
 end
 
+function Kid:ressurect()
+    self.hp = self.hp_init
+    self:set_state(States.idle)
+end
+
 function Kid:set_target_position(x, y)
     self.target_pos_x = x or self.target_pos_x
     self.target_pos_y = y or self.target_pos_y
@@ -229,15 +236,15 @@ function Kid:set_state(new_state)
 end
 
 function Kid:keypressed(key)
-    do
-        local state = self.state
-        if state == States.idle
-            or state == States.preparing
-            or state == States.dead
-        then
-            return false
-        end
-    end
+    -- do
+    --     local state = self.state
+    --     if state == States.idle
+    --         or state == States.preparing
+    --         or state == States.dead
+    --     then
+    --         return false
+    --     end
+    -- end
 
     local P1 = self.controller
     local Button = P1.Button
@@ -259,6 +266,14 @@ end
 function Kid:damage(value, obj)
     value = value or 1
     if self:is_dead() or self.time_invincible ~= 0.0 then return false end
+    do
+        local state = self.state
+        if state == States.preparing
+            or state == States.idle
+        then
+            return false
+        end
+    end
 
     self.hp = Utils:clamp(self.hp - value, 0, HP_MAX)
     self.time_invincible = INVICIBLE_DURATION
@@ -304,11 +319,16 @@ end
 
 function Kid:attack()
     if self:is_dead() then return false end
-    local state = self.state
-    if state == States.idle or state == States.preparing
-        or state == States.runAway
-    then
-        return false
+
+    do
+        local state = self.state
+        if state == States.idle
+            or state == States.preparing
+            or state == States.runAway
+            or state == States.victory
+        then
+            return false
+        end
     end
 
     return self:atk_action()
@@ -316,6 +336,17 @@ end
 
 function Kid:jump()
     if self:is_dead() then return false end
+    do
+        local state = self.state
+        if state == States.preparing
+            or state == States.idle
+            or state == States.runAway
+            or (state == States.victory and not self.is_enemy)
+        then
+            return false
+        end
+    end
+
     local bd2 = self.body2
     if bd2.speed_y == 0 then
         self.is_jump = true
@@ -596,10 +627,19 @@ function Kid:update(dt)
     self:keep_on_bounds()
 
     if self.is_enemy or self.ia_mode then
-        if self.state == States.normal then
+        if self.state == States.normal
+            or self.state == States.goingTo
+        then
             self.time_throw = self.time_throw - dt
             if self.time_throw <= 0 then
-                self.time_throw = 1 + 3 * random()
+                ---@type GameState.Game.Data
+                local data = self.gamestate:__get_data__()
+
+                if not data:leader_is_dead() then
+                    self.time_throw = 1 + 3 * random()
+                else
+                    self.time_throw = 0.5 + 2 * random()
+                end
                 self:attack()
             end
         end

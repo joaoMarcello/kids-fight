@@ -22,6 +22,7 @@ local QUADS
 local Projectile = setmetatable({}, GC)
 Projectile.Type = Types
 Projectile.__index = Projectile
+Projectile.is_projectile = true
 
 ---@param x number
 ---@param y number
