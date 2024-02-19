@@ -96,7 +96,7 @@ function Kid:__constructor__(gender, direction, is_enemy, move_type)
     self.stones = not self.is_enemy and math.floor(MAX_STONE * 0.5) or 1000
     self.max_stones = not self.is_enemy and MAX_STONE or math.huge
 
-    self.hp = self.is_enemy and 3 or HP_MAX
+    self.hp = self.is_enemy and 2 or HP_MAX
     self.hp_init = self.hp
     -- self.hp = 2
     self.time_invincible = 0.0
@@ -144,10 +144,10 @@ function Kid:__constructor__(gender, direction, is_enemy, move_type)
     self.update = Kid.update
     self.draw = Kid.draw
 
-    self.time_throw = 1 + 3 * random()
 
     -- if self.is_enemy then
     do
+        self.time_throw = 1 + 3 * random()
         self.time_jump = random()
         self.time_jump_interval = 1 + random()
         self.time_move_y = (math.pi * 0.5) * random(4)
@@ -160,7 +160,7 @@ function Kid:__constructor__(gender, direction, is_enemy, move_type)
         self.goingTo_speed = 1.5
         self.move_x_value = 28
         self.move_y_value = 40
-        self.move_delay = 1
+        self.move_delay = 0.5
         -- self:update(0)
     end
 
@@ -217,6 +217,7 @@ function Kid:is_on_target_position()
     return bd.x == self.target_pos_x and bd.y == self.target_pos_y
 end
 
+---@param new_state Kid.States
 function Kid:set_state(new_state)
     if self.state == new_state then return end
     self.state = new_state
@@ -279,7 +280,13 @@ function Kid:damage(value, obj)
     end
 
     self.hp = Utils:clamp(self.hp - value, 0, HP_MAX)
-    self.time_invincible = INVICIBLE_DURATION
+
+    if self.is_enemy then
+        self.time_invincible = INVICIBLE_DURATION * 0.5
+    else
+        self.time_invincible = INVICIBLE_DURATION
+    end
+
 
     if self.hp == 0 then
         self:set_state(States.dead)
@@ -687,12 +694,12 @@ end
 
 ---@param self Kid
 local my_draw = function(self)
-    local lgx = love.graphics
-    lgx.setColor(1, 0, 0)
-    lgx.rectangle("fill", self:rect())
+    -- local lgx = love.graphics
+    -- lgx.setColor(1, 0, 0)
+    -- lgx.rectangle("fill", self:rect())
 
-    lgx.setColor(0, 0, 1)
-    lgx.rectangle("line", self.body2:rect())
+    -- lgx.setColor(0, 0, 1)
+    -- lgx.rectangle("line", self.body2:rect())
 
     self.cur_anima:draw_rec(self.body2:rect())
 end
