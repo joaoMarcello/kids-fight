@@ -31,6 +31,7 @@ local States = {
     waveIsComing = 3,
     playerIsDead = 4,
     dialogue = 5,
+    preparingToTalk = 6,
 }
 --============================================================================
 ---@class GameState.Game.Data
@@ -78,12 +79,13 @@ function data:put_kids_to_run(send_leader)
     local list = self.kids
     if not list then return end
 
-    for i = 1, #list do
+    for i = #list, 1, -1 do
         ---@type Kid
         local k = list[i]
 
         if k ~= self.leader or send_leader then
             k:set_state(Kid.State.runAway)
+            table.remove(list, i)
         end
     end
 end
@@ -206,41 +208,38 @@ local function load_wave(value)
     data.wave_number = value
     data:set_state(States.waveIsComing)
 
-    if data.kids then
-        local list = data.kids
-        for i = 1, #list do
-            ---@type Kid
-            local k = list[i]
-
-            if k ~= data.leader then
-                k:set_state(Kid.State.runAway)
-            end
-        end
+    if State:is_current_active() and not State:is_showing_black_bar() then
+        State:show_black_bar(16)
     end
 
     data.kids = {}
 
     if value == 1 then
         ---@type Kid
-        local k = State:add_object(Kid:new(SCREEN_WIDTH, 16 * 7, Kid.Gender.boy, -1, true, 2))
-        k:set_position(SCREEN_WIDTH, 16 * 7)
-        k:set_target_position(16 * 12)
-        k:set_state(k.State.preparing)
+        local k = data.leader or State:add_object(Kid:new(SCREEN_WIDTH, 16 * 7, Kid.Gender.boy, -1, true, 2))
+
+        if k.state ~= Kid.State.idle then
+            k:set_position(SCREEN_WIDTH, 16 * 7)
+            k:set_target_position(16 * 12)
+            k:set_state(k.State.preparing)
+        end
         k.time_move_y = 0.0
         k.anchor_y = 16 * 7
         k.goingTo_speed = 1.5
+        k.time_jump = 0.0
         table.insert(data.kids, k)
         data.leader = k
+        data.leader.time_throw = 0.0
 
-        ---@type Kid
-        k = State:add_object(Kid:new(16 * 12, 16 * 9, Kid.Gender.boy, -1, true, 1))
-        k:set_position(SCREEN_WIDTH, 16 * 9)
-        k:set_target_position(16 * 14, 16 * 9)
-        k:set_state(k.State.preparing)
-        k.goingTo_speed = 0.75
-        k.anchor_y = 16 * 9 - k.move_y_value
-        k.time_move_y = math.pi * 0.5
-        table.insert(data.kids, k)
+        -- ---@type Kid
+        -- k = State:add_object(Kid:new(16 * 12, 16 * 9, Kid.Gender.boy, -1, true, 1))
+        -- k:set_position(SCREEN_WIDTH, 16 * 9)
+        -- k:set_target_position(16 * 14, 16 * 9)
+        -- k:set_state(k.State.preparing)
+        -- k.goingTo_speed = 0.75
+        -- k.anchor_y = 16 * 9 - k.move_y_value
+        -- k.time_move_y = math.pi * 0.5
+        -- table.insert(data.kids, k)
 
         -- ---@type Kid
         -- k = State:add_object(Kid:new(16 * 15, 16 * 9, Kid.Gender.boy, -1, true, 3))
@@ -270,10 +269,12 @@ local function load_wave(value)
         end
 
         ---@type Kid
-        local k = data.leader or State:add_object(Kid:new(SCREEN_WIDTH, 16 * 7, Kid.Gender.boy, -1, true, 1))
-        -- k:set_position(SCREEN_WIDTH, 16 * 7)
-        k:set_target_position(16 * 12, 16 * 7)
-        k:set_state(k.State.preparing)
+        local k = data.leader or State:add_object(Kid:new(SCREEN_WIDTH, 16 * 7, Kid.Gender.boy, -1, true, 2))
+
+        if k.state ~= Kid.State.idle then
+            k:set_target_position(16 * 12, 16 * 7)
+            k:set_state(k.State.preparing)
+        end
         k.time_move_y = 0.0
         k.anchor_y = 16 * 7
         k.goingTo_speed = 1.5
@@ -308,10 +309,12 @@ local function load_wave(value)
         end
 
         ---@type Kid
-        local k = data.leader or State:add_object(Kid:new(SCREEN_WIDTH, 16 * 7, Kid.Gender.boy, -1, true, 1))
-        -- k:set_position(SCREEN_WIDTH, 16 * 7)
-        k:set_target_position(16 * 12, 16 * 7)
-        k:set_state(k.State.preparing)
+        local k = data.leader or State:add_object(Kid:new(SCREEN_WIDTH, 16 * 7, Kid.Gender.boy, -1, true, 2))
+
+        if k.state ~= Kid.State.idle then
+            k:set_target_position(16 * 12, 16 * 7)
+            k:set_state(k.State.preparing)
+        end
         k.time_move_y = 0.0
         k.anchor_y = 16 * 7
         k.goingTo_speed = 1.5
@@ -355,7 +358,10 @@ local function init(args)
     args = args or {}
 
     data.time_game = 0
+    data.time_gamestate = 0.0
     data.countdown_time = nil
+    ---@type JM.DialogueSystem.Dialogue|any
+    data.dialogue = nil
 
     data.world = JM.Physics:newWorld { tile = TILE }
     JM.GameObject:init_state(State, data.world)
@@ -377,8 +383,7 @@ local function init(args)
 
     data.displayHP = DisplayHP:new(data.player)
 
-    -- data:start_countdown(0.3)
-    data:set_state(States.waveIsComing)
+    data:set_state(States.preparingToTalk)
 end
 
 local function textinput(t)
@@ -386,6 +391,8 @@ local function textinput(t)
 end
 
 local function keypressed(key)
+    if State.transition then return end
+
     if key == 'o' then
         State.camera:toggle_grid()
         State.camera:toggle_world_bounds()
@@ -395,7 +402,23 @@ local function keypressed(key)
     local Button = P1.Button
     P1:switch_to_keyboard()
 
-    if (P1:pressed(Button.start, key) or P1:pressed(Button.B, key))
+    if data.gamestate ~= States.game
+        and P1:pressed(Button.start, key)
+        and not data.countdown_time
+    then
+        -- data:skip_intro()
+        State:add_transition("door", "out", { axis = "y", post_delay = 0.2 }, nil,
+            ---@param State JM.Scene
+            function(State)
+                data:skip_intro()
+                State:add_transition("door", "in", { axis = "y", duration = 0.5, pause_scene = true }, nil)
+            end)
+        return
+    end
+
+    if (P1:pressed(Button.start, key)
+            or P1:pressed(Button.B, key))
+        and not data.countdown_time
     then
         JM.Sound:pause()
         _G.Play_sfx("pause", true)
@@ -502,13 +525,27 @@ local function game_logic(dt)
     local state = data.gamestate
     if state == States.game then
         if data:wave_is_over() then
-            load_wave(data.wave_number + 1)
-            data:set_state(States.waveIsComing)
+            data:put_kids_to_run(false)
 
             local player = data.player
             player:set_target_position(16 * 7, 16 * 7)
             player:set_state(Kid.State.preparing)
             player.goingTo_speed = 1.5
+
+            local leader = data.leader
+            leader:ressurect()
+            leader:set_target_position(16 * 12, 16 * 7)
+            leader:set_state(Kid.State.preparing)
+            leader.goingTo_speed = 2
+
+            data:set_state(States.preparingToTalk)
+            data.wave_number = data.wave_number + 1
+        end
+        ---
+    elseif state == States.preparingToTalk then
+        if data:all_kids_on_position() then
+            data:set_state(States.waveIsComing)
+            load_wave(data.wave_number)
         end
         ---
     elseif state == States.waveIsComing then
@@ -517,11 +554,46 @@ local function game_logic(dt)
         then
             if State:is_current_active() then
                 data:start_countdown(3.6)
+                State:remove_black_bar()
             else
                 data:start_countdown(-0.5)
             end
         end
     end
+end
+
+function data:skip_intro()
+    local list = self.kids
+    if not list then return end
+
+
+
+    local player = self.player
+    player:set_state(Kid.State.idle)
+    player:set_position(player.target_pos_x, player.target_pos_y)
+
+    for i = #list, 1, -1 do
+        ---@type Kid
+        local k = list[i]
+        k:remove()
+        table.remove(list, i)
+    end
+    data.leader = nil
+
+    load_wave(data.wave_number)
+    list = data.kids
+    for i = 1, #list do
+        ---@type Kid
+        local k = list[i]
+        k:set_state(Kid.State.idle)
+        k:set_position(k.target_pos_x, k.target_pos_y)
+    end
+    data:start_countdown(3.6)
+    -- self:set_state(States.waveIsComing)
+    -- game_logic(0)
+
+    State:remove_black_bar(true)
+    -- data.countdown_time = 1
 end
 
 local function update(dt)
@@ -582,28 +654,39 @@ local function draw(cam)
     lgx.draw(imgs["street_down"])
 
     local font = JM:get_font("pix5")
-    local px = data.displayHP.x
-    local py = data.displayHP.y + 8
 
-    lgx.setColor(1, 1, 1, 0.75)
-    lgx.draw(imgs["box"], px - 12, data.displayHP.y - 4)
+    --================================================================
+    cam:detach()
+    if data.gamestate == States.game
+        or data.gamestate == States.waveIsComing
+        or not State:is_current_active()
+    then
+        local px = data.displayHP.x
+        local py = data.displayHP.y + 8
 
-    if data.player.stones == data.player.max_stones then
-        font:printx(string.format("ammo x %d <effect=flickering, speed=0.5><color-hex=ff0000>max", data.player.stones),
-            px, py)
-    elseif data.player.stones <= 0 then
-        font:printx(string.format("<effect=flickering, speed=0.5><color-hex=ff0000>no ammo"), px, py)
-    else
-        font:printf(string.format("ammo x %d", data.player.stones), px, py)
+        lgx.setColor(1, 1, 1, 0.75)
+        lgx.draw(imgs["box"], px - 12, data.displayHP.y - 4)
+
+        if data.player.stones == data.player.max_stones then
+            font:printx(
+                string.format("ammo x %d <effect=flickering, speed=0.5><color-hex=ff0000>max", data.player.stones),
+                px, py)
+        elseif data.player.stones <= 0 then
+            font:printx(string.format("<effect=flickering, speed=0.5><color-hex=ff0000>no ammo"), px, py)
+        else
+            font:printf(string.format("ammo x %d", data.player.stones), px, py)
+        end
+
+        font = JM:get_font("pix8")
+        -- font:print(tostring(#State.game_objects), 16, 16 * 4)
+
+        if data:wave_is_over() then
+            font:printf("WAVE IS OVER", 0, 16 * 4, SCREEN_WIDTH, "center")
+        end
+        data.displayHP:draw()
     end
-
-    font = JM:get_font("pix8")
-    font:print(tostring(#State.game_objects), 16, 16 * 4)
-
-    if data:wave_is_over() then
-        font:printf("WAVE IS OVER", 0, 16 * 4, SCREEN_WIDTH, "center")
-    end
-    data.displayHP:draw()
+    cam:attach(nil, State.subpixel)
+    --================================================================
 
     font:print("<color>LEADER", data.leader.x, data.leader.y - 48)
 
