@@ -63,7 +63,8 @@ end
 
 function Display:my_draw()
     if self.w <= 0
-    -- or not self.kid.is_enemy
+        or not self.kid.is_enemy
+        or self.kid.state ~= self.kid.State.normal
     then
         return
     end
