@@ -40,7 +40,7 @@ end
 
 function Projectile:__constructor__(id, bottom, direction, mult)
     self.type = id
-    self.time_force = 0.85 --0.5
+    self.time_force = 0.95 --0.5
     self.direction = direction
 
     local bd = self.body
@@ -184,7 +184,7 @@ function Projectile:update(dt)
                     and bd:check_collision(kbd:rect())
                 then
                     if self.direction ~= kid.direction then
-                        local cond = math.abs(kid:get_shadow():bottom() - bd2.y) <= 16
+                        local cond = math.abs(kid:get_shadow():bottom() - bd2.y) <= 12
                         local success = cond and kid:damage(1, self)
                         if success then
                             return self:remove()
@@ -205,8 +205,8 @@ local function my_draw(self)
     -- lgx.setColor(1, 1, 0)
     -- lgx.rectangle("line", self:rect())
 
-    -- lgx.setColor(1, 0, 0)
-    -- lgx.rectangle("fill", self.body2:rect())
+    lgx.setColor(1, 0, 0)
+    lgx.rectangle("fill", self.body2:rect())
 
     lgx.setColor(1, 1, 1)
     ---@type love.Quad
