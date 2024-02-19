@@ -377,7 +377,7 @@ local function init(args)
 
     data.displayHP = DisplayHP:new(data.player)
 
-    data:start_countdown(0.3)
+    -- data:start_countdown(0.3)
     data:set_state(States.waveIsComing)
 end
 
@@ -515,7 +515,11 @@ local function game_logic(dt)
         if not data.countdown_time
             and data:all_kids_on_position()
         then
-            data:start_countdown(3.6)
+            if State:is_current_active() then
+                data:start_countdown(3.6)
+            else
+                data:start_countdown(-0.5)
+            end
         end
     end
 end
