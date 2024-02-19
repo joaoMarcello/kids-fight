@@ -67,6 +67,8 @@ end
 local Kid = setmetatable({}, GC)
 Kid.__index = Kid
 Kid.Gender = Gender
+Kid.State = States
+Kid.AnimaState = AnimaState
 Kid.is_kid = true
 
 function Kid:new(x, y, gender, direction, is_enemy, move_type)
@@ -140,11 +142,12 @@ function Kid:__constructor__(gender, direction, is_enemy, move_type)
     self.update = Kid.update
     self.draw = Kid.draw
 
-    self.time_throw = 1 + 2 * random()
+    self.time_throw = 1 + 3 * random()
 
-    if self.is_enemy then
-        self.time_jump = 0.0
-        self.time_jump_interval = 2
+    -- if self.is_enemy then
+    do
+        self.time_jump = random()
+        self.time_jump_interval = 1 + random()
         self.time_move_y = (math.pi * 0.5) * random(4)
         self.time_move_x = (math.pi * 0.5) * random(4)
         self.anchor_x = self.x
@@ -152,11 +155,16 @@ function Kid:__constructor__(gender, direction, is_enemy, move_type)
         self.target_pos_x = self.x
         self.target_pos_y = self.y
         self.move_type = move_type or 1
-        self:update(0)
+        self.goingTo_speed = 1.5
+        self.move_x_value = 28
+        self.move_y_value = 40
+        self.move_delay = 1
+        -- self:update(0)
     end
 
+    self.ia_mode = false
 
-    -- self:update(1 / 60)
+    -- self:set_position(self.x, self.y)
     self:keep_on_bounds()
     return self
 end
@@ -194,7 +202,7 @@ function Kid:set_target_position(x, y)
 end
 
 function Kid:is_on_target_position()
-    if self.state ~= States.goingTo then return false end
+    -- if self.state ~= States.goingTo then return false end
     local bd = self.body
     return bd.x == self.target_pos_x and bd.y == self.target_pos_y
 end
@@ -204,19 +212,33 @@ function Kid:set_state(new_state)
     self.state = new_state
     self.time_state = 0.0
 
-    if new_state == States.goingTo then
+    if new_state == States.goingTo
+        or new_state == States.preparing
+    then
         self.time_going = 0.0
         local bd = self.body
         self.diff_x = bd.x - self.target_pos_x
         self.diff_y = bd.y - self.target_pos_y
         self.init_x = bd.x
         self.init_y = bd.y
+    elseif new_state == States.idle then
+        self.goingTo_speed = 1.5
     end
 
     return true
 end
 
 function Kid:keypressed(key)
+    do
+        local state = self.state
+        if state == States.idle
+            or state == States.preparing
+            or state == States.dead
+        then
+            return false
+        end
+    end
+
     local P1 = self.controller
     local Button = P1.Button
     P1:switch_to_keyboard()
@@ -282,10 +304,18 @@ end
 
 function Kid:attack()
     if self:is_dead() then return false end
+    local state = self.state
+    if state == States.idle or state == States.preparing
+        or state == States.runAway
+    then
+        return false
+    end
+
     return self:atk_action()
 end
 
 function Kid:jump()
+    if self:is_dead() then return false end
     local bd2 = self.body2
     if bd2.speed_y == 0 then
         self.is_jump = true
@@ -310,9 +340,22 @@ function Kid:keep_on_bounds()
     local px, py = 0, (SCREEN_HEIGHT - bd.h)
     local pr = 16 * 7
 
+    local state = self.state
     if self.direction < 0 then
         px = 16 * 12
         pr = SCREEN_WIDTH - bd2.w - 2
+        if state == States.preparing
+            or state == States.runAway
+        then
+            pr = SCREEN_WIDTH + 100
+        end
+        --
+    else
+        if state == States.preparing
+            or state == States.runAway
+        then
+            px = -100
+        end
     end
 
     bd:refresh(math.min(math.max(px, bd.x), pr), math.min(py, bd.y))
@@ -360,13 +403,15 @@ local function goingTo(self, dt)
 
     local domain = math.pi * 0.5
     self.time_going = Utils:clamp(
-        self.time_going + (domain / 1.5) * dt,
+        self.time_going + (domain / self.goingTo_speed) * dt,
         0, domain
     )
 
     if self:is_on_target_position() then
         if self:is_dead() then
             self:set_state(States.dead)
+        elseif self.state == States.preparing then
+            self:set_state(States.idle)
         else
             self:set_state(States.normal)
         end
@@ -381,13 +426,21 @@ local function movement(self, dt)
     local Button = P1.Button
 
     local state = self.state
-    if state == States.dead then
+
+    if state == States.dead
+        or state == States.idle
+    then
         return 0, 0
-    elseif state == States.goingTo and not self.is_enemy then
+    elseif (state == States.goingTo
+            and not self.is_enemy)
+        or state == States.preparing
+    then
         return goingTo(self, dt)
+    elseif state == States.runAway then
+        return 1, 0
     end
 
-    if not self.is_enemy then
+    if not self.is_enemy and not self.ia_mode then
         local x = P1:pressing(Button.dpad_right) and 1 or 0
         x = (x == 0 and P1:pressing(Button.dpad_left) and -1) or x
         x = (x == 0 and tonumber(P1:pressing(Button.left_stick_x))) or x
@@ -406,14 +459,24 @@ local function movement(self, dt)
             if not self.is_jump then
                 self.time_move_y = self.time_move_y + dt
             end
-            local vy = 40 * math.sin(self.time_move_y)
+            local vy = self.move_y_value * math.sin(self.time_move_y)
 
             self:set_position(nil, self.anchor_y + vy)
             --
         elseif self.move_type == 2 then
             if self.state == States.normal then
-                if self.time_state >= 1 then
-                    self:set_target_position(16 * random(12, 16), 16 * random(4, 9))
+                if self.time_state >= self.move_delay then
+                    if self.direction == -1 then
+                        self:set_target_position(
+                            16 * random(12, 16),
+                            16 * random(4, 9)
+                        )
+                    else
+                        self:set_target_position(
+                            16 * random(2, 8),
+                            16 * random(4, 9)
+                        )
+                    end
                     self:set_state(States.goingTo)
                 end
             else
@@ -426,8 +489,8 @@ local function movement(self, dt)
                 self.time_move_x = self.time_move_x + ((math.pi) / 5.0) * dt
             end
 
-            local vy = 40 * math.sin(self.time_move_y)
-            local vx = 28 * math.sin(self.time_move_x)
+            local vy = self.move_y_value * math.sin(self.time_move_y)
+            local vx = self.move_x_value * math.sin(self.time_move_x)
 
             self:set_position(self.anchor_x + vx, self.anchor_y + vy)
         end
@@ -464,6 +527,12 @@ function Kid:update(dt)
 
     local x_axis, y_axis = movement(self, dt)
     self.time_state = self.time_state + dt
+
+    if self.state == States.runAway then
+        if not self.gamestate.camera:rect_is_on_view(self:rect()) then
+            return self:remove()
+        end
+    end
 
     -- flick when invincible
     if self.time_invincible ~= 0 and not self:is_dead()
@@ -526,16 +595,21 @@ function Kid:update(dt)
 
     self:keep_on_bounds()
 
-    if self.is_enemy then
-        self.time_throw = self.time_throw - dt
-        if self.time_throw <= 0 then
-            self.time_throw = 1 + 3 * random()
-            self:attack()
+    if self.is_enemy or self.ia_mode then
+        if self.state == States.normal then
+            self.time_throw = self.time_throw - dt
+            if self.time_throw <= 0 then
+                self.time_throw = 1 + 3 * random()
+                self:attack()
+            end
         end
     end
 
     self.cur_anima:update(dt)
     self.cur_anima:set_flip_x(self.direction == -1)
+    if self.state == States.runAway then
+        self.cur_anima:set_flip_x(false)
+    end
 
     self.x, self.y = bd.x, bd.y
 end
