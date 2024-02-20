@@ -39,7 +39,7 @@ local ACC = (16 * 12 * 60) --16 * 12  f = m * a   a = f / m
 local MAX_SPEED = 16 * 4.5
 local DACC = ACC * 2
 local MAX_STONE = 10
-local HP_MAX = 10
+local HP_MAX = 5
 local INVICIBLE_DURATION = 1
 
 local imgs
@@ -234,21 +234,25 @@ function Kid:set_state(new_state)
         self.init_y = bd.y
     elseif new_state == States.idle then
         self.goingTo_speed = 1.5
+        --
+    elseif new_state == States.victory then
+        self.time_jump_interval = random() * 0.5
     end
+
+    self:adjust_cur_anima()
 
     return true
 end
 
 function Kid:keypressed(key)
-    -- do
-    --     local state = self.state
-    --     if state == States.idle
-    --         or state == States.preparing
-    --         or state == States.dead
-    --     then
-    --         return false
-    --     end
-    -- end
+    do
+        local state = self.state
+        if state == States.victory
+            or state == States.dead
+        then
+            return false
+        end
+    end
 
     local P1 = self.controller
     local Button = P1.Button
@@ -274,6 +278,7 @@ function Kid:damage(value, obj)
         local state = self.state
         if state == States.preparing
             or state == States.idle
+            or state == States.victory
         then
             return false
         end
@@ -344,14 +349,14 @@ function Kid:attack()
     return self:atk_action()
 end
 
-function Kid:jump()
+function Kid:jump(height)
     if self:is_dead() then return false end
     do
         local state = self.state
         if state == States.preparing
             or state == States.idle
             or state == States.runAway
-            or (state == States.victory and not self.is_enemy)
+        -- or (state == States.victory and not self.is_enemy)
         then
             return false
         end
@@ -361,7 +366,7 @@ function Kid:jump()
     if bd2.speed_y == 0 then
         self.is_jump = true
         self:remove_effect("stretchSquash")
-        return bd2:jump(16 * 2, -1)
+        return bd2:jump(height or (16 * 2), -1)
     end
 end
 
@@ -471,6 +476,17 @@ local function movement(self, dt)
     if state == States.dead
         or state == States.idle
     then
+        return 0, 0
+    elseif state == States.victory then
+        if not self.is_jump then
+            self.time_jump = self.time_jump + dt
+            if self.time_jump >= self.time_jump_interval then
+                self.time_jump = 0.0
+                self.time_jump_interval = 0.15 --0.1 + 0.4 * random()
+                self.body2.speed_y = 0.0
+                self:jump(16)
+            end
+        end
         return 0, 0
     elseif (state == States.goingTo
             and not self.is_enemy)
@@ -684,24 +700,49 @@ function Kid:update(dt)
     end
 
     self.cur_anima:update(dt)
-    self.cur_anima:set_flip_x(self.direction == -1)
-    if self.state == States.runAway then
-        self.cur_anima:set_flip_x(false)
-    end
+    self:adjust_cur_anima()
 
     self.x, self.y = bd.x, bd.y
 end
 
+function Kid:adjust_cur_anima()
+    local anima = self.cur_anima
+    if not anima then return end
+    anima:set_flip_x(self.direction == -1)
+    if self.state == States.runAway then
+        anima:set_flip_x(false)
+        anima:set_rotation(0)
+        ---
+    elseif self.state == States.dead then
+        anima:set_rotation(math.pi * 0.5 * -self.direction)
+    else
+        anima:set_rotation(0)
+    end
+end
+
 ---@param self Kid
 local my_draw = function(self)
-    -- local lgx = love.graphics
-    -- lgx.setColor(1, 0, 0)
-    -- lgx.rectangle("fill", self:rect())
+    local lgx = love.graphics
+    lgx.setColor(1, 0, 0)
+    lgx.rectangle("fill", self:rect())
 
-    -- lgx.setColor(0, 0, 1)
-    -- lgx.rectangle("line", self.body2:rect())
+    lgx.setColor(0, 0, 1)
+    lgx.rectangle("line", self.body2:rect())
 
-    self.cur_anima:draw_rec(self.body2:rect())
+    local state = self.state
+    if not self:is_dead()
+        or state == States.runAway
+        or state == States.preparing
+        or state == States.goingTo
+    then
+        self.cur_anima:draw_rec(self.body2:rect())
+    else
+        local bd = self.body2
+        self.cur_anima:draw(
+            bd.x + bd.w * 0.5 + 8 * -self.direction,
+            bd:bottom() - 8
+        )
+    end
 end
 
 function Kid:draw()
