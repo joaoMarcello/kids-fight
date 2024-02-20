@@ -69,7 +69,7 @@ end
 
 local restart_game = function()
     Game:restaure_canvas()
-    Game:init()
+    Game:init { wave_number = 2 }
     local data_ = Game:__get_data__()
     data_.player.ia_mode = true
     data_.player.move_type = 2
