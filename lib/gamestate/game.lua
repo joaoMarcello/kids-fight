@@ -32,6 +32,8 @@ local States = {
     playerIsDead = 4,
     dialogue = 5,
     preparingToTalk = 6,
+    finishFight = 7,
+    countDown = 8,
 }
 --============================================================================
 ---@class GameState.Game.Data
@@ -106,7 +108,7 @@ function data:start_game()
     return false
 end
 
-function data:wave_is_over()
+function data:wave_is_over(check_on_ground)
     local list = self.kids
     if not list then return false end
 
@@ -115,7 +117,9 @@ function data:wave_is_over()
     for i = 1, N do
         ---@type Kid
         local k = list[i]
-        if k:is_dead() then
+        if k:is_dead()
+            and ((check_on_ground and not k.is_jump) or not check_on_ground)
+        then
             c = c + 1
         end
     end
@@ -126,8 +130,33 @@ end
 function data:set_state(new_state)
     if new_state == self.gamestate then return false end
     self.gamestate = new_state
+    self.time_gamestate = 0.0
+    self.dialogue = nil
+
+    if new_state == States.dialogue then
+        self.dialogue = JM.DialogueSystem:newDialogue("/data/dialogue_1.md", JM:get_font("pix8"),
+            { align = "center", w = 16 * 9, n_lines = 2 })
+    end
 
     return true
+end
+
+---@param cam JM.Camera.Camera
+function data:draw_dialogue(cam)
+    local dialogue = data.dialogue
+    if not dialogue then return end
+    local id = dialogue:get_id()
+    local box = dialogue:get_cur_box()
+
+    local speaker = id:match("bully") and data.leader or data.player
+    box.x = speaker.x + speaker.w * 0.5 - dialogue.w * 0.5
+    box.y = speaker.y - 52 - dialogue.h
+    box.show_border = true
+    dialogue:draw(cam)
+
+    local lgx = love.graphics
+    lgx.setColor(1, 0, 0)
+    -- lgx.rectangle("line", box:rect())
 end
 
 function data:leader_is_dead()
@@ -406,6 +435,7 @@ local function keypressed(key)
     P1:switch_to_keyboard()
 
     if data.gamestate ~= States.game
+        and data.gamestate ~= States.finishFight
         and P1:pressed(Button.start, key)
         and not data.countdown_time
     then
@@ -417,6 +447,27 @@ local function keypressed(key)
                 State:add_transition("door", "in", { axis = "y", duration = 0.5, pause_scene = true }, nil)
             end)
         return
+    end
+
+    do
+        local dialogue = data.dialogue
+        if dialogue
+            and (P1:pressed(Button.A, key)
+                or P1:pressed(Button.dpad_right, key)
+                or P1:pressed(Button.X))
+        then
+            if dialogue:finished() then
+                dialogue.flush()
+                data.dialogue = nil
+                data:start_countdown(3.6)
+                State:remove_black_bar()
+                JM:flush()
+                return
+            else
+                dialogue:pressed()
+                return
+            end
+        end
     end
 
     if (P1:pressed(Button.start, key)
@@ -529,22 +580,58 @@ local function game_logic(dt)
     if State.transition then return end
 
     if state == States.game then
-        if data:wave_is_over() then
-            data:put_kids_to_run(false)
-
+        if data.player:is_dead() then
+            data:enemy_victory()
+            data:set_state(States.finishFight)
+            ---
+        elseif data:wave_is_over(true) then
             local player = data.player
-            player:set_target_position(16 * 7, 16 * 7)
-            player:set_state(Kid.State.preparing)
-            player.goingTo_speed = 1.5
+            player:set_state(Kid.State.victory)
 
-            local leader = data.leader
-            leader:ressurect()
-            leader:set_target_position(16 * 12, 16 * 7)
-            leader:set_state(Kid.State.preparing)
-            leader.goingTo_speed = 2
-
-            data:set_state(States.preparingToTalk)
             data.wave_number = data.wave_number + 1
+            data:set_state(States.finishFight)
+        end
+        ---
+    elseif state == States.finishFight then
+        if data.time_gamestate >= 4 then
+            if not data.player:is_dead() then
+                data:put_kids_to_run(false)
+
+                local player = data.player
+                player:set_target_position(16 * 7, 16 * 7)
+                player:set_state(Kid.State.preparing)
+                player.goingTo_speed = 1.5
+
+                local leader = data.leader
+                leader:ressurect()
+                leader:set_target_position(16 * 12, 16 * 7)
+                leader:set_state(Kid.State.preparing)
+                leader.goingTo_speed = 2
+
+                if not State:is_showing_black_bar() then
+                    State:show_black_bar(16)
+                end
+
+                data:set_state(States.preparingToTalk)
+                ---
+            else
+                if not State.transition then
+                    State:add_transition("door", "out", { axis = "y", post_delay = 0.2 }, nil,
+                        ---@param State JM.Scene
+                        function(State)
+                            data.player:ressurect()
+                            data.player:set_state(Kid.State.preparing)
+                            data.player.stones = 5
+                            data.player:update(0)
+                            data.displayHP = DisplayHP:new(data.player)
+
+                            data:set_state(States.waveIsComing)
+
+                            data:skip_intro()
+                            State:add_transition("door", "in", { axis = "y", pause_scene = true })
+                        end)
+                end
+            end
         end
         ---
     elseif state == States.preparingToTalk then
@@ -558,12 +645,16 @@ local function game_logic(dt)
             and data:all_kids_on_position()
         then
             if State:is_current_active() then
-                data:start_countdown(3.6)
-                State:remove_black_bar()
+                -- data:start_countdown(3.6)
+                -- State:remove_black_bar()
+                data:set_state(States.dialogue)
             else
                 data:start_countdown(-0.5)
             end
         end
+        ---
+    elseif state == States.dialogue then
+
     end
 end
 
@@ -601,6 +692,8 @@ end
 
 local function update(dt)
     data.time_game = data.time_game + dt
+    data.time_gamestate = data.time_gamestate + dt
+
     if data.countdown_time then
         data.countdown_time = data.countdown_time - dt
         if data.countdown_time <= 0 then
@@ -611,7 +704,16 @@ local function update(dt)
     data.world:update(dt)
     State:update_game_objects(dt)
 
-    data.displayHP:update(dt)
+    if data.gamestate == States.game
+        or (data.countdown_time and data.countdown_time > 0)
+    then
+        data.displayHP:update(dt)
+    end
+
+    do
+        local D = data.dialogue
+        if D then D:update(dt) end
+    end
 
     game_logic(dt)
 end
@@ -660,8 +762,10 @@ local function draw(cam)
 
     --================================================================
     cam:detach()
-    if data.gamestate == States.game
-        or data.gamestate == States.waveIsComing
+    local state = data.gamestate
+    if state == States.game
+        -- or state == States.waveIsComing
+        or (data.countdown_time and data.countdown_time > 0)
         or not State:is_current_active()
     then
         local px = data.displayHP.x
@@ -696,6 +800,7 @@ local function draw(cam)
     do
         local countdown_time = data.countdown_time
         if countdown_time and countdown_time > 0 then
+            font = JM:get_font("pix8")
             if countdown_time > 1 then
                 font:printf(string.format("WAVE START IN\n%d", data.countdown_time), 0, 16 * 4, SCREEN_WIDTH, "center")
             else
@@ -703,6 +808,8 @@ local function draw(cam)
             end
         end
     end
+
+    data:draw_dialogue(cam)
 end
 
 --============================================================================
