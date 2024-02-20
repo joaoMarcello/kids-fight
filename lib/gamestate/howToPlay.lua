@@ -319,7 +319,7 @@ local function update(dt)
 
     local data_ = Game:__get_data__()
     if data_.player.hp <= 3
-    -- or data_.time_game > 135
+        or data_.time_game > 20
     then
         restart_game()
     end
