@@ -2,6 +2,7 @@ local path = ...
 local JM = _G.JM
 local Kid = require "lib.object.kid"
 local DisplayHP = require "lib.object.displayHP_game"
+local Timer = require "lib.object.timer"
 
 do
     _G.SUBPIXEL = _G.SUBPIXEL or 3
@@ -231,6 +232,7 @@ local function load()
 
     Kid:load()
     DisplayHP:load()
+    Timer:load()
 
     local lgx = love.graphics
     imgs = imgs or {
@@ -416,6 +418,7 @@ local function init(args)
 
     data.time_game = 0
     data.time_gamestate = 0.0
+    data.time_gameover = 60 * 4
     data.countdown_time = nil
     ---@type JM.DialogueSystem.Dialogue|any
     data.dialogue = nil
@@ -439,6 +442,7 @@ local function init(args)
     load_wave(data.wave_number)
 
     data.displayHP = DisplayHP:new(data.player)
+    data.timer = Timer:new(0.0)
 
     data:set_state(States.waveIsComing)
 end
@@ -486,7 +490,7 @@ local function keypressed(key)
                 if data.gamestate ~= States.endGame then
                     dialogue.flush()
                     data.dialogue = nil
-                    data:start_countdown(3.6)
+                    data:start_countdown(4)
                     State:remove_black_bar()
                     ---
                 else
@@ -624,7 +628,7 @@ local function game_logic(dt)
             data:set_state(States.finishFight)
             ---
         elseif data:wave_is_over(true) then
-            if data.wave_number < 4 then
+            if data.wave_number < 3 then
                 local player = data.player
                 player:set_state(Kid.State.victory)
 
@@ -768,6 +772,7 @@ end
 local function update(dt)
     if data.gamestate == States.game then
         data.time_game = data.time_game + dt
+        data.timer:update(dt)
     end
 
     data.time_gamestate = data.time_gamestate + dt
@@ -784,6 +789,7 @@ local function update(dt)
 
     if data.gamestate == States.game
         or (data.countdown_time and data.countdown_time > 0)
+        or not State:is_current_active()
     then
         data.displayHP:update(dt)
     end
@@ -865,10 +871,14 @@ local function draw(cam)
         font = JM:get_font("pix8")
         -- font:print(tostring(#State.game_objects), 16, 16 * 4)
 
-        if data:wave_is_over() then
-            font:printf("WAVE IS OVER", 0, 16 * 4, SCREEN_WIDTH, "center")
-        end
+        -- if data:wave_is_over() then
+        --     font:printf("WAVE IS OVER", 0, 16 * 4, SCREEN_WIDTH, "center")
+        -- end
         data.displayHP:draw()
+
+        if State:is_current_active() then
+            data.timer:draw()
+        end
     end
     cam:attach(nil, State.subpixel)
     --================================================================
@@ -880,7 +890,9 @@ local function draw(cam)
         if countdown_time and countdown_time > 0 then
             font = JM:get_font("pix8")
             if countdown_time > 1 then
-                font:printf(string.format("WAVE START IN\n%d", data.countdown_time), 0, 16 * 4, SCREEN_WIDTH, "center")
+                font:printf(string.format("STARTING IN\n%d...",
+                        math.min(3, data.countdown_time)),
+                    0, 16 * 3.5, SCREEN_WIDTH, "center")
             else
                 font:printx("<effect=scream>FIGHT", 0, 16 * 4, SCREEN_WIDTH, "center")
             end
