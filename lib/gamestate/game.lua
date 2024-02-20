@@ -34,6 +34,7 @@ local States = {
     preparingToTalk = 6,
     finishFight = 7,
     countDown = 8,
+    endGame = 9,
 }
 --============================================================================
 ---@class GameState.Game.Data
@@ -134,8 +135,13 @@ function data:set_state(new_state)
     self.dialogue = nil
 
     if new_state == States.dialogue then
-        self.dialogue = JM.DialogueSystem:newDialogue("/data/dialogue_1.md", JM:get_font("pix8"),
-            { align = "center", w = 16 * 9, n_lines = 2 })
+        self.dialogue = JM.DialogueSystem:newDialogue(
+            string.format("/data/dialogue_%d.md", data.wave_number),
+            JM:get_font("pix8"),
+            { align = "center", w = 16 * 8, n_lines = 2, text_align = 3 }
+        )
+    elseif new_state == States.endGame then
+        ---
     end
 
     return true
@@ -144,19 +150,38 @@ end
 ---@param cam JM.Camera.Camera
 function data:draw_dialogue(cam)
     local dialogue = data.dialogue
-    if not dialogue then return end
+    if not dialogue or not dialogue.is_visible then return end
+    local lgx = love.graphics
     local id = dialogue:get_id()
     local box = dialogue:get_cur_box()
-
     local speaker = id:match("bully") and data.leader or data.player
+
     box.x = speaker.x + speaker.w * 0.5 - dialogue.w * 0.5
     box.y = speaker.y - 52 - dialogue.h
-    box.show_border = true
+
+    lgx.setColor(JM_Utils:hex_to_rgba_float("f4ffe8"))
+    lgx.rectangle("fill", box.x - 2, box.y - 1, box.w + 16, box.h + 2)
+
+    if speaker == data.leader then
+        lgx.polygon("fill",
+            box.x + 24, box.y + box.h + 1,
+            box.x + 24 + 16, box.y + box.h + 1,
+            speaker.x, box.y + box.h + 16
+        )
+    else
+        lgx.polygon("fill",
+            box.x + 80, box.y + box.h + 1,
+            box.x + 80 + 16, box.y + box.h + 1,
+            speaker.x + speaker.w, box.y + box.h + 16
+        )
+    end
+
     dialogue:draw(cam)
 
-    local lgx = love.graphics
-    lgx.setColor(1, 0, 0)
-    -- lgx.rectangle("line", box:rect())
+    if box:screen_is_finished() then
+        local font = JM:get_font("pix8")
+        font:printx("<effect=float, speed=0.75, range=1>:arw_dw:", box.x + box.w + 1, box.y + dialogue.h - 12)
+    end
 end
 
 function data:leader_is_dead()
@@ -433,13 +458,14 @@ local function keypressed(key)
     local P1 = data.player.controller
     local Button = P1.Button
     P1:switch_to_keyboard()
+    local state = data.gamestate
 
-    if data.gamestate ~= States.game
-        and data.gamestate ~= States.finishFight
+    if state ~= States.game
+        and state ~= States.finishFight
+        and state ~= States.endGame
         and P1:pressed(Button.start, key)
         and not data.countdown_time
     then
-        -- data:skip_intro()
         State:add_transition("door", "out", { axis = "y", post_delay = 0.2, pause_scene = false }, nil,
             ---@param State JM.Scene
             function(State)
@@ -456,15 +482,28 @@ local function keypressed(key)
                 or P1:pressed(Button.dpad_right, key)
                 or P1:pressed(Button.X))
         then
-            if dialogue:finished() then
-                dialogue.flush()
-                data.dialogue = nil
-                data:start_countdown(3.6)
-                State:remove_black_bar()
+            if dialogue:finished() and dialogue.is_visible then
+                if data.gamestate ~= States.endGame then
+                    dialogue.flush()
+                    data.dialogue = nil
+                    data:start_countdown(3.6)
+                    State:remove_black_bar()
+                    ---
+                else
+                    data.time_gamestate = 0.0
+                    data.dialogue.is_visible = false
+                end
+
                 JM:flush()
                 return
             else
-                dialogue:pressed()
+                if data.gamestate ~= States.endGame then
+                    dialogue:pressed()
+                else
+                    if data.player:is_on_target_position() then
+                        dialogue:pressed()
+                    end
+                end
                 return
             end
         end
@@ -585,15 +624,51 @@ local function game_logic(dt)
             data:set_state(States.finishFight)
             ---
         elseif data:wave_is_over(true) then
-            local player = data.player
-            player:set_state(Kid.State.victory)
+            if data.wave_number < 2 then
+                local player = data.player
+                player:set_state(Kid.State.victory)
 
-            data.wave_number = data.wave_number + 1
-            data:set_state(States.finishFight)
+                data.wave_number = data.wave_number + 1
+                data:set_state(States.finishFight)
+                ---
+            else
+                local player = data.player
+                player:set_target_position(16 * 7, 16 * 7)
+                player:set_state(Kid.State.preparing)
+                player.goingTo_speed = 1.5
+
+                data:set_state(States.endGame)
+            end
+        end
+        ---
+    elseif state == States.endGame then
+        local player = data.player
+        local dialogue = data.dialogue
+        if player:is_on_target_position() and not dialogue then
+            data.dialogue = JM.DialogueSystem:newDialogue(
+                "/data/dialogue_4.md",
+                JM:get_font("pix8"),
+                { align = "center", w = 16 * 8, n_lines = 2, text_align = 3 }
+            )
+        end
+
+        if dialogue and not dialogue.is_visible
+            and data.time_gamestate > 1
+            and not State.transition
+        then
+            return State:add_transition("sawtooth", "out", { axis = "y", type = "bottom-top" }, nil,
+                ---@param State JM.Scene
+                function(State)
+                    return State:change_gamestate(require "lib.gamestate.victory", {
+                        skip_finish = true,
+                        transition = "sawtooth",
+                        transition_conf = { axis = "y", type = "bottom-top" }
+                    })
+                end)
         end
         ---
     elseif state == States.finishFight then
-        if data.time_gamestate >= 4 then
+        if data.time_gamestate >= 3 then
             if not data.player:is_dead() then
                 data:put_kids_to_run(false)
 
