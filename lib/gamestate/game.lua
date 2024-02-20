@@ -286,7 +286,7 @@ local function load_wave(value)
         k:set_position(SCREEN_WIDTH, 16 * 9)
         k:set_target_position(16 * 14, 16 * 9)
         k:set_state(k.State.preparing)
-        k.goingTo_speed = 2
+        k.goingTo_speed = 2.5
         k.anchor_y = 16 * 9 - k.move_y_value
         k.time_move_y = math.pi * 0.5
         k.anchor_x = 16 * 14
@@ -325,7 +325,7 @@ local function load_wave(value)
         k:set_position(SCREEN_WIDTH, 16 * 4)
         k:set_target_position(16 * 14, 16 * 4)
         k:set_state(k.State.preparing)
-        k.goingTo_speed = 0.75
+        k.goingTo_speed = 1.5
         table.insert(data.kids, k)
 
         ---@type Kid
@@ -333,7 +333,7 @@ local function load_wave(value)
         k:set_position(SCREEN_WIDTH, 16 * 9)
         k:set_target_position(16 * 14, 16 * 9)
         k:set_state(k.State.preparing)
-        k.goingTo_speed = 2
+        k.goingTo_speed = 2.5
         k.anchor_y = 16 * 9 - k.move_y_value
         k.time_move_y = math.pi * 0.5
         k.anchor_x = 16 * 14
@@ -353,6 +353,9 @@ local function load_wave(value)
     end
 end
 
+function data:load_wave(value)
+    return load_wave(value)
+end
 
 local function init(args)
     args = args or {}
@@ -383,7 +386,7 @@ local function init(args)
 
     data.displayHP = DisplayHP:new(data.player)
 
-    data:set_state(States.preparingToTalk)
+    data:set_state(States.waveIsComing)
 end
 
 local function textinput(t)
@@ -407,7 +410,7 @@ local function keypressed(key)
         and not data.countdown_time
     then
         -- data:skip_intro()
-        State:add_transition("door", "out", { axis = "y", post_delay = 0.2 }, nil,
+        State:add_transition("door", "out", { axis = "y", post_delay = 0.2, pause_scene = false }, nil,
             ---@param State JM.Scene
             function(State)
                 data:skip_intro()
@@ -523,6 +526,8 @@ end
 
 local function game_logic(dt)
     local state = data.gamestate
+    if State.transition then return end
+
     if state == States.game then
         if data:wave_is_over() then
             data:put_kids_to_run(false)
@@ -565,8 +570,6 @@ end
 function data:skip_intro()
     local list = self.kids
     if not list then return end
-
-
 
     local player = self.player
     player:set_state(Kid.State.idle)
