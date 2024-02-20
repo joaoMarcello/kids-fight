@@ -39,7 +39,7 @@ local ACC = (16 * 12 * 60) --16 * 12  f = m * a   a = f / m
 local MAX_SPEED = 16 * 4.5
 local DACC = ACC * 2
 local MAX_STONE = 10
-local HP_MAX = 5
+local HP_MAX = 7
 local INVICIBLE_DURATION = 1
 
 local imgs
@@ -525,7 +525,7 @@ local function movement(self, dt)
                 if self.time_state >= self.move_delay then
                     if self.direction == -1 then
                         self:set_target_position(
-                            16 * random(12, 16),
+                            16 * random(13, 17),
                             16 * random(4, 9)
                         )
                     else
@@ -722,12 +722,12 @@ end
 
 ---@param self Kid
 local my_draw = function(self)
-    local lgx = love.graphics
-    lgx.setColor(1, 0, 0)
-    lgx.rectangle("fill", self:rect())
+    -- local lgx = love.graphics
+    -- lgx.setColor(1, 0, 0)
+    -- lgx.rectangle("fill", self:rect())
 
-    lgx.setColor(0, 0, 1)
-    lgx.rectangle("line", self.body2:rect())
+    -- lgx.setColor(0, 0, 1)
+    -- lgx.rectangle("line", self.body2:rect())
 
     local state = self.state
     if not self:is_dead()
@@ -747,12 +747,7 @@ end
 
 function Kid:draw()
     GC.draw(self, my_draw)
-
-    -- love.graphics.setColor(0, 0, 0)
-    -- love.graphics.print(tostring(self.hp), self.x, self.y - 32)
-
-    self.displayHP:draw()
-    -- love.graphics.print(string.format("%.2f %.2f", self.body.amount_x, self.body.amount_y), self.x, self.y - 48)
+    return self.displayHP:draw()
 end
 
 return Kid
