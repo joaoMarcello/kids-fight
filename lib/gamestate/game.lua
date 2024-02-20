@@ -466,7 +466,7 @@ local function keypressed(key)
         and P1:pressed(Button.start, key)
         and not data.countdown_time
     then
-        State:add_transition("door", "out", { axis = "y", post_delay = 0.2, pause_scene = false }, nil,
+        State:add_transition("door", "out", { axis = "y", duration = 1, post_delay = 0.3, pause_scene = false }, nil,
             ---@param State JM.Scene
             function(State)
                 data:skip_intro()
@@ -624,7 +624,7 @@ local function game_logic(dt)
             data:set_state(States.finishFight)
             ---
         elseif data:wave_is_over(true) then
-            if data.wave_number < 2 then
+            if data.wave_number < 4 then
                 local player = data.player
                 player:set_state(Kid.State.victory)
 
@@ -766,7 +766,10 @@ function data:skip_intro()
 end
 
 local function update(dt)
-    data.time_game = data.time_game + dt
+    if data.gamestate == States.game then
+        data.time_game = data.time_game + dt
+    end
+
     data.time_gamestate = data.time_gamestate + dt
 
     if data.countdown_time then
@@ -885,6 +888,8 @@ local function draw(cam)
     end
 
     data:draw_dialogue(cam)
+
+    font:print(string.format("%.1f", data.time_game), 16, 16 * 6)
 end
 
 --============================================================================
