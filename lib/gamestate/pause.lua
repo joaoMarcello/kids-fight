@@ -45,16 +45,18 @@ function data:restart()
         JM.Sound:stop_all()
 
         ---@type GameState.Game.Data
-        local data_ = State.prev_state:__get_data__()
+        local _data_ = State.prev_state:__get_data__()
 
         State:add_transition("door", "out", { duration = 0.8, axis = "y", pause_scene = true, post_delay = 0.1 }, nil,
             function()
+                -- State.prev_state:init { wave_number = _data_.wave_number }
                 State:change_gamestate(State.prev_state, {
                     -- skip_finish = true,
                     skip_load = true,
+                    -- skip_init = true,
 
                     trans_end_action = function()
-                        data_.play_song()
+                        _data_.play_song()
                     end,
 
                     transition = "door",
