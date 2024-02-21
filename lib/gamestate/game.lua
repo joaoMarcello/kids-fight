@@ -139,8 +139,9 @@ function data:set_state(new_state)
         self.dialogue = JM.DialogueSystem:newDialogue(
             string.format("/data/dialogue_%d.md", data.wave_number),
             JM:get_font("pix8"),
-            { align = "center", w = 16 * 8, n_lines = 2, text_align = 3 }
+            { align = "center", w = 16 * 8, n_lines = 2, text_align = 3, time_wait = 0.05 }
         )
+        ---
     elseif new_state == States.endGame then
         ---
     end
@@ -270,21 +271,26 @@ local function load_wave(value)
 
     data.kids = {}
 
-    if value == 1 then
-        ---@type Kid
-        local k = data.leader or State:add_object(Kid:new(SCREEN_WIDTH, 16 * 7, Kid.Gender.boy, -1, true, 2))
+    if data.leader then
+        data.leader:ressurect()
+    end
 
-        if k.state ~= Kid.State.idle then
-            k:set_position(SCREEN_WIDTH, 16 * 7)
-            k:set_target_position(16 * 12)
-            k:set_state(k.State.preparing)
-        end
-        k.time_move_y = 0.0
-        k.anchor_y = 16 * 7
-        k.goingTo_speed = 1.5
-        k.time_jump = 0.0
-        table.insert(data.kids, k)
-        data.leader = k
+    ---@type Kid
+    local k = data.leader or State:add_object(Kid:new(SCREEN_WIDTH, 16 * 7, Kid.Gender.boy, -1, true, 2))
+
+    if k.state ~= Kid.State.idle then
+        k:set_position(SCREEN_WIDTH, 16 * 7)
+        k:set_target_position(16 * 12)
+        k:set_state(k.State.preparing)
+    end
+    k.time_move_y = 0.0
+    k.anchor_y = 16 * 7
+    k.goingTo_speed = 1.5
+    k.time_jump = 0.0
+    table.insert(data.kids, k)
+    data.leader = k
+
+    if value == 1 then
         data.leader.time_throw = 0.0
 
         -- ---@type Kid
@@ -320,62 +326,62 @@ local function load_wave(value)
         -- table.insert(data.kids, k)
         ---
     elseif value == 2 then
-        if data.leader then
-            data.leader:ressurect()
-        end
+        -- if data.leader then
+        --     data.leader:ressurect()
+        -- end
 
-        ---@type Kid
-        local k = data.leader or State:add_object(Kid:new(SCREEN_WIDTH, 16 * 7, Kid.Gender.boy, -1, true, 2))
+        -- ---@type Kid
+        -- local k = data.leader or State:add_object(Kid:new(SCREEN_WIDTH, 16 * 7, Kid.Gender.boy, -1, true, 2))
 
-        if k.state ~= Kid.State.idle then
-            k:set_target_position(16 * 12, 16 * 7)
-            k:set_state(k.State.preparing)
-        end
-        k.time_move_y = 0.0
-        k.anchor_y = 16 * 7
-        k.goingTo_speed = 1.5
-        table.insert(data.kids, k)
-        data.leader = k
+        -- if k.state ~= Kid.State.idle then
+        --     k:set_target_position(16 * 12, 16 * 7)
+        --     k:set_state(k.State.preparing)
+        -- end
+        -- k.time_move_y = 0.0
+        -- k.anchor_y = 16 * 7
+        -- k.goingTo_speed = 1.5
+        -- table.insert(data.kids, k)
+        -- data.leader = k
 
         ---@type Kid
         k = State:add_object(Kid:new(16 * 15, 16 * 9, Kid.Gender.boy, -1, true, 3))
         k:set_position(SCREEN_WIDTH, 16 * 9)
         k:set_target_position(16 * 14, 16 * 9)
         k:set_state(k.State.preparing)
-        k.goingTo_speed = 2.5
+        k.goingTo_speed = 1.5
         k.anchor_y = 16 * 9 - k.move_y_value
         k.time_move_y = math.pi * 0.5
         k.anchor_x = 16 * 14
         k.time_move_x = 0.0
         table.insert(data.kids, k)
 
-        ---@type Kid
-        k = State:add_object(Kid:new(16 * 17, 16 * 5, Kid.Gender.boy, -1, true, 1))
-        k:set_position(SCREEN_WIDTH, 16 * 5)
-        k:set_target_position(16 * 17, 16 * 5)
-        k:set_state(k.State.preparing)
-        k.goingTo_speed = 2
-        k.anchor_y = 16 * 5 + k.move_y_value
-        k.time_move_y = -math.pi * 0.5
-        table.insert(data.kids, k)
+        -- ---@type Kid
+        -- k = State:add_object(Kid:new(16 * 17, 16 * 5, Kid.Gender.boy, -1, true, 1))
+        -- k:set_position(SCREEN_WIDTH, 16 * 5)
+        -- k:set_target_position(16 * 17, 16 * 5)
+        -- k:set_state(k.State.preparing)
+        -- k.goingTo_speed = 2
+        -- k.anchor_y = 16 * 5 + k.move_y_value
+        -- k.time_move_y = -math.pi * 0.5
+        -- table.insert(data.kids, k)
         ---
     else
-        if data.leader then
-            data.leader:ressurect()
-        end
+        -- if data.leader then
+        --     data.leader:ressurect()
+        -- end
 
-        ---@type Kid
-        local k = data.leader or State:add_object(Kid:new(SCREEN_WIDTH, 16 * 7, Kid.Gender.boy, -1, true, 2))
+        -- ---@type Kid
+        -- local k = data.leader or State:add_object(Kid:new(SCREEN_WIDTH, 16 * 7, Kid.Gender.boy, -1, true, 2))
 
-        if k.state ~= Kid.State.idle then
-            k:set_target_position(16 * 12, 16 * 7)
-            k:set_state(k.State.preparing)
-        end
-        k.time_move_y = 0.0
-        k.anchor_y = 16 * 7
-        k.goingTo_speed = 1.5
-        table.insert(data.kids, k)
-        data.leader = k
+        -- if k.state ~= Kid.State.idle then
+        --     k:set_target_position(16 * 12, 16 * 7)
+        --     k:set_state(k.State.preparing)
+        -- end
+        -- k.time_move_y = 0.0
+        -- k.anchor_y = 16 * 7
+        -- k.goingTo_speed = 1.5
+        -- table.insert(data.kids, k)
+        -- data.leader = k
 
         k = State:add_object(Kid:new(16 * 12, 16 * 4, Kid.Gender.boy, -1, true, 2))
         k:set_position(SCREEN_WIDTH, 16 * 4)
@@ -650,7 +656,7 @@ local function game_logic(dt)
         local dialogue = data.dialogue
         if player:is_on_target_position() and not dialogue then
             data.dialogue = JM.DialogueSystem:newDialogue(
-                "/data/dialogue_4.md",
+                "/data/dialogue_final.md",
                 JM:get_font("pix8"),
                 { align = "center", w = 16 * 8, n_lines = 2, text_align = 3 }
             )
@@ -751,6 +757,17 @@ function data:skip_intro()
         k:remove()
         table.remove(list, i)
     end
+
+    do
+        local objs = State.game_objects
+        for i = #objs, 1, -1 do
+            ---@type Kid|any
+            local k = objs[i]
+            if k.is_kid and not k.__remove and k ~= player then
+                k:remove()
+            end
+        end
+    end
     data.leader = nil
 
     load_wave(data.wave_number)
@@ -777,7 +794,9 @@ local function update(dt)
 
     data.time_gamestate = data.time_gamestate + dt
 
-    if data.countdown_time then
+    if data.countdown_time
+    -- and (not State:is_showing_black_bar() or not State:is_current_active())
+    then
         data.countdown_time = data.countdown_time - dt
         if data.countdown_time <= 0 then
             data:start_game()
@@ -788,7 +807,8 @@ local function update(dt)
     State:update_game_objects(dt)
 
     if data.gamestate == States.game
-        or (data.countdown_time and data.countdown_time > 0)
+        or (data.countdown_time and data.countdown_time > 0
+            and not State:is_showing_black_bar())
         or not State:is_current_active()
     then
         data.displayHP:update(dt)
@@ -855,26 +875,22 @@ local function draw(cam)
         local px = data.displayHP.x
         local py = data.displayHP.y + 8
 
-        lgx.setColor(1, 1, 1, 0.75)
-        lgx.draw(imgs["box"], px - 12, data.displayHP.y - 4)
+        if not State:is_showing_black_bar() then
+            lgx.setColor(1, 1, 1, 0.75)
+            lgx.draw(imgs["box"], px - 12, data.displayHP.y - 4)
+            data.displayHP:draw()
 
-        if data.player.stones == data.player.max_stones then
-            font:printx(
-                string.format("ammo x %d <effect=flickering, speed=0.5><color-hex=ff0000>max", data.player.stones),
-                px, py)
-        elseif data.player.stones <= 0 then
-            font:printx(string.format("<effect=flickering, speed=0.5><color-hex=ff0000>no ammo"), px, py)
-        else
-            font:printf(string.format("ammo x %d", data.player.stones), px, py)
+            if data.player.stones == data.player.max_stones then
+                font:printx(
+                    string.format("ammo x %d <effect=flickering, speed=0.5><color-hex=ff0000>max", data.player.stones),
+                    px, py)
+            elseif data.player.stones <= 0 then
+                font:printx(string.format("<effect=flickering, speed=0.5><color-hex=ff0000>no ammo"), px, py)
+            else
+                font:printf(string.format("ammo x %d", data.player.stones), px, py)
+            end
         end
 
-        font = JM:get_font("pix8")
-        -- font:print(tostring(#State.game_objects), 16, 16 * 4)
-
-        -- if data:wave_is_over() then
-        --     font:printf("WAVE IS OVER", 0, 16 * 4, SCREEN_WIDTH, "center")
-        -- end
-        data.displayHP:draw()
 
         if State:is_current_active() then
             data.timer:draw()
@@ -882,7 +898,7 @@ local function draw(cam)
     end
     cam:attach(nil, State.subpixel)
     --================================================================
-
+    font = JM:get_font("pix8")
     font:print("<color>LEADER", data.leader.x, data.leader.y - 48)
 
     do
