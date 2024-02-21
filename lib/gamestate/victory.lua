@@ -25,7 +25,8 @@ local State = JM.Scene:new {
     cam_scale = 1,
 }
 
-State:set_color(JM_Utils:hex_to_rgba_float("2c2433"))
+-- State:set_color(JM_Utils:hex_to_rgba_float("2c2433"))
+State:set_color(0, 0, 0, 1)
 --============================================================================
 ---@class GameState.Victory.Data
 local data = {}
