@@ -260,7 +260,10 @@ function Kid:keypressed(key)
 
     if P1:pressed(Button.A, key) then
         return self:jump()
-    elseif P1:pressed(Button.X, key) then
+    elseif P1:pressed(Button.X, key)
+        or P1:pressed(Button.L, key)
+        or P1:pressed(Button.R, key)
+    then
         return self:attack()
     end
 end
@@ -287,7 +290,7 @@ function Kid:damage(value, obj)
     self.hp = Utils:clamp(self.hp - value, 0, HP_MAX)
 
     if self.is_enemy then
-        self.time_invincible = INVICIBLE_DURATION * 0.5
+        self.time_invincible = INVICIBLE_DURATION * 1 --0.5
     else
         self.time_invincible = INVICIBLE_DURATION
     end
