@@ -50,6 +50,7 @@ local function init(args)
     local _data_ = game:__get_data__()
 
     data.total_time = _data_.time_game
+    data.death_count = _data_.death_count or 0
     data.time_gamestate = 0.0
 end
 
@@ -143,12 +144,16 @@ local function draw(cam)
     local Utils = JM_Utils
     font:push()
     font:set_color(Utils:get_rgba(Utils:hex_to_rgba_float("e5f285")))
+
+    font:printf(string.format("N. deaths: <color-hex=d96c21>%d", data.death_count), 0, 16 * 4, SCREEN_WIDTH, "center")
+
     font:printf(string.format("Your time was\n<color-hex=f4ffe8>%.1f</color> seconds", tostring(data.total_time or 0)), 0,
         16 * 6,
         SCREEN_WIDTH, "center")
 
     -- font:set_font_size(font.__font_size * 2)
     if data.time_gamestate > 3.0 then
+        font:set_color(Utils:get_rgba(Utils:hex_to_rgba_float("bf91b4")))
         font:printx("<effect=flickering, speed=1>Press [space] to continue", 0, 16 * 9.5, SCREEN_WIDTH,
             "center")
     end
