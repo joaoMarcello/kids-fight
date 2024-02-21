@@ -711,7 +711,7 @@ end
 local __draw__ = {
     [States.pressToPlay] = function(self, cam)
         font:push()
-        font:set_color(JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("332424")))
+        font:set_color(JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("334266")))
         font:printx("<effect=ghost, min=0.1, max=1.15>Press [enter] to play", 0, 16 * 7, SCREEN_WIDTH,
             "center")
 
@@ -823,7 +823,7 @@ local function draw(cam)
     data.layers[1].angle = -math.pi * 0.015
     data.layers[1]:draw(cam)
 
-    local color = JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("332424"))
+    local color = JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("334266"))
     local state = data.state
 
     if state ~= States.pressToPlay
@@ -833,6 +833,11 @@ local function draw(cam)
         font:push()
         font:set_color(color)
         font:printf("[up/down] move\t [space] select\t [esc] back", 8, TILE * 10, SCREEN_WIDTH, "center")
+        font:pop()
+
+        font:push()
+        font:set_color(JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("334266")))
+        font:printf('Select an option:', 24, 16, SCREEN_WIDTH, "left")
         font:pop()
         ---
     elseif state ~= States.data
