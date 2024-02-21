@@ -712,10 +712,10 @@ local __draw__ = {
     [States.pressToPlay] = function(self, cam)
         font:push()
         font:set_color(JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("332424")))
-        font:printx("<effect=ghost, min=0.1, max=1.15>Press [enter] to play", 0, 16 * 8, SCREEN_WIDTH,
+        font:printx("<effect=ghost, min=0.1, max=1.15>Press [enter] to play", 0, 16 * 7, SCREEN_WIDTH,
             "center")
 
-        font:printf("2024, JM", 0, 16 * 9, SCREEN_WIDTH, "center")
+        font:printf("©2024, JM", 0, 16 * 9, SCREEN_WIDTH, "center")
 
         love.graphics.setColor(JM_Utils:hex_to_rgba_float("998e79"))
         love.graphics.ellipse("fill", SCREEN_WIDTH * 0.5 + 1, 16 * 2 + 16 + 4 + 2, 64, 32)
