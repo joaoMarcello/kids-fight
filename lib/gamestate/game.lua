@@ -677,13 +677,17 @@ local function game_logic(dt)
             and data.time_gamestate > 1
             and not State.transition
         then
-            return State:add_transition("sawtooth", "out", { axis = "y", type = "bottom-top" }, nil,
+            return State:add_transition("sawtooth", "out",
+                {
+                    axis = "y",
+                    -- type = "bottom-top"
+                }, nil,
                 ---@param State JM.Scene
                 function(State)
                     return State:change_gamestate(require "lib.gamestate.victory", {
                         skip_finish = true,
-                        transition = "sawtooth",
-                        transition_conf = { axis = "y", type = "bottom-top" }
+                        transition = "fade",
+                        -- transition_conf = { axis = "y", type = "bottom-top" }
                     })
                 end)
         end
@@ -923,7 +927,12 @@ local function draw(cam)
     do
         local leader = data.leader
         if leader and not leader:is_dead()
-            and state ~= States.dialogue and state ~= States.endGame
+            -- and state ~= States.dialogue and state ~= States.endGame
+            -- and state ~= States.preparingToTalk
+            -- and state ~= States.waveIsComing
+            and state == States.game
+            and not data.countdown_time
+            and State:is_current_active()
         then
             font = JM:get_font("pix8")
             font:print("<color>LEADER", data.leader.x, data.leader.y - 48)
