@@ -32,6 +32,7 @@ local AnimaState = {
     atk = 6,
     walk = 7,
     victory = 8,
+    damage = 9,
 }
 
 local tile = _G.TILE or 16
@@ -62,6 +63,10 @@ local function throw_stone(self)
 
     self.gamestate:add_object(p)
     self.stones = self.stones - 1
+
+    self.cur_anima = self.animas[AnimaState.atk]
+    self.cur_anima:reset()
+
     return true
 end
 
@@ -90,6 +95,8 @@ function Kid:__constructor__(gender, direction, is_enemy, move_type)
     self.oy = self.h
 
     self.gender = gender
+    self.__id = 1
+
     self.is_enemy = is_enemy or false
     self.direction = direction
 
@@ -137,13 +144,21 @@ function Kid:__constructor__(gender, direction, is_enemy, move_type)
 
 
     self.animas = {
-        [AnimaState.idle] = animas["idle"]:copy(),
-        [AnimaState.run] = animas["run"]:copy(),
+        [AnimaState.idle] = animas[self.__id]["idle"]:copy(),
+        [AnimaState.run] = animas[self.__id]["run"]:copy(),
+        [AnimaState.dead] = animas[self.__id]["death"]:copy(),
+        [AnimaState.jump] = animas[self.__id]["jump"]:copy(),
+        [AnimaState.fall] = animas[self.__id]["fall"]:copy(),
+        [AnimaState.victory] = animas[self.__id]["victory"]:copy(),
+        [AnimaState.atk] = animas[self.__id]["attack"]:copy(),
+        [AnimaState.damage] = animas[self.__id]["damage"]:copy(),
     }
 
     ---@type JM.Anima
     self.cur_anima = self.animas[AnimaState.idle]
     self.cur_anima:set_flip_x(self.direction == -1)
+    self.cur_anima.current_frame = random(1, #self.cur_anima.frames_list)
+
     --
     self.update = Kid.update
     self.draw = Kid.draw
@@ -153,6 +168,7 @@ function Kid:__constructor__(gender, direction, is_enemy, move_type)
     do
         self.time_throw = 1 + 3 * random()
         self.time_jump = random()
+        self.time_delay = 0.0
         self.time_jump_interval = 1 + random()
         self.time_move_y = (math.pi * 0.5) * random(4)
         self.time_move_x = (math.pi * 0.5) * random(4)
@@ -185,11 +201,25 @@ function Kid:load()
     imgs = imgs or {
         ["idle"] = lgx.newImage("/data/img/kid_idle-Sheet.png"),
         ["run"] = lgx.newImage("/data/img/kid_run-Sheet.png"),
+        ["death"] = lgx.newImage("/data/img/kid_death.png"),
+        ["jump"] = lgx.newImage("/data/img/kid_jump-Sheet.png"),
+        ["fall"] = lgx.newImage("/data/img/kid_fall-Sheet.png"),
+        ["victory"] = lgx.newImage("/data/img/kid_victory-Sheet.png"),
+        ["attack"] = lgx.newImage("/data/img/kid_atk-Sheet.png"),
+        ["damage"] = lgx.newImage("/data/img/kid_damage-Sheet.png"),
     }
 
-    animas = animas or {
+    animas = animas or {}
+
+    animas[1] = animas[1] or {
         ["idle"] = Anima:new { img = imgs["idle"], frames = 4, duration = 0.3 },
         ["run"] = Anima:new { img = imgs["run"], frames = 8, duration = 0.5 },
+        ["death"] = Anima:new { img = imgs["death"], frames = 1 },
+        ["jump"] = Anima:new { img = imgs["jump"], frames = 2, duration = 0.25, stop_at_the_end = true },
+        ["fall"] = Anima:new { img = imgs["fall"], frames = 1 },
+        ["victory"] = Anima:new { img = imgs["victory"], frames = 1 },
+        ["attack"] = Anima:new { img = imgs["attack"], frames = 2, duration = 0.2, stop_at_the_end = true },
+        ["damage"] = Anima:new { img = imgs["damage"], frames = 1 },
     }
 end
 
@@ -243,6 +273,9 @@ function Kid:set_state(new_state)
         --
     elseif new_state == States.victory then
         self.time_jump_interval = random() * 0.5
+    elseif new_state == States.runAway then
+        self.hp = self.hp_init
+        ---
     end
 
     self:adjust_cur_anima()
@@ -318,8 +351,13 @@ function Kid:damage(value, obj)
         self.displayHP:show()
     end
 
+    self.cur_anima = self.animas[AnimaState.damage]
+    self.cur_anima:reset()
+
     if not self.is_enemy then
         self.gamestate:pause(self:is_dead() and 1.3 or 0.2, pause_action, self)
+    else
+        self.gamestate:pause(0.2, pause_action, self)
     end
 
     return true
@@ -611,6 +649,17 @@ end
 local args_flick = { speed = 0.06 }
 
 function Kid:update(dt)
+    if self.time_delay ~= 0 then
+        self.time_delay = self.time_delay - dt
+        if self.time_delay <= 0 then
+            self.time_delay = 0
+            self.is_visible = true
+        else
+            self.is_visible = false
+            return
+        end
+    end
+
     GC.update(self, dt)
     self.displayHP:update(dt)
 
@@ -723,11 +772,48 @@ function Kid:update(dt)
     self:adjust_cur_anima()
 end
 
-function Kid:get_cur_anima()
-    local diff_x = self.lpx - self.body.x
-    local diff_y
+function Kid:get_cur_anima(state)
+    state = state or self.state
 
-    if diff_x ~= 0 or self.body.speed_x ~= 0.0 then
+    local bd = self.body
+    local bd2 = self.body2
+    local diff_x = self.lpx - bd.x
+    local diff_y = self.lpy - bd.y
+
+    if state == States.victory then
+        return self.animas[AnimaState.victory]
+        ---
+    elseif self.cur_anima == self.animas[AnimaState.damage] then
+        local anima = self.cur_anima
+        if anima:time_updating() >= 0.1 then
+            self.cur_anima = nil
+            return self:get_cur_anima()
+        else
+            return anima
+        end
+        ---
+    elseif self:is_dead() then
+        return self.animas[AnimaState.dead]
+        ---
+    elseif self.cur_anima == self.animas[AnimaState.atk] then
+        local anima = self.cur_anima
+        if anima:time_updating() >= 0.1 then
+            self.cur_anima = nil
+            return self:get_cur_anima()
+        else
+            return anima
+        end
+        ---
+    elseif self.is_jump then
+        if bd2.speed_y < 0 then
+            return self.animas[AnimaState.jump]
+        else
+            return self.animas[AnimaState.fall]
+        end
+        ---
+    elseif diff_x ~= 0 or bd.speed_x ~= 0.0
+        or (not self.is_jump and (diff_y ~= 0.0 or bd.speed_y ~= 0))
+    then
         return self.animas[AnimaState.run]
     else
         return self.animas[AnimaState.idle]
@@ -741,12 +827,12 @@ function Kid:adjust_cur_anima()
     anima:set_flip_x(self.direction == -1)
     if self.state == States.runAway then
         anima:set_flip_x(false)
-        anima:set_rotation(0)
+        -- anima:set_rotation(0)
         ---
     elseif self.state == States.dead then
-        anima:set_rotation(math.pi * 0.5 * -self.direction)
+        -- anima:set_rotation(math.pi * 0.5 * -self.direction)
     else
-        anima:set_rotation(0)
+        -- anima:set_rotation(0)
     end
 end
 
@@ -759,20 +845,7 @@ local my_draw = function(self)
     -- lgx.setColor(0, 0, 1)
     -- lgx.rectangle("line", self.body2:rect())
 
-    local state = self.state
-    if not self:is_dead()
-        or state == States.runAway
-        or state == States.preparing
-        or state == States.goingTo
-    then
-        self.cur_anima:draw_rec(self.body2:rect())
-    else
-        local bd = self.body2
-        self.cur_anima:draw(
-            bd.x + bd.w * 0.5 + 8 * -self.direction,
-            bd:bottom() - 8
-        )
-    end
+    return self.cur_anima:draw_rec(self.body2:rect())
 end
 
 function Kid:draw()
