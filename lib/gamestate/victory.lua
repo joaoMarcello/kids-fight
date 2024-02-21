@@ -38,6 +38,7 @@ end
 
 local function load()
     JM:get_font("pix8")
+    JM:get_font("pix5")
 end
 
 local function finish()
@@ -57,7 +58,7 @@ local function textinput(t)
 end
 
 local function keypressed(key)
-    if State.transition or data.time_gamestate < 1 then return end
+    if State.transition or data.time_gamestate < 3 then return end
 
     if key == 'o' then
         State.camera:toggle_grid()
@@ -67,7 +68,9 @@ local function keypressed(key)
     local P1 = JM.ControllerManager.P1
     local Button = P1.Button
 
-    if P1:pressed(Button.start, key) then
+    if P1:pressed(Button.start, key)
+        or P1:pressed(Button.A, key)
+    then
         if not State.transition then
             return State:add_transition("fade", "out", { post_delay = 0.2 }, nil,
                 ---@param State JM.Scene
@@ -88,7 +91,9 @@ local function keyreleased(key)
 end
 
 local function mousepressed(x, y, button, istouch, presses)
-
+    if button == 1 or button == 2 then
+        return State:keypressed('space')
+    end
 end
 
 local function mousereleased(x, y, button, istouch, presses)
@@ -108,7 +113,14 @@ local function touchreleased(id, x, y, dx, dy, pressure)
 end
 
 local function gamepadpressed(joystick, button)
+    local P1 = JM.ControllerManager.P1
+    local Button = P1.Button
 
+    if P1:pressed(Button.start, joystick, button)
+        or P1:pressed(Button.A, joystick, button)
+    then
+        return State:keypressed('return')
+    end
 end
 
 local function gamepadreleased(joystick, button)
@@ -131,7 +143,23 @@ local function draw(cam)
     local Utils = JM_Utils
     font:push()
     font:set_color(Utils:get_rgba(Utils:hex_to_rgba_float("e5f285")))
-    font:printf(string.format("Your time was\n%.1f seconds", data.total_time), 0, 16 * 6, SCREEN_WIDTH, "center")
+    font:printf(string.format("Your time was\n<color-hex=f4ffe8>%.1f</color> seconds", tostring(data.total_time or 0)), 0,
+        16 * 6,
+        SCREEN_WIDTH, "center")
+
+    -- font:set_font_size(font.__font_size * 2)
+    if data.time_gamestate > 3.0 then
+        font:printx("<effect=flickering, speed=1>Press [space] to continue", 0, 16 * 9.5, SCREEN_WIDTH,
+            "center")
+    end
+
+    font:pop()
+
+    font = JM:get_font("pix5")
+    font:push()
+    font:set_color(Utils:get_rgba(Utils:hex_to_rgba_float("e5f285")))
+    font:set_font_size(font.__font_size * 2)
+    font:printf("you defeat the bullies!", 0, 16 * 1.5, SCREEN_WIDTH, "center")
     font:pop()
 end
 
