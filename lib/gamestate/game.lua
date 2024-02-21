@@ -421,10 +421,16 @@ end
 
 local function init(args)
     args = args or {}
+    State:remove_black_bar(true)
+    State.camera.x = 0
+    State.camera.y = 0
 
     data.time_game = 0
     data.time_gamestate = 0.0
     data.time_gameover = 60 * 4
+    data.time_gc = 0.0
+    data.death_count = 0
+
     data.countdown_time = nil
     ---@type JM.DialogueSystem.Dialogue|any
     data.dialogue = nil
@@ -522,6 +528,9 @@ local function keypressed(key)
     if (P1:pressed(Button.start, key)
             or P1:pressed(Button.B, key))
         and not data.countdown_time
+        and state ~= States.endGame
+        and state ~= States.preparingToTalk
+        and state ~= States.finishFight
     then
         JM.Sound:pause()
         _G.Play_sfx("pause", true)
@@ -631,6 +640,7 @@ local function game_logic(dt)
     if state == States.game then
         if data.player:is_dead() then
             data:enemy_victory()
+            data.death_count = data.death_count + 1
             data:set_state(States.finishFight)
             ---
         elseif data:wave_is_over(true) then
@@ -648,6 +658,7 @@ local function game_logic(dt)
                 player.goingTo_speed = 1.5
 
                 data:set_state(States.endGame)
+                State:show_black_bar(16)
             end
         end
         ---
@@ -820,6 +831,14 @@ local function update(dt)
     end
 
     game_logic(dt)
+
+    data.time_gc = data.time_gc + dt
+    if data.time_gc > 20 then
+        data.time_gc = 0.0
+        for _ = 1, 10 do
+            collectgarbage('step')
+        end
+    end
 end
 
 local sort_draw = function(a, b)
@@ -831,6 +850,8 @@ end
 ---@param cam JM.Camera.Camera
 local function draw(cam)
     local lgx = love.graphics
+    local Utils = JM_Utils
+
     lgx.setColor(1, 1, 1)
     lgx.draw(imgs["field"])
 
@@ -859,7 +880,7 @@ local function draw(cam)
 
     State:draw_game_object(cam, nil, sort_draw)
 
-    lgx.setColor(JM_Utils:hex_to_rgba_float("799299"))
+    lgx.setColor(Utils:hex_to_rgba_float("799299"))
     lgx.draw(imgs["street_down"])
 
     local font = JM:get_font("pix5")
@@ -898,26 +919,58 @@ local function draw(cam)
     end
     cam:attach(nil, State.subpixel)
     --================================================================
-    font = JM:get_font("pix8")
-    font:print("<color>LEADER", data.leader.x, data.leader.y - 48)
+
+    do
+        local leader = data.leader
+        if leader and not leader:is_dead()
+            and state ~= States.dialogue and state ~= States.endGame
+        then
+            font = JM:get_font("pix8")
+            font:print("<color>LEADER", data.leader.x, data.leader.y - 48)
+        end
+    end
 
     do
         local countdown_time = data.countdown_time
         if countdown_time and countdown_time > 0 then
             font = JM:get_font("pix8")
+
+            lgx.setColor(Utils:hex_to_rgba_float("f4ffe8bf"))
+            local x, y, w, h = (16 * 7), (16 * 2), (16 * 6), (16 * 2.5)
+            lgx.rectangle("fill", x, y, w, h)
             if countdown_time > 1 then
-                font:printf(string.format("STARTING IN\n%d...",
-                        math.min(3, data.countdown_time)),
-                    0, 16 * 3.5, SCREEN_WIDTH, "center")
+                if data.wave_number < 3 then
+                    font:printf(string.format("STARTING IN\n%d",
+                            math.min(3, data.countdown_time)),
+                        x, y + 8, w, "center")
+                else
+                    font:printf(string.format("FINAL FIGHT IN\n%d",
+                            math.min(3, data.countdown_time)),
+                        x, y + 8, w, "center")
+                end
             else
-                font:printx("<effect=scream>FIGHT", 0, 16 * 4, SCREEN_WIDTH, "center")
+                font:printx("<effect=scream>FIGHT", x, y + 12, w, "center")
             end
         end
     end
 
     data:draw_dialogue(cam)
 
-    font:print(string.format("%.1f", data.time_game), 16, 16 * 6)
+    if State:is_showing_black_bar() and not data.countdown_time
+        and state ~= States.endGame
+    then
+        lgx.setColor(0, 0, 0, 0.5)
+        local x, y, w, h = 16 * 15.25, (16 * 9 + 4), 16 * 4, 12
+        lgx.rectangle("fill", x, y, w, h)
+
+        font = JM:get_font("pix5")
+        font:push()
+        font:set_color(Utils:get_rgba(Utils:hex_to_rgba_float("f4ffe8")))
+        font:printf("[enter] skip", x, y, w, "center")
+        font:pop()
+    end
+
+    -- font:print(string.format("%.1f", data.time_game), 16, 16 * 6)
 end
 
 --============================================================================
