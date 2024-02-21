@@ -486,7 +486,7 @@ local function keypressed(key)
             ---@param State JM.Scene
             function(State)
                 data:skip_intro()
-                State:add_transition("door", "in", { axis = "y", duration = 0.5, pause_scene = true }, nil)
+                State:add_transition("door", "in", { axis = "y", duration = 0.5, pause_scene = false }, nil)
             end)
         return
     end
