@@ -677,10 +677,11 @@ local function game_logic(dt)
             and data.time_gamestate > 1
             and not State.transition
         then
-            return State:add_transition("sawtooth", "out",
+            return State:add_transition("fade", "out",
                 {
-                    axis = "y",
-                    -- type = "bottom-top"
+                    -- axis = "y",
+                    -- type = "bottom-top",
+                    post_delay = 0.1
                 }, nil,
                 ---@param State JM.Scene
                 function(State)
@@ -810,7 +811,7 @@ local function update(dt)
     data.time_gamestate = data.time_gamestate + dt
 
     if data.countdown_time
-    -- and (not State:is_showing_black_bar() or not State:is_current_active())
+        and (not State:is_showing_black_bar())
     then
         data.countdown_time = data.countdown_time - dt
         if data.countdown_time <= 0 then
@@ -941,7 +942,9 @@ local function draw(cam)
 
     do
         local countdown_time = data.countdown_time
-        if countdown_time and countdown_time > 0 then
+        if countdown_time and countdown_time > 0
+            and not State:is_showing_black_bar()
+        then
             font = JM:get_font("pix8")
 
             lgx.setColor(Utils:hex_to_rgba_float("f4ffe8bf"))
