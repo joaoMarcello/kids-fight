@@ -81,7 +81,7 @@ function love.load()
             self:set_shader(shader)
         end
     end)
-    return JM:load_initial_state("lib.gamestate.victory", false)
+    return JM:load_initial_state("lib.gamestate.game", false)
     -- return JM:load_initial_state("jm-love2d-package.modules.editor.editor", false)
 end
 
@@ -178,8 +178,10 @@ function love.quit()
 end
 
 local km = 0
+local lim = 1 / 30
 function love.update(dt)
     km = collectgarbage("count") / 1024.0
+    dt = dt > lim and lim or dt
     return JM:update(dt)
 end
 
