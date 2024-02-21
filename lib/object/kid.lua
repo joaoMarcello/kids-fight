@@ -135,10 +135,14 @@ function Kid:__constructor__(gender, direction, is_enemy, move_type)
 
     self.displayHP = DisplayHP:new(self)
 
+
+    self.animas = {
+        [AnimaState.idle] = animas["idle"]:copy(),
+        [AnimaState.run] = animas["run"]:copy(),
+    }
+
     ---@type JM.Anima
-    self.anima_idle = animas["idle"]:copy()
-    ---@type JM.Anima
-    self.cur_anima = self.anima_idle
+    self.cur_anima = self.animas[AnimaState.idle]
     self.cur_anima:set_flip_x(self.direction == -1)
     --
     self.update = Kid.update
@@ -179,11 +183,13 @@ function Kid:load()
     local Anima = JM.Anima
 
     imgs = imgs or {
-        ["idle"] = lgx.newImage("/data/img/kid_01.png"),
+        ["idle"] = lgx.newImage("/data/img/kid_idle-Sheet.png"),
+        ["run"] = lgx.newImage("/data/img/kid_run-Sheet.png"),
     }
 
     animas = animas or {
-        ["idle"] = Anima:new { img = imgs["idle"], frames = 1 },
+        ["idle"] = Anima:new { img = imgs["idle"], frames = 4, duration = 0.3 },
+        ["run"] = Anima:new { img = imgs["run"], frames = 8, duration = 0.5 },
     }
 end
 
@@ -411,7 +417,7 @@ function Kid:keep_on_bounds()
     if bd.x == 0 and bd.speed_x < 0
         or (bd.x == pr and bd.speed_x > 0)
     then
-        bd.speed_x = 0
+        -- bd.speed_x = 0
     end
     if bd.y == py and bd.speed_y > 0 then
         bd.speed_y = 0
@@ -608,10 +614,13 @@ function Kid:update(dt)
     GC.update(self, dt)
     self.displayHP:update(dt)
 
+
     local P1 = self.controller
     local Button = P1.Button
     local bd = self.body   --shadow
     local bd2 = self.body2 -- player body
+
+    self.lpx, self.lpy = bd.x, bd.y
 
     local x_axis, y_axis = movement(self, dt)
     self.time_state = self.time_state + dt
@@ -702,15 +711,33 @@ function Kid:update(dt)
         end
     end
 
-    self.cur_anima:update(dt)
-    self:adjust_cur_anima()
+
+    local last = self.cur_anima
+    self.cur_anima = self:get_cur_anima()
+    if last ~= self.cur_anima then
+        self.cur_anima:reset()
+    end
 
     self.x, self.y = bd.x, bd.y
+    self.cur_anima:update(dt)
+    self:adjust_cur_anima()
+end
+
+function Kid:get_cur_anima()
+    local diff_x = self.lpx - self.body.x
+    local diff_y
+
+    if diff_x ~= 0 or self.body.speed_x ~= 0.0 then
+        return self.animas[AnimaState.run]
+    else
+        return self.animas[AnimaState.idle]
+    end
 end
 
 function Kid:adjust_cur_anima()
     local anima = self.cur_anima
     if not anima then return end
+
     anima:set_flip_x(self.direction == -1)
     if self.state == States.runAway then
         anima:set_flip_x(false)
