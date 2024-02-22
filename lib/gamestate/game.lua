@@ -243,6 +243,9 @@ local function load()
         ["street_up"] = lgx.newImage("/data/img/back_up.png"),
         ["box"] = lgx.newImage("/data/img/box_gui.png"),
     }
+
+    local Sound = JM.Sound
+    Sound:add_sfx("/data/sfx/pause 01.ogg", "pause", 1)
 end
 
 local function finish()
