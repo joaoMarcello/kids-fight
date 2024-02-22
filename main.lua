@@ -21,6 +21,18 @@ function love.load()
         JM.Sound:set_song_mode("static")
     end
 
+    _G.FONT_THALEAH = JM.FontGenerator:new_by_ttf {
+        name = "thaleah",
+        dir = "data/font/ThaleahFat.ttf",
+        dpi = 16,
+        character_space = 1,
+        line_space = 1,
+        min_filter = 'linear',
+        max_filter = 'nearest',
+        max_texturesize = 2048,
+    }
+    FONT_THALEAH:set_font_size(FONT_THALEAH.__ref_height)
+
     ---@param State JM.Scene
     _G.RESIZE = function(State, w, h)
         local percent = 0.02
@@ -89,7 +101,7 @@ function love.load()
                 end)
         end
     end)
-    return JM:load_initial_state("lib.gamestate.title", false)
+    return JM:load_initial_state("lib.gamestate.victory", false)
     -- return JM:load_initial_state("jm-love2d-package.modules.editor.editor", false)
 end
 
