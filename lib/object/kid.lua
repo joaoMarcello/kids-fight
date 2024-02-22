@@ -280,6 +280,7 @@ function Kid:set_state(new_state)
     elseif new_state == States.idle then
         self.goingTo_speed = 1.5
         self.emitter_rundust.pause = true
+        self.body.speed_x = 0.0
         --
     elseif new_state == States.victory then
         self.time_jump_interval = random() * 0.5
@@ -289,6 +290,8 @@ function Kid:set_state(new_state)
         self.emitter_rundust.pause = false
         ---
     elseif new_state == States.dead then
+        self.emitter_rundust.pause = true
+    elseif new_state == States.normal then
         self.emitter_rundust.pause = true
     end
 
@@ -538,6 +541,7 @@ local function movement(self, dt)
     if state == States.dead
         or state == States.idle
     then
+        self.emitter_rundust.pause = true
         return 0, 0
     elseif state == States.victory then
         if not self.is_jump then
