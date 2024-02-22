@@ -7,6 +7,7 @@ local Types = {
     rabbit = 2,
     seed = 3, -- watemelon
     ray = 4,
+    stoneMove = 5,
 }
 
 local ACC = (16 * 12 * 60)
@@ -80,6 +81,7 @@ function Projectile:load()
     local w, h = IMG:getDimensions()
     QUADS = QUADS or {
         [Types.stone] = lgx.newQuad(0, 0, 16, 16, w, h),
+        [Types.stoneMove] = lgx.newQuad(16, 0, 32, 16, w, h),
     }
 end
 
@@ -212,8 +214,11 @@ local function my_draw(self)
     lgx.setColor(1, 1, 1)
     ---@type love.Quad
     local quad = QUADS[self.type]
+    if not self:on_ground() and not self.body.allowed_gravity then
+        quad = QUADS[Types.stoneMove]
+    end
     local vx, vy, vw, vh = quad:getViewport()
-    lgx.draw(IMG, quad, self.x + self.w * 0.5, self.y + self.h * 0.5, 0, 1, 1, vw * 0.5, vh * 0.5)
+    lgx.draw(IMG, quad, self.x + self.w * 0.5, self.y + self.h * 0.5, 0, self.direction, 1, vw * 0.5, vh * 0.5)
 end
 
 function Projectile:draw()
