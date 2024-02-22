@@ -345,6 +345,24 @@ local function pause_action(dt, self)
     self.gamestate.camera:update(dt)
 end
 
+function Kid:is_the_last()
+    ---@type GameState.Game.Data
+    local data = self.gamestate:__get_data__()
+    local list = data.kids
+    local N = #list
+    local count = 0
+
+    for i = 1, N do
+        ---@type Kid
+        local kid = list[i]
+        if kid:is_dead() then
+            count = count + 1
+        end
+    end
+
+    return count == N
+end
+
 function Kid:damage(value, obj)
     value = value or 1
     if self:is_dead() or self.time_invincible ~= 0.0 then return false end
@@ -389,7 +407,14 @@ function Kid:damage(value, obj)
     if not self.is_enemy then
         self.gamestate:pause(self:is_dead() and 1.3 or 0.2, pause_action, self)
     else
-        self.gamestate:pause(0.2, pause_action, self)
+        local is_the_last = self:is_dead() and self:is_the_last()
+        if is_the_last then
+            self.gamestate.camera:shake_x(3, 0.08, 0.5)
+            self.gamestate.camera:shake_y(3, 0.08, 0.3)
+        end
+        self.gamestate:pause(
+            is_the_last and 1 or 0.2,
+            pause_action, self)
     end
 
     return true
@@ -857,7 +882,7 @@ function Kid:get_cur_anima(state)
         ---
     elseif self.cur_anima == self.animas[AnimaState.atk] then
         local anima = self.cur_anima
-        if anima:time_updating() >= 0.1 then
+        if anima:time_updating() >= 0.2 then
             self.cur_anima = nil
             return self:get_cur_anima()
         else
