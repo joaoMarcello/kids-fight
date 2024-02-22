@@ -943,24 +943,26 @@ local function draw(cam)
         if countdown_time and countdown_time > 0
             and not State:is_showing_black_bar()
         then
-            font = JM:get_font("pix8")
-
+            font = _G.FONT_THALEAH --JM:get_font("pix8")
+            font:push()
+            font:set_color(JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("665c57")))
             lgx.setColor(Utils:hex_to_rgba_float("f4ffe8bf"))
             local x, y, w, h = (16 * 7), (16 * 2), (16 * 6), (16 * 2.5)
             lgx.rectangle("fill", x, y, w, h)
             if countdown_time > 1 then
                 if data.wave_number < 3 then
-                    font:printf(string.format("STARTING IN\n%d",
+                    font:printf(string.format("STARTING IN\n<color-hex=bf3526>%d",
                             math.min(3, data.countdown_time)),
                         x, y + 8, w, "center")
                 else
-                    font:printf(string.format("FINAL FIGHT IN\n%d",
+                    font:printf(string.format("FINAL FIGHT IN\n<color-hex=bf3526>%d",
                             math.min(3, data.countdown_time)),
                         x, y + 8, w, "center")
                 end
             else
-                font:printx("<effect=scream>FIGHT", x, y + 12, w, "center")
+                font:printx("<effect=scream>FIGHT!!!", x, y + 14, w, "center")
             end
+            font:pop()
         end
     end
 
