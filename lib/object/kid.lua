@@ -592,6 +592,10 @@ local function movement(self, dt)
             local vy = self.move_y_value * math.sin(self.time_move_y)
 
             self:set_position(nil, self.anchor_y + vy)
+
+            if not self:is_dead() then
+                self.emitter_rundust.pause = false
+            end
             --
         elseif self.move_type == 2 then
             if self.state == States.normal then
@@ -651,6 +655,10 @@ local function movement(self, dt)
             local vx = self.move_x_value * math.sin(self.time_move_x)
 
             self:set_position(self.anchor_x + vx, self.anchor_y + vy)
+
+            if not self:is_dead() then
+                self.emitter_rundust.pause = false
+            end
         end
 
 
