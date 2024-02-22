@@ -532,7 +532,13 @@ local function keyreleased(key)
 end
 
 local function mousepressed(x, y, button, istouch, presses)
-
+    if button == 1 then
+        return State:keypressed('f')
+    elseif button == 2 then
+        return State:keypressed('space')
+    elseif button == 3 then
+        return State:keypressed('escape')
+    end
 end
 
 local function mousereleased(x, y, button, istouch, presses)
@@ -656,7 +662,7 @@ local function game_logic(dt)
                 {
                     -- axis = "y",
                     -- type = "bottom-top",
-                    post_delay = 0.1
+                    post_delay = 0.2
                 }, nil,
                 ---@param State JM.Scene
                 function(State)
