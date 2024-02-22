@@ -32,7 +32,7 @@ function Display:finish()
 end
 
 function Display:show(value)
-    self.time_show = value or 2
+    self.time_show = value or 3
     self.is_visible = true
 end
 
@@ -64,7 +64,7 @@ end
 function Display:my_draw()
     if self.w <= 0
         or not self.kid.is_enemy
-        or self.kid.state ~= self.kid.State.normal
+        or self.kid:is_dead()
     then
         return
     end
