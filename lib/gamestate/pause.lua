@@ -89,6 +89,7 @@ end
 function data:go_to_title()
     if not State.transition then
         JM.Sound:stop_all()
+        Play_sfx("ui-back")
 
         return State:add_transition("sawtooth", "out",
             { axis = "y", type = "bottom-top", duration = 0.75, post_delay = 0.2, segments = 10, len = 24 },
@@ -252,8 +253,10 @@ local function keypressed(key)
     P1:switch_to_keyboard()
 
     if P1:pressed(Button.dpad_up, key) then
+        Play_sfx("ui-move", true)
         return data.container:switch_up()
     elseif P1:pressed(Button.dpad_down, key) then
+        Play_sfx("ui-move", true)
         return data.container:switch_down()
     end
 
@@ -268,8 +271,10 @@ local function keypressed(key)
         local cur_bt = data.container:get_cur_obj()
 
         if cur_bt == data.bt_resume then
+            Play_sfx("ui-back")
             return data:unpause()
         elseif cur_bt == data.bt_restart then
+            Play_sfx("ui-select")
             return data:restart()
         elseif cur_bt == data.bt_quit then
             return data:go_to_title()
