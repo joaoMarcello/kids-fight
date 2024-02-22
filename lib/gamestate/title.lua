@@ -142,7 +142,7 @@ end
 local __init__ = {
     [States.options] = function()
         data.container = Container:new {
-            x = TILE, y = TILE * 2.5, w = 128, h = 180,
+            x = TILE * 1.5, y = TILE * 2.5, w = 128, h = 180,
             space_vertical = 12,
             on_focus = true,
         }
@@ -835,6 +835,7 @@ local function draw(cam)
         font:printf("[up/down] move\t [space] select\t [esc] back", 8, TILE * 10, SCREEN_WIDTH, "center")
         font:pop()
 
+        local font = FONT_THALEAH
         font:push()
         font:set_color(JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("334266")))
         font:printf('Select an option:', 24, 16, SCREEN_WIDTH, "left")
@@ -849,6 +850,8 @@ local function draw(cam)
         font_pix5:pop()
     end
 
+    -- local font = _G.FONT_THALEAH
+    -- font:print("teste", 16, 16)
     return __draw__[data.state](__draw__, cam)
 end
 --============================================================================
