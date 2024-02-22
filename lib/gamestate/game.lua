@@ -393,8 +393,8 @@ end
 local function init(args)
     args = args or {}
     State:remove_black_bar(true)
-    State.camera.x = 0
-    State.camera.y = 0
+    -- State.camera.x = 0
+    -- State.camera.y = 0
 
     data.time_game = 0
     data.time_gamestate = 0.0
