@@ -26,12 +26,14 @@ function love.load()
         dir = "data/font/ThaleahFat.ttf",
         dpi = 16,
         character_space = 1,
-        line_space = 1,
+        word_space = 3,
+        line_space = 8,
         min_filter = 'linear',
         max_filter = 'nearest',
         max_texturesize = 2048,
     }
     FONT_THALEAH:set_font_size(FONT_THALEAH.__ref_height)
+    FONT_THALEAH:set_color(JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("242833")))
 
     ---@param State JM.Scene
     _G.RESIZE = function(State, w, h)
@@ -101,7 +103,7 @@ function love.load()
                 end)
         end
     end)
-    return JM:load_initial_state("lib.gamestate.victory", false)
+    return JM:load_initial_state("lib.gamestate.game", false)
     -- return JM:load_initial_state("jm-love2d-package.modules.editor.editor", false)
 end
 
