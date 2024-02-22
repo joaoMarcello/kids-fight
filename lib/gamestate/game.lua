@@ -182,7 +182,8 @@ function data:draw_dialogue(cam)
 
     if box:screen_is_finished() then
         local font = JM:get_font("pix8")
-        font:printx("<effect=float, speed=0.75, range=1>:arw_dw:", box.x + box.w + 1, box.y + dialogue.h - 12)
+        font:printx("<color-hex=#334266><effect=float, speed=1, range=1, pixelmode=true>:arw_dw:", box.x + box.w + 1,
+            box.y + dialogue.h - 12)
     end
 end
 
@@ -292,9 +293,11 @@ local function load_wave(value)
 
     if value == 1 then
         data.leader.time_throw = 0.0
-        data.leader.time_delay = 2
+        -- data.leader.time_delay = 2
+        -- data.leader.is_visible = false
+        data.leader:set_delay(2)
         data.leader.goingTo_speed = 1.5
-        data.leader.is_visible = false
+
         -- ---@type Kid
         -- k = State:add_object(Kid:new(16 * 12, 16 * 9, Kid.Gender.boy, -1, true, 1))
         -- k:set_position(SCREEN_WIDTH, 16 * 9)
@@ -412,7 +415,7 @@ local function init(args)
     data.player:set_state(Kid.State.preparing)
     if State:is_current_active() then
         data.player.goingTo_speed = 3
-        data.player.time_delay = 0.75
+        data.player.time_delay = 0.2
         data.player.is_visible = false
     end
 
@@ -702,6 +705,7 @@ local function game_logic(dt)
 
                             data:skip_intro()
                             State:add_transition("door", "in", { axis = "y", pause_scene = false })
+                            JM:flush()
                         end)
                 end
             end
@@ -751,9 +755,14 @@ function data:skip_intro()
     do
         local objs = State.game_objects
         for i = #objs, 1, -1 do
-            ---@type Kid|any
+            ---@type Kid|JM.Emitter|any
             local k = objs[i]
             if k.is_kid and not k.__remove and k ~= player then
+                k:remove()
+            elseif k.__is_emitter and k.lifetime ~= math.huge
+                and not k.__remove
+            then
+                k:destroy()
                 k:remove()
             end
         end
@@ -778,7 +787,10 @@ function data:skip_intro()
     -- data.countdown_time = 1
 end
 
+local lim = 1 / 30
 local function update(dt)
+    dt = dt > lim and lim or dt
+
     if data.gamestate == States.game then
         data.time_game = data.time_game + dt
         data.timer:update(dt)

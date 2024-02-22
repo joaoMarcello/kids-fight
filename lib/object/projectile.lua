@@ -1,5 +1,6 @@
 local GC = _G.JM.BodyObject
 local Phys = JM.Physics
+local Emitters = require "lib.emitters"
 
 ---@enum Projectile.Types
 local Types = {
@@ -190,6 +191,11 @@ function Projectile:update(dt)
                         local cond = math.abs(kid:get_shadow():bottom() - bd2.y) <= 14
                         local success = cond and kid:damage(1, self)
                         if success then
+                            local px = bd.x + bd.w * 0.5
+                            local e = Emitters:Paft(
+                                px, self.y
+                            )
+                            self.gamestate:add_object(e)
                             return self:remove()
                         end
                     end

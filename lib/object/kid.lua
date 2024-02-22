@@ -34,6 +34,7 @@ local AnimaState = {
     walk = 7,
     victory = 8,
     damage = 9,
+    hitGround = 10,
 }
 
 local tile = _G.TILE or 16
@@ -152,6 +153,7 @@ function Kid:__constructor__(gender, direction, is_enemy, move_type)
         [AnimaState.victory] = animas[self.__id]["victory"]:copy(),
         [AnimaState.atk] = animas[self.__id]["attack"]:copy(),
         [AnimaState.damage] = animas[self.__id]["damage"]:copy(),
+        [AnimaState.hitGround] = animas[self.__id]["hitGround"]:copy(),
     }
 
     ---@type JM.Anima
@@ -194,6 +196,8 @@ function Kid:__constructor__(gender, direction, is_enemy, move_type)
 
     self:set_state(States.normal)
 
+    self.lpx = self.x
+    self.lpy = self.y
     return self
 end
 
@@ -213,6 +217,7 @@ function Kid:load()
         ["victory"] = lgx.newImage("/data/img/kid_victory-Sheet.png"),
         ["attack"] = lgx.newImage("/data/img/kid_atk-Sheet.png"),
         ["damage"] = lgx.newImage("/data/img/kid_damage-Sheet.png"),
+        ["hitGround"] = lgx.newImage("/data/img/kid_hit_ground-Sheet.png"),
     }
 
     animas = animas or {}
@@ -221,11 +226,12 @@ function Kid:load()
         ["idle"] = Anima:new { img = imgs["idle"], frames = 4, duration = 0.3 },
         ["run"] = Anima:new { img = imgs["run"], frames = 8, duration = 0.5 },
         ["death"] = Anima:new { img = imgs["death"], frames = 1 },
-        ["jump"] = Anima:new { img = imgs["jump"], frames = 2, duration = 0.25, stop_at_the_end = true },
+        ["jump"] = Anima:new { img = imgs["jump"], frames = 3, duration = 0.25, stop_at_the_end = true },
         ["fall"] = Anima:new { img = imgs["fall"], frames = 1 },
         ["victory"] = Anima:new { img = imgs["victory"], frames = 1 },
         ["attack"] = Anima:new { img = imgs["attack"], frames = 2, duration = 0.2, stop_at_the_end = true },
         ["damage"] = Anima:new { img = imgs["damage"], frames = 1 },
+        ["hitGround"] = Anima:new { img = imgs["hitGround"], frames = 1 },
     }
 end
 
@@ -258,6 +264,15 @@ function Kid:is_on_target_position()
     -- if self.state ~= States.goingTo then return false end
     local bd = self.body
     return bd.x == self.target_pos_x and bd.y == self.target_pos_y
+end
+
+function Kid:set_delay(value)
+    value = value or 0
+    self.time_delay = value
+    if value ~= 0 then
+        self.is_visible = false
+        self.emitter_rundust.pause = true
+    end
 end
 
 ---@param new_state Kid.States
@@ -429,8 +444,12 @@ function Kid:jump(height)
     local bd2 = self.body2
     if bd2.speed_y == 0 then
         self.is_jump = true
+        bd2.allowed_gravity = true
         self:remove_effect("stretchSquash")
         self.emitter_rundust.pause = true
+        self.gamestate:add_object(
+            Emitters:Zup(self)
+        )
         return bd2:jump(height or (16 * 2), -1)
     end
 end
@@ -688,6 +707,7 @@ function Kid:update(dt)
         if self.time_delay <= 0 then
             self.time_delay = 0
             self.is_visible = true
+            self.emitter_rundust.pause = false
         else
             self.is_visible = false
             return
@@ -698,8 +718,8 @@ function Kid:update(dt)
     self.displayHP:update(dt)
 
 
-    local P1 = self.controller
-    local Button = P1.Button
+    -- local P1 = self.controller
+    -- local Button = P1.Button
     local bd = self.body   --shadow
     local bd2 = self.body2 -- player body
 
@@ -761,8 +781,14 @@ function Kid:update(dt)
         if bd2.speed_y >= 0.0 and bd2:bottom() >= bd.y then
             bd2:refresh(nil, bd.y - bd2.h)
             bd2.speed_y = 0.0
+            bd2.allowed_gravity = false
             self.is_jump = false
             self:apply_effect("stretchSquash", conf_stretch, true)
+            self.cur_anima = self.animas[AnimaState.hitGround]
+            self.cur_anima:reset()
+
+            local e = Emitters:FallDust(self)
+            self.gamestate:add_object(e)
         end
     else
         if not self.is_jump then
@@ -838,6 +864,14 @@ function Kid:get_cur_anima(state)
             return anima
         end
         ---
+    elseif self.cur_anima == self.animas[AnimaState.hitGround] then
+        local anima = self.cur_anima
+        if anima:time_updating() >= 0.1 then
+            self.cur_anima = nil
+            return self:get_cur_anima()
+        else
+            return anima
+        end
     elseif self.is_jump then
         if bd2.speed_y < 0 then
             return self.animas[AnimaState.jump]
