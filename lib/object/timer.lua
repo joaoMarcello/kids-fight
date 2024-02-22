@@ -1,8 +1,9 @@
 -- local Font = _G.JM_Font
 local GC = JM.GameObject
 
-local color_yellow = _G.JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("dcffb3"))
+local color_yellow = _G.JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("f4ffe8"))
 local color_black = _G.JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("332424"))
+local color_red = JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("332424"))
 
 local string_format = string.format
 local math_floor = math.floor
@@ -17,7 +18,7 @@ Timer.__index = Timer
 
 ---@return Timer
 function Timer:new(time_in_sec)
-    local obj = GC:new(16 * 16, 16 * 9, 64, 32, 50)
+    local obj = GC:new(16 * 14, 16 * 1, 64, 32, 50)
     setmetatable(obj, self)
     Timer.__constructor__(obj, time_in_sec)
     return obj
@@ -40,7 +41,7 @@ function Timer:init()
 end
 
 function Timer:load()
-    font = JM:get_font("pix5")
+    font = _G.FONT_THALEAH or JM:get_font("pix5")
 end
 
 function Timer:set_font(new_font)
@@ -150,7 +151,8 @@ local function my_draw(self)
     local min, sec, dec = self:get_time2()
 
     font:push()
-    font:set_font_size(20)
+    local x, y, w = 16 * 14, 12, 16 * 20
+    -- font:set_font_size(20)
 
     font:set_color(color_black)
     local px, py = font:print(string_format("%02d:", min), self.x, self.y)
@@ -168,6 +170,17 @@ local function my_draw(self)
     font:set_color(color_yellow)
     font:print(string_format("%02d", dec), px - 1, py - 1)
 
+    -- font:set_color(color_yellow)
+    -- font:printf(string_format("%02d:%02d:%02d", min, sec, dec), x, y, w, "left")
+
+    font:pop()
+
+    local font = JM:get_font("pix8")
+    font:push()
+    -- font:set_color(color_yellow)
+    -- font:printf("time:", x - 7, 2, w, "left")
+    font:set_color(JM_Utils:get_rgba3(("2c2433")))
+    font:printf("time:", x - 8, 1, w, "left")
     font:pop()
 end
 
