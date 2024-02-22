@@ -60,6 +60,7 @@ function love.load()
         Word.eff_spooky_range_y = 0.4
     end
 
+    ---@param self JM.Scene|any
     JM.Scene.set_default_scene_config(function(self)
         if self.is_splash_screen
             or _G.WEB
@@ -68,20 +69,27 @@ function love.load()
             return
         end
 
-        -- local scanline = JM.Shader:get_shader("scanline", self, { screen_h = 256, width = 0.85 })
-        -- scanline:send("opacity", 0.25)
-        -- self:set_shader(scanline)
-
         do
             local shader = JM.Shader:get_shader("crt_scanline", self, {
                 screen_h = 288,
                 width = 1,
             })
             shader:send("opacity", 0.25)
-            self:set_shader(shader)
+
+            local ab = JM.Shader:get_shader("aberration", self, { aberration_x = 0.1, aberration_y = 0.2 })
+            local filmgrain = JM.Shader:get_shader("filmgrain", self, { opacity = 0.3 })
+            local noise = {}
+            self:set_shader({ ab, filmgrain, shader },
+                function(self, shader, n)
+                    if n == 2 then
+                        noise[1] = love.math.random()
+                        noise[2] = love.math.random()
+                        shader:send("noise", noise)
+                    end
+                end)
         end
     end)
-    return JM:load_initial_state("lib.gamestate.game", false)
+    return JM:load_initial_state("lib.gamestate.title", false)
     -- return JM:load_initial_state("jm-love2d-package.modules.editor.editor", false)
 end
 
