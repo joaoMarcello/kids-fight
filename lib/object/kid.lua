@@ -3,6 +3,7 @@ local Phys = JM.Physics
 local Utils = JM.Utils
 local Projectile = require "lib.object.projectile"
 local DisplayHP = require "lib.object.displayHP"
+local Emitters = require "lib.emitters"
 
 ---@enum Kid.Gender
 local Gender = {
@@ -108,7 +109,6 @@ function Kid:__constructor__(gender, direction, is_enemy, move_type)
     -- self.hp = 2
     self.time_invincible = 0.0
 
-    self:set_state(States.normal)
 
     self.controller = JM.ControllerManager.P1
 
@@ -188,6 +188,12 @@ function Kid:__constructor__(gender, direction, is_enemy, move_type)
 
     -- self:set_position(self.x, self.y)
     self:keep_on_bounds()
+
+    self.emitter_rundust = Emitters:RunDust(self)
+    self.gamestate:add_object(self.emitter_rundust)
+
+    self:set_state(States.normal)
+
     return self
 end
 
@@ -230,6 +236,7 @@ end
 
 function Kid:remove()
     GC.remove(self)
+    self.emitter_rundust:destroy()
     self.body2.__remove = true
     self.body2 = nil
 end
@@ -259,6 +266,8 @@ function Kid:set_state(new_state)
     self.state = new_state
     self.time_state = 0.0
 
+    self.emitter_rundust.pause = false
+
     if new_state == States.goingTo
         or new_state == States.preparing
     then
@@ -270,12 +279,17 @@ function Kid:set_state(new_state)
         self.init_y = bd.y
     elseif new_state == States.idle then
         self.goingTo_speed = 1.5
+        self.emitter_rundust.pause = true
         --
     elseif new_state == States.victory then
         self.time_jump_interval = random() * 0.5
+        ---
     elseif new_state == States.runAway then
         self.hp = self.hp_init
+        self.emitter_rundust.pause = false
         ---
+    elseif new_state == States.dead then
+        self.emitter_rundust.pause = true
     end
 
     self:adjust_cur_anima()
@@ -413,6 +427,7 @@ function Kid:jump(height)
     if bd2.speed_y == 0 then
         self.is_jump = true
         self:remove_effect("stretchSquash")
+        self.emitter_rundust.pause = true
         return bd2:jump(height or (16 * 2), -1)
     end
 end
@@ -552,6 +567,13 @@ local function movement(self, dt)
         local y = P1:pressing(Button.dpad_up) and -1 or 0
         y = (y == 0 and P1:pressing(Button.dpad_down) and 1) or y
         y = (y == 0 and tonumber(P1:pressing(Button.left_stick_y))) or y
+
+        if x == 0 and y == 0 or self.is_jump then
+            self.emitter_rundust.pause = true
+        else
+            self.emitter_rundust.pause = false
+        end
+
         return x, y
     else
         local x = 0
