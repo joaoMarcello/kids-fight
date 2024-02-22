@@ -209,8 +209,8 @@ function Kid:load()
     local Anima = JM.Anima
 
     imgs = imgs or {
-        ["idle"] = lgx.newImage("/data/img/kid_idle-Sheet.png"),
-        ["run"] = lgx.newImage("/data/img/kid_run-Sheet.png"),
+        ["idle"] = lgx.newImage("/data/img/girl/kid_idle-Sheet.png"),
+        ["run"] = lgx.newImage("/data/img/girl/kid_run-Sheet.png"),
         ["death"] = lgx.newImage("/data/img/kid_death-Sheet.png"),
         ["jump"] = lgx.newImage("/data/img/kid_jump-Sheet.png"),
         ["fall"] = lgx.newImage("/data/img/kid_fall-Sheet.png"),
