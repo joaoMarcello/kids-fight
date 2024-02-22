@@ -402,6 +402,8 @@ local function init(args)
 
     data.world = JM.Physics:newWorld { tile = TILE }
     JM.GameObject:init_state(State, data.world)
+    JM.ParticleSystem:init_module(data.world, State)
+
     State.game_objects = {}
 
     data.player = Kid:new(16 * 7, 16 * 7, 1)
