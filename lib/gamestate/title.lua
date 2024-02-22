@@ -366,7 +366,7 @@ local function go_to_how_to_play()
         -- JM.Sound:fade_out()
         -- JM.Sound:stop_all()
 
-        return State:add_transition("fade", "out", { duration = 1 }, nil, function(self)
+        return State:add_transition("fade", "out", { duration = 1, post_delay = 0.1 }, nil, function(self)
             self:change_gamestate(require "lib.gamestate.howToPlay",
                 {
                     unload = path,
@@ -805,7 +805,7 @@ local __draw__ = {
         do
             font:push()
             font:set_color(JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("332424")))
-            font:printf("Copyright, ©2024. Kids Fight, by `#000000`JM`#-`.<br>All rights reserved.", 0,
+            font:printf("Copyright, ©2024. `#334266`Kids Fight`#-`, by `#000000`JM`#-`.<br>All rights reserved.", 0,
                 math.max(py + 16, 16 * 6), SCREEN_WIDTH, "center")
 
             if py < 16 * 4.25 then
