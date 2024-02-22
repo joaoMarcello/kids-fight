@@ -21,7 +21,7 @@ local function rundust_action(self, dt, args)
         e:add_particle(p)
         e.lifetime = -1000
         self.gamestate:add_object(e)
-        self.duration = 0.25
+        self.duration = 0.22
     end
 end
 
