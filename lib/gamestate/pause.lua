@@ -419,7 +419,7 @@ local function draw(cam)
     lgx.setLineWidth(line_width)
 
     cam:detach()
-    local font = JM:get_font()
+    local font = _G.FONT_THALEAH --JM:get_font()
     font:push()
     font:set_color(Utils:get_rgba(Utils:hex_to_rgba_float("d96c21")))
     font:printx("<effect=wave>PAUSE", 0, 32, State.screen_w, "center")

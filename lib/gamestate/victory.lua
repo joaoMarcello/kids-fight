@@ -161,10 +161,10 @@ local function draw(cam)
 
     font:pop()
 
-    font = JM:get_font("pix5")
+    font = _G.FONT_THALEAH --JM:get_font("pix5")
     font:push()
     font:set_color(Utils:get_rgba(Utils:hex_to_rgba_float("e5f285")))
-    font:set_font_size(font.__font_size * 2)
+    -- font:set_font_size(font.__font_size * 2)
     font:printf("you defeat the bullies!", 0, 16 * 1.5, SCREEN_WIDTH, "center")
     font:pop()
 end
