@@ -246,6 +246,7 @@ local function load()
 
     local Sound = JM.Sound
     Sound:add_sfx("/data/sfx/pause 01.ogg", "pause", 1)
+    Sound:add_sfx("/data/sfx/little-girl-screaming-101185.ogg", "girl screaming", 0.5)
 end
 
 local function finish()
@@ -428,7 +429,7 @@ local function init(args)
     JM.Physics:newBody(data.world, 0, SCREEN_HEIGHT - 16, SCREEN_WIDTH, 16, "static")
 
     data.leader = nil
-    data.wave_number = args.wave_number or 1
+    data.wave_number = args.wave_number or 3
     load_wave(data.wave_number)
 
     data.displayHP = DisplayHP:new(data.player)
@@ -925,7 +926,7 @@ local function draw(cam)
 
     do
         local leader = data.leader
-        if leader and not leader:is_dead()
+        if leader and not leader.__remove and not leader:is_dead()
             -- and state ~= States.dialogue and state ~= States.endGame
             -- and state ~= States.preparingToTalk
             -- and state ~= States.waveIsComing
