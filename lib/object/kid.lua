@@ -211,13 +211,13 @@ function Kid:load()
     imgs = imgs or {
         ["idle"] = lgx.newImage("/data/img/girl/kid_idle-Sheet.png"),
         ["run"] = lgx.newImage("/data/img/girl/kid_run-Sheet.png"),
-        ["death"] = lgx.newImage("/data/img/kid_death-Sheet.png"),
-        ["jump"] = lgx.newImage("/data/img/kid_jump-Sheet.png"),
-        ["fall"] = lgx.newImage("/data/img/kid_fall-Sheet.png"),
-        ["victory"] = lgx.newImage("/data/img/kid_victory-Sheet.png"),
-        ["attack"] = lgx.newImage("/data/img/kid_atk-Sheet.png"),
-        ["damage"] = lgx.newImage("/data/img/kid_damage-Sheet.png"),
-        ["hitGround"] = lgx.newImage("/data/img/kid_hit_ground-Sheet.png"),
+        ["death"] = lgx.newImage("/data/img/girl/kid_death-Sheet.png"),
+        ["jump"] = lgx.newImage("/data/img/girl/kid_jump-Sheet.png"),
+        ["fall"] = lgx.newImage("/data/img/girl/kid_fall-Sheet.png"),
+        ["victory"] = lgx.newImage("/data/img/girl/kid_victory-Sheet.png"),
+        ["attack"] = lgx.newImage("/data/img/girl/kid_atk-Sheet.png"),
+        ["damage"] = lgx.newImage("/data/img/girl/kid_damage-Sheet.png"),
+        ["hitGround"] = lgx.newImage("/data/img/girl/kid_hit_ground-Sheet.png"),
     }
 
     animas = animas or {}
@@ -343,6 +343,7 @@ end
 local function pause_action(dt, self)
     self:set_visible(true)
     self.gamestate.camera:update(dt)
+    GC.update(self, dt)
 end
 
 function Kid:is_the_last()
@@ -362,6 +363,8 @@ function Kid:is_the_last()
 
     return count == N
 end
+
+local earthquake_args = { range_y = 0, duration_y = 0.7, speed_y = 0.1, range_x = 5, duration_x = 1, speed_x = 0.1, duration = 0.5, pixel_mode = true }
 
 function Kid:damage(value, obj)
     value = value or 1
@@ -399,6 +402,11 @@ function Kid:damage(value, obj)
         end
 
         self.displayHP:show()
+    end
+
+    if not self:is_dead() then
+        earthquake_args.range_y = self.is_jump and 2 or 0
+        self:apply_effect("earthquake", earthquake_args, true)
     end
 
     self.cur_anima = self.animas[AnimaState.damage]
@@ -726,6 +734,12 @@ end
 
 local args_flick = { speed = 0.06 }
 
+function Kid:is_leader()
+    ---@type GameState.Game.Data
+    local data = self.gamestate:__get_data__()
+    return data.leader == self
+end
+
 function Kid:update(dt)
     if self.time_delay ~= 0 then
         self.time_delay = self.time_delay - dt
@@ -755,6 +769,9 @@ function Kid:update(dt)
 
     if self.state == States.runAway then
         if not self.gamestate.camera:rect_is_on_view(self:rect()) then
+            if self:is_leader() then
+                self.gamestate:__get_data__().leader = nil
+            end
             return self:remove()
         end
     end
