@@ -381,11 +381,14 @@ local function draw(cam)
 
     lgx.setColor(Utils:hex_to_rgba_float("d96c21"))
     lgx.ellipse("fill", 48, 24, 40, 16, 10)
-    local font = JM:get_font("pix8")
+    local font = _G.FONT_THALEAH --JM:get_font("pix8")
     font:push()
-    font:set_color(Utils:get_rgba(Utils:hex_to_rgba_float("f4ffe8")))
-    font:printf("HOW TO PLAY", 0, TILE, 96, "center")
+    font:set_line_space(3)
+    font:set_color(Utils:get_rgba3("f4ffe8"))
+    font:printf("HOW TO\nPLAY", 0, TILE, 96, "center")
     font:pop()
+
+    local font = JM:get_font("pix8")
 
     lgx.setColor(Utils:hex_to_rgba_float("352e99"))
     -- blue shadow for game screen
