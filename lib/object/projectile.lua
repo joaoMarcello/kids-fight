@@ -170,6 +170,9 @@ function Projectile:update(dt)
                     if self:on_ground() then
                         local success = kid:add_stone()
                         if success then
+                            if not kid.is_enemy then
+                                Play_sfx("pickup", true)
+                            end
                             return self:remove()
                         end
                         ---
