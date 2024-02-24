@@ -228,6 +228,37 @@ function Kid:load()
         ["attack_boy_1"] = lgx.newImage("/data/img/boy_1/kid_atk-Sheet.png"),
         ["damage_boy_1"] = lgx.newImage("/data/img/Boy_1/kid_damage-Sheet.png"),
         ["hitGround_boy_1"] = lgx.newImage("/data/img/boy_1/kid_hit_ground-Sheet.png"),
+        ---
+        ["idle_boy_2"] = lgx.newImage("/data/img/boy_2/kid_idle-Sheet.png"),
+        ["run_boy_2"] = lgx.newImage("/data/img/boy_2/kid_run-Sheet.png"),
+        ["death_boy_2"] = lgx.newImage("/data/img/boy_2/kid_death-Sheet.png"),
+        ["jump_boy_2"] = lgx.newImage("/data/img/boy_2/kid_jump-Sheet.png"),
+        ["fall_boy_2"] = lgx.newImage("/data/img/boy_2/kid_fall-Sheet.png"),
+        ["victory_boy_2"] = lgx.newImage("/data/img/boy_2/kid_victory-Sheet.png"),
+        ["attack_boy_2"] = lgx.newImage("/data/img/boy_2/kid_atk-Sheet.png"),
+        ["damage_boy_2"] = lgx.newImage("/data/img/Boy_2/kid_damage-Sheet.png"),
+        ["hitGround_boy_2"] = lgx.newImage("/data/img/boy_2/kid_hit_ground-Sheet.png"),
+        ---
+        ["idle_boy_3"] = lgx.newImage("/data/img/boy_3/kid_idle-Sheet.png"),
+        ["run_boy_3"] = lgx.newImage("/data/img/boy_3/kid_run-Sheet.png"),
+        ["death_boy_3"] = lgx.newImage("/data/img/boy_3/kid_death-Sheet.png"),
+        ["jump_boy_3"] = lgx.newImage("/data/img/boy_3/kid_jump-Sheet.png"),
+        ["fall_boy_3"] = lgx.newImage("/data/img/boy_3/kid_fall-Sheet.png"),
+        ["victory_boy_3"] = lgx.newImage("/data/img/boy_3/kid_victory-Sheet.png"),
+        ["attack_boy_3"] = lgx.newImage("/data/img/boy_3/kid_atk-Sheet.png"),
+        ["damage_boy_3"] = lgx.newImage("/data/img/Boy_3/kid_damage-Sheet.png"),
+        ["hitGround_boy_3"] = lgx.newImage("/data/img/boy_3/kid_hit_ground-Sheet.png"),
+        ---
+        ["idle_boy_4"] = lgx.newImage("/data/img/boy_4/kid_idle-Sheet.png"),
+        ["run_boy_4"] = lgx.newImage("/data/img/boy_4/kid_run-Sheet.png"),
+        ["death_boy_4"] = lgx.newImage("/data/img/boy_4/kid_death-Sheet.png"),
+        ["jump_boy_4"] = lgx.newImage("/data/img/boy_4/kid_jump-Sheet.png"),
+        ["fall_boy_4"] = lgx.newImage("/data/img/boy_4/kid_fall-Sheet.png"),
+        ["victory_boy_4"] = lgx.newImage("/data/img/boy_4/kid_victory-Sheet.png"),
+        ["attack_boy_4"] = lgx.newImage("/data/img/boy_4/kid_atk-Sheet.png"),
+        ["damage_boy_4"] = lgx.newImage("/data/img/Boy_4/kid_damage-Sheet.png"),
+        ["hitGround_boy_4"] = lgx.newImage("/data/img/boy_4/kid_hit_ground-Sheet.png"),
+        ---
     }
 
     animas = animas or {}
@@ -254,6 +285,42 @@ function Kid:load()
         ["attack"] = Anima:new { img = imgs["attack_boy_1"], frames = 2, duration = 0.2, stop_at_the_end = true },
         ["damage"] = Anima:new { img = imgs["damage_boy_1"], frames = 1 },
         ["hitGround"] = Anima:new { img = imgs["hitGround_boy_1"], frames = 1 },
+    }
+
+    animas[3] = animas[3] or {
+        ["idle"] = Anima:new { img = imgs["idle_boy_2"], frames = 4, duration = 0.3 },
+        ["run"] = Anima:new { img = imgs["run_boy_2"], frames = 8, duration = 0.5 },
+        ["death"] = Anima:new { img = imgs["death_boy_2"], frames = 1 },
+        ["jump"] = Anima:new { img = imgs["jump_boy_2"], frames = 3, duration = 0.25, stop_at_the_end = true },
+        ["fall"] = Anima:new { img = imgs["fall_boy_2"], frames = 1 },
+        ["victory"] = Anima:new { img = imgs["victory_boy_2"], frames = 1 },
+        ["attack"] = Anima:new { img = imgs["attack_boy_2"], frames = 2, duration = 0.2, stop_at_the_end = true },
+        ["damage"] = Anima:new { img = imgs["damage_boy_2"], frames = 1 },
+        ["hitGround"] = Anima:new { img = imgs["hitGround_boy_2"], frames = 1 },
+    }
+
+    animas[4] = animas[4] or {
+        ["idle"] = Anima:new { img = imgs["idle_boy_3"], frames = 4, duration = 0.3 },
+        ["run"] = Anima:new { img = imgs["run_boy_3"], frames = 8, duration = 0.5 },
+        ["death"] = Anima:new { img = imgs["death_boy_3"], frames = 1 },
+        ["jump"] = Anima:new { img = imgs["jump_boy_3"], frames = 3, duration = 0.25, stop_at_the_end = true },
+        ["fall"] = Anima:new { img = imgs["fall_boy_3"], frames = 1 },
+        ["victory"] = Anima:new { img = imgs["victory_boy_3"], frames = 1 },
+        ["attack"] = Anima:new { img = imgs["attack_boy_3"], frames = 2, duration = 0.2, stop_at_the_end = true },
+        ["damage"] = Anima:new { img = imgs["damage_boy_3"], frames = 1 },
+        ["hitGround"] = Anima:new { img = imgs["hitGround_boy_3"], frames = 1 },
+    }
+
+    animas[5] = animas[5] or {
+        ["idle"] = Anima:new { img = imgs["idle_boy_4"], frames = 4, duration = 0.3 },
+        ["run"] = Anima:new { img = imgs["run_boy_4"], frames = 8, duration = 0.5 },
+        ["death"] = Anima:new { img = imgs["death_boy_4"], frames = 1 },
+        ["jump"] = Anima:new { img = imgs["jump_boy_4"], frames = 3, duration = 0.25, stop_at_the_end = true },
+        ["fall"] = Anima:new { img = imgs["fall_boy_4"], frames = 1 },
+        ["victory"] = Anima:new { img = imgs["victory_boy_4"], frames = 1 },
+        ["attack"] = Anima:new { img = imgs["attack_boy_4"], frames = 2, duration = 0.2, stop_at_the_end = true },
+        ["damage"] = Anima:new { img = imgs["damage_boy_4"], frames = 1 },
+        ["hitGround"] = Anima:new { img = imgs["hitGround_boy_4"], frames = 1 },
     }
 end
 
