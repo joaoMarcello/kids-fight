@@ -21,6 +21,8 @@ function love.load()
         JM.Sound:set_song_mode("static")
     end
 
+    require "data"
+
     _G.FONT_THALEAH = JM.FontGenerator:new_by_ttf {
         name = "thaleah",
         dir = "data/font/ThaleahFat.ttf",
@@ -62,8 +64,6 @@ function love.load()
     P2.button_to_key[Button.A] = { 'i' }
     P2.button_to_key[Button.X] = { 'u' }
 
-    -- love.keyboard.isDown('ls')
-
     do
         local Word = require "jm-love2d-package.modules.font.Word"
         ---@diagnostic disable-next-line: inject-field
@@ -78,8 +78,13 @@ function love.load()
     JM.Scene.set_default_scene_config(function(self)
         if self.is_splash_screen
             or _G.WEB
-            or true
+        -- or true
         then
+            return
+        end
+
+        if SAVE_DATA.skip_crt then
+            self:set_shader()
             return
         end
 
@@ -90,7 +95,7 @@ function love.load()
             })
             shader:send("opacity", 0.25)
 
-            local ab = JM.Shader:get_shader("aberration", self, { aberration_x = 0.1, aberration_y = 0.2 })
+            local ab = JM.Shader:get_shader("aberration", self, { aberration_x = 0.1, aberration_y = 0.15 })
             local filmgrain = JM.Shader:get_shader("filmgrain", self, { opacity = 0.3 })
             local noise = {}
             self:set_shader({ ab, filmgrain, shader },
@@ -114,6 +119,16 @@ end
 function love.keypressed(key, scancode, isrepeat)
     if key == 'p' and love.keyboard.isDown('lctrl') then
         return love.graphics.captureScreenshot("img_" .. os.time() .. ".png")
+    end
+
+    if key == 'f1' then
+        SAVE_DATA.skip_crt = not SAVE_DATA.skip_crt
+        local scene = JM.SceneManager.scene
+        if scene then
+            JM.Scene.default_config(scene)
+            scene:resize(love.graphics:getDimensions())
+        end
+        return
     end
 
     return JM:keypressed(key, scancode, isrepeat)
