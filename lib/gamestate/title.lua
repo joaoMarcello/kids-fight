@@ -20,6 +20,7 @@ local State = JM.Scene:new {
     subpixel = _G.SUBPIXEL or 3,
     canvas_filter = _G.CANVAS_FILTER or 'linear',
     cam_scale = 1,
+    use_canvas_layer = true,
 }
 
 ---@enum GameState.Title.States

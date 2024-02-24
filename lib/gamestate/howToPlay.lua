@@ -23,6 +23,7 @@ local State = JM.Scene:new {
     canvas_filter = _G.CANVAS_FILTER or 'linear',
     cam_scale = 1,
     show_border = false,
+    use_canvas_layer = true,
 }
 
 State:set_color(JM.Utils:hex_to_rgba_float("c5bde6")) --e5f285

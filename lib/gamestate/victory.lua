@@ -24,6 +24,7 @@ local State = JM.Scene:new {
     bound_right = 1366,
     bound_bottom = 1366,
     cam_scale = 1,
+    use_canvas_layer = true,
 }
 
 -- State:set_color(JM_Utils:hex_to_rgba_float("2c2433"))
@@ -80,6 +81,11 @@ local function init(args)
     end
 
     Play_sfx("victory", true)
+
+    if data.total_time < SAVE_DATA.best_time and data.total_time ~= 0 then
+        SAVE_DATA.best_time = data.total_time
+        SAVE_DATA:save_to_disc()
+    end
 end
 
 local function textinput(t)
