@@ -96,6 +96,10 @@ end
 
 function data:start_countdown(init)
     self.countdown_time = init or 1
+    Play_song("game", true)
+    -- if State:is_current_active() then
+    --     JM.Sound:fade_in()
+    -- end
 end
 
 function data:start_game()
@@ -139,11 +143,25 @@ function data:set_state(new_state)
         self.dialogue = JM.DialogueSystem:newDialogue(
             string.format("/data/dialogue_%d.md", data.wave_number),
             JM:get_font("pix8"),
-            { align = "center", w = 16 * 8, n_lines = 2, text_align = 3, time_wait = 0.05 }
+            {
+                align = "center",
+                w = 16 * 8,
+                n_lines = 2,
+                text_align = 3,
+                time_wait = 0.05,
+                glyph_sfx = "glyph bip",
+                finish_sfx = "box end"
+            }
         )
         ---
     elseif new_state == States.endGame then
+        local audio = JM.Sound:get_current_song()
+        if audio then audio.source:stop() end
         ---
+    elseif new_state == States.game then
+        -- Play_song("game", true)
+    elseif new_state == States.finishFight then
+        JM.Sound:stop_all()
     end
 
     return true
@@ -246,7 +264,20 @@ local function load()
 
     local Sound = JM.Sound
     Sound:add_sfx("/data/sfx/pause 01.ogg", "pause", 1)
-    Sound:add_sfx("/data/sfx/little-girl-screaming-101185.ogg", "girl screaming", 0.5)
+    Sound:add_sfx("/data/sfx/little-girl-screaming-101185.ogg", "girl screaming", 0.025)
+    Sound:add_sfx("/data/sfx/wrong-47985.ogg", "atk fail", 0.25)
+    Sound:add_sfx("/data/sfx/throw_stone.ogg", "throw stone", 0.1)
+    Sound:add_sfx("/data/sfx/triqystudio__dropitem.ogg", "slap")
+    Sound:add_sfx("/data/sfx/heart up 01 square.ogg", "heart up", 0.25)
+    Sound:add_sfx("/data/sfx/blippy-31899 (mp3cut.net) 3.ogg", "blip dying", 0.5)
+    Sound:add_sfx("/data/sfx/pixel-death-66829.ogg", "game over", 1)
+    Sound:add_sfx("/data/sfx/kid jump 01 square.wav", "jump", 0.2)
+    Sound:add_sfx("/data/sfx/success_bell-6776.ogg", "victory", 1)
+    Sound:add_sfx("/data/sfx/UI/textbox 01 square.ogg", "glyph bip", 0.25)
+    Sound:add_sfx("/data/sfx/UI/textbox end 02.wav", "box end", 0.15)
+    Sound:add_sfx("/data/sfx/footstep06.ogg", "footstep 01", 0.25)
+    --==============================================================
+    Sound:add_song("/data/song/More-Coin-Op-Chaos.ogg", "game", 0.35)
 end
 
 local function finish()
@@ -263,6 +294,8 @@ local function finish()
     data.kids = nil
     data.world = nil
     data.player = nil
+
+    JM.Sound:remove_song("game")
 end
 
 local function load_wave(value)
@@ -281,7 +314,7 @@ local function load_wave(value)
     end
 
     ---@type Kid
-    local k = data.leader or State:add_object(Kid:new(SCREEN_WIDTH, 16 * 7, Kid.Gender.boy, -1, true, 2))
+    local k = data.leader or State:add_object(Kid:new(SCREEN_WIDTH, 16 * 7, Kid.Gender.boy, -1, true, 2, 2))
 
     if k.state ~= Kid.State.idle then
         k:set_position(SCREEN_WIDTH, 16 * 7)
@@ -336,7 +369,7 @@ local function load_wave(value)
         ---
     elseif value == 2 then
         ---@type Kid
-        k = State:add_object(Kid:new(16 * 15, 16 * 9, Kid.Gender.boy, -1, true, 3))
+        k = State:add_object(Kid:new(16 * 15, 16 * 9, Kid.Gender.boy, -1, true, 3, 2))
         k:set_position(SCREEN_WIDTH, 16 * 9)
         k:set_target_position(16 * 14, 16 * 9)
         k:set_state(k.State.preparing)
@@ -351,7 +384,7 @@ local function load_wave(value)
         ---
     else
         ---@type Kid
-        k = State:add_object(Kid:new(16 * 12, 16 * 4, Kid.Gender.boy, -1, true, 2))
+        k = State:add_object(Kid:new(16 * 12, 16 * 4, Kid.Gender.boy, -1, true, 2, 2))
         k:set_position(SCREEN_WIDTH, 16 * 4)
         k:set_target_position(16 * 14, 16 * 4)
         k:set_state(k.State.preparing)
@@ -361,7 +394,7 @@ local function load_wave(value)
         table.insert(data.kids, k)
 
         ---@type Kid
-        k = State:add_object(Kid:new(16 * 15, 16 * 9, Kid.Gender.boy, -1, true, 3))
+        k = State:add_object(Kid:new(16 * 15, 16 * 9, Kid.Gender.boy, -1, true, 3, 2))
         k:set_position(SCREEN_WIDTH, 16 * 9)
         k:set_target_position(16 * 14, 16 * 9)
         k:set_state(k.State.preparing)
@@ -375,7 +408,7 @@ local function load_wave(value)
         table.insert(data.kids, k)
 
         ---@type Kid
-        k = State:add_object(Kid:new(16 * 17, 16 * 5, Kid.Gender.boy, -1, true, 1))
+        k = State:add_object(Kid:new(16 * 17, 16 * 5, Kid.Gender.boy, -1, true, 1, 2))
         k:set_position(SCREEN_WIDTH, 16 * 5)
         k:set_target_position(16 * 17, 16 * 5)
         k:set_state(k.State.preparing)
@@ -429,7 +462,7 @@ local function init(args)
     JM.Physics:newBody(data.world, 0, SCREEN_HEIGHT - 16, SCREEN_WIDTH, 16, "static")
 
     data.leader = nil
-    data.wave_number = args.wave_number or 3
+    data.wave_number = args.wave_number or 1
     load_wave(data.wave_number)
 
     data.displayHP = DisplayHP:new(data.player)
@@ -654,7 +687,14 @@ local function game_logic(dt)
             data.dialogue = JM.DialogueSystem:newDialogue(
                 "/data/dialogue_final.md",
                 JM:get_font("pix8"),
-                { align = "center", w = 16 * 8, n_lines = 2, text_align = 3 }
+                {
+                    align = "center",
+                    w = 16 * 8,
+                    n_lines = 2,
+                    text_align = 3,
+                    glyph_sfx = "glyph bip",
+                    finish_sfx = "box end"
+                }
             )
         end
 
@@ -725,18 +765,33 @@ local function game_logic(dt)
         if data:all_kids_on_position() then
             data:set_state(States.waveIsComing)
             load_wave(data.wave_number)
+        else
+            Play_sfx("footstep 01")
         end
         ---
     elseif state == States.waveIsComing then
-        if not data.countdown_time
-            and data:all_kids_on_position()
-        then
-            if State:is_current_active() then
-                -- data:start_countdown(3.6)
-                -- State:remove_black_bar()
-                data:set_state(States.dialogue)
+        if not data.countdown_time then
+            if data:all_kids_on_position() then
+                if State:is_current_active() then
+                    -- data:start_countdown(3.6)
+                    -- State:remove_black_bar()
+                    data:set_state(States.dialogue)
+                else
+                    data:start_countdown(-0.5)
+                end
             else
-                data:start_countdown(-0.5)
+                -- local list = data.kids
+                -- for i = 1, #list do
+                --     ---@type Kid
+                --     local kid = list[i]
+
+                --     if kid.state == Kid.State.preparing
+                --         and kid.time_delay == 0
+                --     then
+                --         break
+                --     end
+                -- end
+                Play_sfx("footstep 01")
             end
         end
         ---
