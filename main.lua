@@ -93,7 +93,7 @@ function love.load()
                 screen_h = 288,
                 width = 1,
             })
-            shader:send("opacity", 0.25)
+            shader:send("opacity", 0.15)
 
             local ab = JM.Shader:get_shader("aberration", self, { aberration_x = 0.1, aberration_y = 0.15 })
             local filmgrain = JM.Shader:get_shader("filmgrain", self, { opacity = 0.3 })
@@ -108,7 +108,7 @@ function love.load()
                 end)
         end
     end)
-    return JM:load_initial_state("lib.gamestate.game", false)
+    return JM:load_initial_state("lib.gamestate.title", false)
     -- return JM:load_initial_state("jm-love2d-package.modules.editor.editor", false)
 end
 
@@ -121,7 +121,7 @@ function love.keypressed(key, scancode, isrepeat)
         return love.graphics.captureScreenshot("img_" .. os.time() .. ".png")
     end
 
-    if key == 'f1' then
+    if key == 'f10' then
         SAVE_DATA.skip_crt = not SAVE_DATA.skip_crt
         local scene = JM.SceneManager.scene
         if scene then
@@ -221,6 +221,7 @@ local lim = 1 / 30
 function love.update(dt)
     km = collectgarbage("count") / 1024.0
     dt = dt > lim and lim or dt
+    SAVE_DATA:update(dt)
     return JM:update(dt)
 end
 
