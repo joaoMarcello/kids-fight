@@ -40,6 +40,7 @@ local States = {
     endGame = 9,
 }
 
+State:set_color(JM_Utils:hex_to_rgba_float("3dbf26"))
 local imgs
 --============================================================================
 ---@class GameState.Game.Data
@@ -375,7 +376,7 @@ local function load_wave(value)
         ---
     elseif value == 2 then
         ---@type Kid
-        k = State:add_object(Kid:new(16 * 15, 16 * 9, Kid.Gender.boy, -1, true, 3, 2))
+        k = State:add_object(Kid:new(16 * 15, 16 * 9, Kid.Gender.boy, -1, true, 3, 3))
         k:set_position(SCREEN_WIDTH, 16 * 9)
         k:set_target_position(16 * 14, 16 * 9)
         k:set_state(k.State.preparing)
@@ -390,7 +391,7 @@ local function load_wave(value)
         ---
     else
         ---@type Kid
-        k = State:add_object(Kid:new(16 * 12, 16 * 4, Kid.Gender.boy, -1, true, 2, 2))
+        k = State:add_object(Kid:new(16 * 12, 16 * 4, Kid.Gender.boy, -1, true, 2, 5))
         k:set_position(SCREEN_WIDTH, 16 * 4)
         k:set_target_position(16 * 14, 16 * 4)
         k:set_state(k.State.preparing)
@@ -400,7 +401,7 @@ local function load_wave(value)
         table.insert(data.kids, k)
 
         ---@type Kid
-        k = State:add_object(Kid:new(16 * 15, 16 * 9, Kid.Gender.boy, -1, true, 3, 2))
+        k = State:add_object(Kid:new(16 * 15, 16 * 9, Kid.Gender.boy, -1, true, 3, 4))
         k:set_position(SCREEN_WIDTH, 16 * 9)
         k:set_target_position(16 * 14, 16 * 9)
         k:set_state(k.State.preparing)
@@ -414,7 +415,7 @@ local function load_wave(value)
         table.insert(data.kids, k)
 
         ---@type Kid
-        k = State:add_object(Kid:new(16 * 17, 16 * 5, Kid.Gender.boy, -1, true, 1, 2))
+        k = State:add_object(Kid:new(16 * 17, 16 * 5, Kid.Gender.boy, -1, true, 1, 3))
         k:set_position(SCREEN_WIDTH, 16 * 5)
         k:set_target_position(16 * 17, 16 * 5)
         k:set_state(k.State.preparing)
@@ -1013,20 +1014,20 @@ local function draw(cam)
     cam:attach(nil, State.subpixel)
     --================================================================
 
-    do
-        local leader = data.leader
-        if leader and not leader.__remove and not leader:is_dead()
-            -- and state ~= States.dialogue and state ~= States.endGame
-            -- and state ~= States.preparingToTalk
-            -- and state ~= States.waveIsComing
-            and state == States.game
-            and not data.countdown_time
-            and State:is_current_active()
-        then
-            font = JM:get_font("pix8")
-            font:print("<color>LEADER", data.leader.x, data.leader.y - 48)
-        end
-    end
+    -- do
+    --     local leader = data.leader
+    --     if leader and not leader.__remove and not leader:is_dead()
+    --         -- and state ~= States.dialogue and state ~= States.endGame
+    --         -- and state ~= States.preparingToTalk
+    --         -- and state ~= States.waveIsComing
+    --         and state == States.game
+    --         and not data.countdown_time
+    --         and State:is_current_active()
+    --     then
+    --         font = JM:get_font("pix8")
+    --         font:print("<color>LEADER", data.leader.x, data.leader.y - 48)
+    --     end
+    -- end
 
     do
         local countdown_time = data.countdown_time
