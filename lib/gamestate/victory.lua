@@ -1,5 +1,5 @@
-local path = ...
 local JM = _G.JM
+local Particle = require "lib.particles"
 
 do
     _G.SUBPIXEL = _G.SUBPIXEL or 3
@@ -53,6 +53,30 @@ local function init(args)
     data.total_time = _data_.time_game
     data.death_count = _data_.death_count or 0
     data.time_gamestate = 0.0
+
+    data.star = data.star
+        or love.graphics.newQuad(16 * 3, 0, 16, 16, Particle.IMG:getDimensions())
+
+    if not data.obj1 then
+        ---@type JM.Template.Affectable
+        data.obj1 = JM.Affectable:new()
+        data.obj1:apply_effect("swing")
+        data.obj1.ox = 8
+        data.obj1.oy = 8
+        data.obj1.x = 16 * 3.5
+        data.obj1.y = 18
+    end
+    if not data.obj2 then
+        ---@type JM.Template.Affectable
+        data.obj2 = JM.Affectable:new()
+        local eff = data.obj2:apply_effect("swing")
+        eff.__rad = math.pi * 1.25
+        -- eff.__speed = 3.75
+        data.obj2.ox = 8
+        data.obj2.oy = 8
+        data.obj2.x = 16 * 15.5
+        data.obj2.y = 18
+    end
 
     Play_sfx("victory", true)
 end
@@ -142,6 +166,14 @@ end
 local function update(dt)
     if dt > 1 / 30 then dt = 1 / 30 end
     data.time_gamestate = data.time_gamestate + dt
+    data.obj1:update(dt)
+    data.obj2:update(dt)
+end
+
+local function draw_star(self)
+    local lgx = love.graphics
+    lgx.setColor(1, 1, 1)
+    lgx.draw(Particle.IMG, data.star, self.x, self.y, 0, 1, 1)
 end
 
 local function draw(cam)
@@ -171,6 +203,13 @@ local function draw(cam)
     -- font:set_font_size(font.__font_size * 2)
     font:printf("you defeat the bullies!", 0, 16 * 1.5, SCREEN_WIDTH, "center")
     font:pop()
+
+    local lgx = love.graphics
+    lgx.setColor(1, 1, 1)
+    -- lgx.draw(Particle.IMG, data.star, 16 * 3.5, 18, 0, 1, 1)
+    -- lgx.draw(Particle.IMG, data.star, 16 * 15.5, 18, 0, 1, 1)
+    data.obj1:draw(draw_star)
+    data.obj2:draw(draw_star)
 end
 
 --============================================================================
