@@ -18,7 +18,7 @@ Timer.__index = Timer
 
 ---@return Timer
 function Timer:new(time_in_sec)
-    local obj = GC:new(16 * 14, 16 * 1, 64, 32, 50)
+    local obj = GC:new(16 * 14, 16 * 1 - 2, 64, 32, 50)
     setmetatable(obj, self)
     Timer.__constructor__(obj, time_in_sec)
     return obj
@@ -151,7 +151,7 @@ local function my_draw(self)
     local min, sec, dec = self:get_time2()
 
     font:push()
-    local x, y, w = 16 * 14, 12, 16 * 20
+    -- local x, y, w = 16 * 14, 12, 16 * 20
     -- font:set_font_size(20)
 
     font:set_color(color_black)
@@ -175,13 +175,13 @@ local function my_draw(self)
 
     font:pop()
 
-    local font = JM:get_font("pix8")
-    font:push()
-    -- font:set_color(color_yellow)
-    -- font:printf("time:", x - 7, 2, w, "left")
-    font:set_color(JM_Utils:get_rgba3(("2c2433")))
-    font:printf("time:", x - 8, 1, w, "left")
-    font:pop()
+    -- local font = JM:get_font("pix8")
+    -- font:push()
+    -- -- font:set_color(color_yellow)
+    -- -- font:printf("time:", x - 7, 2, w, "left")
+    -- font:set_color(JM_Utils:get_rgba3(("2c2433")))
+    -- font:printf("time:", x - 8, 1, w, "left")
+    -- font:pop()
 end
 
 function Timer:draw()
