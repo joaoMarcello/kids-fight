@@ -69,7 +69,7 @@ local function load()
     Sound:add_sfx("/data/sfx/UI/select 01 sinewave.ogg", "ui-select", 0.25)
     Sound:add_sfx("/data/sfx/UI/select 02 sawtooth.ogg", "ui-select 02", 0.15)
     --========================================================================
-    -- Sound:add_song("/data/song/Game-Menu_Looping.ogg", "title", 0.3)
+    Sound:add_song("/data/song/Quirky-Coin-Op-Games.ogg", "title", 0.35)
 end
 
 local function finish()
@@ -354,7 +354,7 @@ local function init(args)
     }
 
     _G.Play_song("title")
-    -- JM.Sound:fade_in()
+    JM.Sound:fade_in()
 end
 
 local function textinput(t)
