@@ -51,9 +51,9 @@ local function load()
     JM:get_font("pix5")
     JM:get_font("pix8")
 
-    -- JM.Sound:add_sfx("/data/sfx/flipping-through-a-bookmp3-14415.ogg", "flip", 1)
+    JM.Sound:add_sfx("/data/sfx/flipping-through-a-bookmp3-14415.ogg", "flip", 1)
 
-    -- JM.Sound:add_song("/data/song/Bass-Invaders.ogg", "HowToPlay", 0.35)
+    JM.Sound:add_song("/data/song/The-8-Bit-March_Looping.ogg", "HowToPlay", 0.5)
 end
 
 local function finish()
@@ -80,12 +80,12 @@ local function init(args)
     restart_game()
 
     data.text = string.format(
-        "Throw stones on your enemies<next>Move:\tA/D or left/right\nJump:\tspace\nAttack:\tF/J/E<next>Done")
+        "It:comma_end:s `#bf3526`WAR`#-`! The boys challenge you to a fight to settle the new `#795ce6`street owner`#-`. Defend yourself throwing `#575b66`stones`#` on them.<next>`#000000`Move:`#`\tA/D `#000000`or`#` left/right\n`#000000`Jump:`#`\tspace `#000000`or`#` Mouse RB\n`#000000`Attack:`#`\tF/J/E `#000000`or`#` Mouse LB<next>If running out of ammo, `#bf3526`collect the stones`#` left by your foes.")
 
     local font = JM:get_font("pix8")
     font:push()
     -- font:set_font_size(font.__font_size * 2)
-    font:set_color(JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("332424")))
+    font:set_color(JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("242833")))
     data.textbox = Textbox:new {
         text = data.text,
         font = JM:get_font("pix8"),
@@ -136,7 +136,7 @@ local function go_to_game()
         -- end
 
         JM.Sound:stop_all()
-        _G.Play_sfx("eat", true)
+        _G.Play_sfx("ui-select 02", true)
 
         return State:add_transition("sawtooth", "out",
             {
@@ -194,7 +194,6 @@ local function keypressed(key)
     if P1:pressed(Button.B, key) then
         if not State.transition then
             JM.Sound:fade_out()
-
 
             return State:add_transition("sawtooth", "out",
                 { duration = 0.75, post_delay = 0.1, axis = "y", type = "" }, nil,
