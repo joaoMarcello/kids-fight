@@ -445,6 +445,7 @@ function Kid:damage(value, obj)
 
     if not self.is_enemy then
         self.gamestate:pause(self:is_dead() and 1.3 or 0.2, pause_action, self)
+        Play_sfx("player damage", true)
     else
         local is_the_last = self:is_dead() and self:is_the_last()
         if is_the_last then
@@ -455,6 +456,7 @@ function Kid:damage(value, obj)
             is_the_last and 1 or 0.2,
             pause_action, self)
     end
+    Play_sfx("foe hit", true)
 
     return true
 end
@@ -495,6 +497,9 @@ function Kid:attack()
     elseif r then
         -- Play_sfx("throw stone", not self.is_enemy)
         Play_sfx("slap", not self.is_enemy)
+        if not self.is_enemy then
+            Play_sfx("throw stone", true)
+        end
     end
     return r
 end
