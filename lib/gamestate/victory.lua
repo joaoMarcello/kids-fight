@@ -1,5 +1,6 @@
 local JM = _G.JM
 local Particle = require "lib.particles"
+local Timer = require "lib.object.timer"
 
 do
     _G.SUBPIXEL = _G.SUBPIXEL or 3
@@ -50,7 +51,7 @@ local function init(args)
     local game = require "lib.gamestate.game"
     local _data_ = game:__get_data__()
 
-    data.total_time = _data_.time_game
+    data.total_time = _data_.time_game or 0
     data.death_count = _data_.death_count or 0
     data.time_gamestate = 0.0
 
@@ -60,7 +61,7 @@ local function init(args)
     if not data.obj1 then
         ---@type JM.Template.Affectable
         data.obj1 = JM.Affectable:new()
-        data.obj1:apply_effect("swing")
+        -- data.obj1:apply_effect("swing")
         data.obj1.ox = 8
         data.obj1.oy = 8
         data.obj1.x = 16 * 3.5
@@ -69,8 +70,8 @@ local function init(args)
     if not data.obj2 then
         ---@type JM.Template.Affectable
         data.obj2 = JM.Affectable:new()
-        local eff = data.obj2:apply_effect("swing")
-        eff.__rad = math.pi * 1.25
+        -- local eff = data.obj2:apply_effect("swing")
+        -- eff.__rad = math.pi * 1.25
         -- eff.__speed = 3.75
         data.obj2.ox = 8
         data.obj2.oy = 8
@@ -184,7 +185,11 @@ local function draw(cam)
 
     font:printf(string.format("N. deaths: <color-hex=d96c21>%d", data.death_count), 0, 16 * 4, SCREEN_WIDTH, "center")
 
-    font:printf(string.format("Your time was\n<color-hex=f4ffe8>%.1f</color> seconds", tostring(data.total_time or 0)), 0,
+    local min, sec, dec = Timer.get_time2(Timer, data.total_time)
+
+    font:printf(
+        string.format("Your time was\n<color-hex=f4ffe8>%02d:comma_end::comma_end:%02d:comma_end:%02d", min, sec, dec),
+        0,
         16 * 6,
         SCREEN_WIDTH, "center")
 
