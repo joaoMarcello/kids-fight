@@ -53,6 +53,8 @@ local function init(args)
     data.total_time = _data_.time_game
     data.death_count = _data_.death_count or 0
     data.time_gamestate = 0.0
+
+    Play_sfx("victory", true)
 end
 
 local function textinput(t)
@@ -74,6 +76,7 @@ local function keypressed(key)
         or P1:pressed(Button.A, key)
     then
         if not State.transition then
+            Play_sfx("ui-select 02", true)
             return State:add_transition("fade", "out", { post_delay = 0.2 }, nil,
                 ---@param State JM.Scene
                 function(State)
@@ -137,6 +140,7 @@ local function resize(w, h)
 end
 
 local function update(dt)
+    if dt > 1 / 30 then dt = 1 / 30 end
     data.time_gamestate = data.time_gamestate + dt
 end
 
