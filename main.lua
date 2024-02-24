@@ -103,7 +103,7 @@ function love.load()
                 end)
         end
     end)
-    return JM:load_initial_state("lib.gamestate.game", false)
+    return JM:load_initial_state("lib.gamestate.title", false)
     -- return JM:load_initial_state("jm-love2d-package.modules.editor.editor", false)
 end
 
