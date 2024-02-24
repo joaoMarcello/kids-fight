@@ -127,6 +127,7 @@ function love.keypressed(key, scancode, isrepeat)
         if scene then
             JM.Scene.default_config(scene)
             scene:resize(love.graphics:getDimensions())
+            SAVE_DATA:save_to_disc()
         end
         return
     end
@@ -211,7 +212,8 @@ function love.resize(w, h)
 end
 
 function love.quit()
-
+    local tr = SAVE_DATA:get_thread()
+    local r = tr and tr:wait()
 end
 
 local km = 0
