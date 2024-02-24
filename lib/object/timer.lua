@@ -105,8 +105,9 @@ function Timer:get_time()
     return minutes, seconds, dec
 end
 
-function Timer:get_time2()
-    local time = self.time_in_sec * 100
+function Timer:get_time2(value)
+    value = value or self.time_in_sec
+    local time = value * 100
     local minute = math_floor(time / 6000)
     local seconds = (time - (minute * 6000)) / 100
     seconds = math_floor(seconds)
