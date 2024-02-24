@@ -393,9 +393,13 @@ local function draw(cam)
     if game then
         if not data.capture then
             local shaders = game.shader
-            game:set_shader_params(shaders[2], false)
+            if shaders then
+                game:set_shader_params(shaders[2], false)
+            end
             game:draw_capture(State, cam, 0, 0, 0, 1, 1)
-            game:set_shader_params(shaders[2], true)
+            if shaders then
+                game:set_shader_params(shaders[2], true)
+            end
             data.capture = true
         else
             local layer = data.layers[1]
