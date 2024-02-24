@@ -39,6 +39,8 @@ local States = {
     countDown = 8,
     endGame = 9,
 }
+
+local imgs
 --============================================================================
 ---@class GameState.Game.Data
 local data = {}
@@ -186,21 +188,13 @@ function data:draw_dialogue(cam)
     box.x = speaker.x + speaker.w * 0.5 - dialogue.w * 0.5
     box.y = speaker.y - 52 - dialogue.h
 
-    lgx.setColor(JM_Utils:hex_to_rgba_float("f4ffe8"))
-    lgx.rectangle("fill", box.x - 2, box.y - 1, box.w + 16, box.h + 2)
+    lgx.setColor(1, 1, 1)
+    lgx.draw(imgs["balloon"], data.balloon, box.x - 1, box.y)
 
     if speaker == data.leader then
-        lgx.polygon("fill",
-            box.x + 24, box.y + box.h + 1,
-            box.x + 24 + 16, box.y + box.h + 1,
-            speaker.x, box.y + box.h + 16
-        )
+        lgx.draw(imgs["balloon"], data.balloon_point, box.x + 40, box.y + box.h, 0, -1, 1, 16, 0)
     else
-        lgx.polygon("fill",
-            box.x + 80, box.y + box.h + 1,
-            box.x + 80 + 16, box.y + box.h + 1,
-            speaker.x + speaker.w, box.y + box.h + 16
-        )
+        lgx.draw(imgs["balloon"], data.balloon_point, box.x + 64, box.y + box.h, 0, 1, 1, 0, 0)
     end
 
     dialogue:draw(cam)
@@ -249,7 +243,6 @@ function State:__get_data__()
     return data
 end
 
-local imgs
 local function load()
     local font = JM:get_font("pix8")
     font:set_color(JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("242833")))
@@ -267,6 +260,7 @@ local function load()
         ["street_down"] = lgx.newImage("/data/img/back_down.png"),
         ["street_up"] = lgx.newImage("/data/img/back_up.png"),
         ["box"] = lgx.newImage("/data/img/box_gui.png"),
+        ["balloon"] = lgx.newImage("/data/img/balloon.png"),
     }
 
     local Sound = JM.Sound
@@ -345,6 +339,7 @@ local function load_wave(value)
         -- data.leader.is_visible = false
         data.leader:set_delay(2)
         data.leader.goingTo_speed = 1.5
+        data.leader.time_state = 0.45
 
         -- ---@type Kid
         -- k = State:add_object(Kid:new(16 * 12, 16 * 9, Kid.Gender.boy, -1, true, 1))
@@ -449,6 +444,11 @@ local function init(args)
 
     data.clock = data.clock
         or love.graphics.newQuad(32, 0, 16, 16, Particles.IMG:getDimensions())
+
+    data.balloon = data.balloon
+        or love.graphics.newQuad(0, 0, 16 * 9, 32, imgs["balloon"]:getDimensions())
+    data.balloon_point = data.balloon_point
+        or love.graphics.newQuad(16 * 9, 0, 32, 16, imgs["balloon"]:getDimensions())
 
     data.countdown_time = nil
     ---@type JM.DialogueSystem.Dialogue|any
@@ -694,24 +694,30 @@ local function game_logic(dt)
                 data:set_state(States.endGame)
                 State:show_black_bar(16)
             end
+            data.timer:flick()
         end
         ---
     elseif state == States.endGame then
         local player = data.player
         local dialogue = data.dialogue
-        if player:is_on_target_position() and not dialogue then
-            data.dialogue = JM.DialogueSystem:newDialogue(
-                "/data/dialogue_final.md",
-                JM:get_font("pix8"),
-                {
-                    align = "center",
-                    w = 16 * 8,
-                    n_lines = 2,
-                    text_align = 3,
-                    glyph_sfx = "glyph bip",
-                    finish_sfx = "box end"
-                }
-            )
+        if player:is_on_target_position() then
+            if not dialogue then
+                data.dialogue = JM.DialogueSystem:newDialogue(
+                    "/data/dialogue_final.md",
+                    JM:get_font("pix8"),
+                    {
+                        align = "center",
+                        w = 16 * 8,
+                        n_lines = 2,
+                        text_align = 3,
+                        glyph_sfx = "glyph bip",
+                        finish_sfx = "box end"
+                    }
+                )
+            end
+            ---
+        else
+            Play_sfx("footstep 01")
         end
 
         if dialogue and not dialogue.is_visible
@@ -735,6 +741,7 @@ local function game_logic(dt)
         end
         ---
     elseif state == States.finishFight then
+        JM.GameObject.update(data.timer, dt)
         if data.time_gamestate >= 3 then
             if not data.player:is_dead() then
                 data:put_kids_to_run(false)
@@ -758,9 +765,11 @@ local function game_logic(dt)
                 ---
             else
                 if not State.transition then
+                    JM.Sound:fade_out()
                     State:add_transition("door", "out", { axis = "y", post_delay = 0.2 }, nil,
                         ---@param State JM.Scene
                         function(State)
+                            JM.Sound:fade_in(0.01)
                             data.player:ressurect()
                             data.player:set_state(Kid.State.preparing)
                             data.player.stones = 5
@@ -986,13 +995,18 @@ local function draw(cam)
                 font:printf(string.format("ammo x %d", data.player.stones), px, py)
             end
         end
-
-
-        if State:is_current_active() then
-            data.timer:draw()
-            lgx.setColor(1, 1, 1)
-            lgx.draw(Particles.IMG, data.clock, 16 * 13 - 3, 8, 0, 1, 1)
-        end
+    end
+    if State:is_current_active() and not State:is_showing_black_bar()
+        and (state == States.finishFight
+            or state == States.game
+            or state == States.preparingToTalk
+            or data.player.state == Kid.State.victory
+            or state == States.endGame
+            or (data.countdown_time))
+    then
+        data.timer:draw()
+        lgx.setColor(1, 1, 1)
+        lgx.draw(Particles.IMG, data.clock, 16 * 13 - 3, 8, 0, 1, 1)
     end
     cam:attach(nil, State.subpixel)
     --================================================================
