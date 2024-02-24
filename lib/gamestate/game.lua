@@ -279,6 +279,7 @@ local function load()
     Sound:add_sfx("/data/sfx/blippy-31899 (mp3cut.net) 3.ogg", "blip dying", 0.5)
     Sound:add_sfx("/data/sfx/pixel-death-66829.ogg", "game over", 1)
     Sound:add_sfx("/data/sfx/kid jump 01 square.wav", "jump", 0.2)
+    Sound:add_sfx("/data/sfx/kid jump 02 sine.wav", "jump 2", 0.25)
     Sound:add_sfx("/data/sfx/success_bell-6776.ogg", "victory", 1)
     Sound:add_sfx("/data/sfx/UI/textbox 01 square.ogg", "glyph bip", 0.25)
     Sound:add_sfx("/data/sfx/UI/textbox end 02.wav", "box end", 0.15)
@@ -475,7 +476,7 @@ local function init(args)
     JM.Physics:newBody(data.world, 0, SCREEN_HEIGHT - 16, SCREEN_WIDTH, 16, "static")
 
     data.leader = nil
-    data.wave_number = args.wave_number or 3
+    data.wave_number = args.wave_number or 1
     load_wave(data.wave_number)
 
     data.displayHP = DisplayHP:new(data.player)
