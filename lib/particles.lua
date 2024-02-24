@@ -5,6 +5,8 @@ local lgx = love.graphics
 
 local IMG = lgx.newImage("/data/img/particles.png")
 
+Particles.IMG = IMG
+
 local anima_run_dust = Anima:new { img = lgx.newImage("/data/img/dust_run-Sheet.png"), frames = 4, duration = 0.7 }
 
 local RunDust = {
