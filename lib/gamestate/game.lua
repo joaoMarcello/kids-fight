@@ -3,6 +3,8 @@ local JM = _G.JM
 local Kid = require "lib.object.kid"
 local DisplayHP = require "lib.object.displayHP_game"
 local Timer = require "lib.object.timer"
+local Particles = require "lib.particles"
+
 
 do
     _G.SUBPIXEL = _G.SUBPIXEL or 3
@@ -97,6 +99,10 @@ end
 function data:start_countdown(init)
     self.countdown_time = init or 1
     Play_song("game", true)
+
+    local audio = JM.Sound:get_current_song()
+    if audio then audio:set_volume() end
+
     -- if State:is_current_active() then
     --     JM.Sound:fade_in()
     -- end
@@ -161,7 +167,8 @@ function data:set_state(new_state)
     elseif new_state == States.game then
         -- Play_song("game", true)
     elseif new_state == States.finishFight then
-        JM.Sound:stop_all()
+        local audio = JM.Sound:get_current_song()
+        if audio then audio.source:stop() end
     end
 
     return true
@@ -264,7 +271,7 @@ local function load()
 
     local Sound = JM.Sound
     Sound:add_sfx("/data/sfx/pause 01.ogg", "pause", 1)
-    Sound:add_sfx("/data/sfx/little-girl-screaming-101185.ogg", "girl screaming", 0.025)
+    Sound:add_sfx("/data/sfx/219650__curly_hikari_94__scream_girl1.wav", "girl screaming", 0.1)
     Sound:add_sfx("/data/sfx/wrong-47985.ogg", "atk fail", 0.25)
     Sound:add_sfx("/data/sfx/throw_stone.ogg", "throw stone", 0.1)
     Sound:add_sfx("/data/sfx/triqystudio__dropitem.ogg", "slap")
@@ -276,6 +283,9 @@ local function load()
     Sound:add_sfx("/data/sfx/UI/textbox 01 square.ogg", "glyph bip", 0.25)
     Sound:add_sfx("/data/sfx/UI/textbox end 02.wav", "box end", 0.15)
     Sound:add_sfx("/data/sfx/footstep06.ogg", "footstep 01", 0.25)
+    Sound:add_sfx("/data/sfx/fist-punch-or-kick-7171.ogg", "foe hit", 0.75)
+    Sound:add_sfx("/data/sfx/404747__owlstorm__retro-video-game-sfx-ouch.wav", "player damage", 0.75)
+    Sound:add_sfx("/data/sfx/678385__deltacode__item-pickup-v2.wav", "pickup", 0.35)
     --==============================================================
     Sound:add_song("/data/song/More-Coin-Op-Chaos.ogg", "game", 0.35)
 end
@@ -436,6 +446,9 @@ local function init(args)
     data.time_gc = 0.0
     data.death_count = 0
 
+    data.clock = data.clock
+        or love.graphics.newQuad(32, 0, 16, 16, Particles.IMG:getDimensions())
+
     data.countdown_time = nil
     ---@type JM.DialogueSystem.Dialogue|any
     data.dialogue = nil
@@ -462,7 +475,7 @@ local function init(args)
     JM.Physics:newBody(data.world, 0, SCREEN_HEIGHT - 16, SCREEN_WIDTH, 16, "static")
 
     data.leader = nil
-    data.wave_number = args.wave_number or 1
+    data.wave_number = args.wave_number or 3
     load_wave(data.wave_number)
 
     data.displayHP = DisplayHP:new(data.player)
@@ -494,10 +507,12 @@ local function keypressed(key)
         and P1:pressed(Button.start, key)
         and not data.countdown_time
     then
+        JM.Sound:fade_out()
         State:add_transition("door", "out", { axis = "y", duration = 1, post_delay = 0.3, pause_scene = false }, nil,
             ---@param State JM.Scene
             function(State)
                 data:skip_intro()
+                JM.Sound:fade_in(0.01)
                 State:add_transition("door", "in", { axis = "y", duration = 0.5, pause_scene = false }, nil)
             end)
         return
@@ -844,7 +859,7 @@ function data:skip_intro()
         k.is_visible = true
         k.time_delay = 0.0
     end
-    data:start_countdown(3.6)
+    data:start_countdown(3.9)
     -- self:set_state(States.waveIsComing)
     -- game_logic(0)
 
@@ -974,6 +989,8 @@ local function draw(cam)
 
         if State:is_current_active() then
             data.timer:draw()
+            lgx.setColor(1, 1, 1)
+            lgx.draw(Particles.IMG, data.clock, 16 * 13 - 3, 8, 0, 1, 1)
         end
     end
     cam:attach(nil, State.subpixel)
