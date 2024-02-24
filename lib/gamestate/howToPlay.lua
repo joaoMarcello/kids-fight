@@ -396,9 +396,13 @@ local function draw(cam)
     do
         -- drawing Game mini screen
         local shaders = Game.shader
-        Game:set_shader_params(shaders[1], false)
+        if shaders then
+            Game:set_shader_params(shaders[1], false)
+        end
         Game:draw_capture(State, cam, data.x, data.y, 0, sx, sy, nil, nil, nil, nil, overlay)
-        Game:set_shader_params(shaders[1], true)
+        if shaders then
+            Game:set_shader_params(shaders[1], true)
+        end
         -- SAVE_DATA.use_blur = use_blur
         -- outline for game screen
         lgx.setColor(Utils:hex_to_rgba_float("334266")) --242833
