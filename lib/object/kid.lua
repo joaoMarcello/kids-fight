@@ -80,24 +80,24 @@ Kid.State = States
 Kid.AnimaState = AnimaState
 Kid.is_kid = true
 
-function Kid:new(x, y, gender, direction, is_enemy, move_type)
+function Kid:new(x, y, gender, direction, is_enemy, move_type, ID)
     gender = gender or Gender.girl
     local x = x or (16 * 5)
     local y = y or (16 * 2)
 
     local obj = GC:new(x, y, 14, 3, nil, 10, "dynamic", nil)
     setmetatable(obj, self)
-    return Kid.__constructor__(obj, gender, direction or 1, is_enemy, move_type)
+    return Kid.__constructor__(obj, gender, direction or 1, is_enemy, move_type, ID)
 end
 
 local conf_stretch = { speed_x = 0.3, speed_y = 0.3, decay_speed_x = 0.5, decay_speed_y = 0.5 }
 
-function Kid:__constructor__(gender, direction, is_enemy, move_type)
+function Kid:__constructor__(gender, direction, is_enemy, move_type, ID)
     self.ox = self.w * 0.5
     self.oy = self.h
 
     self.gender = gender
-    self.__id = 1
+    self.__id = ID or 1
 
     self.is_enemy = is_enemy or false
     self.direction = direction
@@ -218,6 +218,16 @@ function Kid:load()
         ["attack"] = lgx.newImage("/data/img/girl/kid_atk-Sheet.png"),
         ["damage"] = lgx.newImage("/data/img/girl/kid_damage-Sheet.png"),
         ["hitGround"] = lgx.newImage("/data/img/girl/kid_hit_ground-Sheet.png"),
+        ---
+        ["idle_boy_1"] = lgx.newImage("/data/img/boy_1/kid_idle-Sheet.png"),
+        ["run_boy_1"] = lgx.newImage("/data/img/boy_1/kid_run-Sheet.png"),
+        ["death_boy_1"] = lgx.newImage("/data/img/boy_1/kid_death-Sheet.png"),
+        ["jump_boy_1"] = lgx.newImage("/data/img/boy_1/kid_jump-Sheet.png"),
+        ["fall_boy_1"] = lgx.newImage("/data/img/boy_1/kid_fall-Sheet.png"),
+        ["victory_boy_1"] = lgx.newImage("/data/img/boy_1/kid_victory-Sheet.png"),
+        ["attack_boy_1"] = lgx.newImage("/data/img/boy_1/kid_atk-Sheet.png"),
+        ["damage_boy_1"] = lgx.newImage("/data/img/Boy_1/kid_damage-Sheet.png"),
+        ["hitGround_boy_1"] = lgx.newImage("/data/img/boy_1/kid_hit_ground-Sheet.png"),
     }
 
     animas = animas or {}
@@ -232,6 +242,18 @@ function Kid:load()
         ["attack"] = Anima:new { img = imgs["attack"], frames = 2, duration = 0.2, stop_at_the_end = true },
         ["damage"] = Anima:new { img = imgs["damage"], frames = 1 },
         ["hitGround"] = Anima:new { img = imgs["hitGround"], frames = 1 },
+    }
+
+    animas[2] = animas[2] or {
+        ["idle"] = Anima:new { img = imgs["idle_boy_1"], frames = 4, duration = 0.3 },
+        ["run"] = Anima:new { img = imgs["run_boy_1"], frames = 8, duration = 0.5 },
+        ["death"] = Anima:new { img = imgs["death_boy_1"], frames = 1 },
+        ["jump"] = Anima:new { img = imgs["jump_boy_1"], frames = 3, duration = 0.25, stop_at_the_end = true },
+        ["fall"] = Anima:new { img = imgs["fall_boy_1"], frames = 1 },
+        ["victory"] = Anima:new { img = imgs["victory_boy_1"], frames = 1 },
+        ["attack"] = Anima:new { img = imgs["attack_boy_1"], frames = 2, duration = 0.2, stop_at_the_end = true },
+        ["damage"] = Anima:new { img = imgs["damage_boy_1"], frames = 1 },
+        ["hitGround"] = Anima:new { img = imgs["hitGround_boy_1"], frames = 1 },
     }
 end
 
@@ -292,6 +314,7 @@ function Kid:set_state(new_state)
         self.diff_y = bd.y - self.target_pos_y
         self.init_x = bd.x
         self.init_y = bd.y
+        ---
     elseif new_state == States.idle then
         self.goingTo_speed = 1.5
         self.emitter_rundust.pause = true
@@ -306,6 +329,14 @@ function Kid:set_state(new_state)
         ---
     elseif new_state == States.dead then
         self.emitter_rundust.pause = true
+
+        if self.is_enemy and self:is_the_last() then
+            local a = JM.Sound:get_current_song()
+            if a then
+                a.source:stop()
+            end
+        end
+        ---
     elseif new_state == States.normal then
         self.emitter_rundust.pause = true
     end
@@ -458,7 +489,14 @@ function Kid:attack()
         end
     end
 
-    return self:atk_action()
+    local r = self:atk_action()
+    if not r and not self.is_enemy then
+        Play_sfx("atk fail", true)
+    elseif r then
+        -- Play_sfx("throw stone", not self.is_enemy)
+        Play_sfx("slap", not self.is_enemy)
+    end
+    return r
 end
 
 function Kid:jump(height)
@@ -483,6 +521,9 @@ function Kid:jump(height)
         self.gamestate:add_object(
             Emitters:Zup(self)
         )
+        if not self.is_enemy then
+            Play_sfx("jump", true)
+        end
         return bd2:jump(height or (16 * 2), -1)
     end
 end
@@ -628,6 +669,7 @@ local function movement(self, dt)
             self.emitter_rundust.pause = true
         else
             self.emitter_rundust.pause = false
+            Play_sfx("footstep 01")
         end
 
         return x, y
@@ -768,7 +810,7 @@ function Kid:update(dt)
     self.time_state = self.time_state + dt
 
     if self.state == States.runAway then
-        if not self.gamestate.camera:rect_is_on_view(self:rect()) then
+        if not self.gamestate.camera:rect_is_on_view(bd.x - 16, bd.y, bd.w + 32, bd.h) then
             if self:is_leader() then
                 self.gamestate:__get_data__().leader = nil
             end
@@ -867,6 +909,13 @@ function Kid:update(dt)
     self.cur_anima = self:get_cur_anima()
     if last ~= self.cur_anima then
         self.cur_anima:reset()
+    end
+
+    if self:is_dead() and not self.is_enemy then
+        if self.time_state >= 0.15 and self.time_state < 10 then
+            self.time_state = 10
+            Play_sfx("game over", true)
+        end
     end
 
     self.x, self.y = bd.x, bd.y
