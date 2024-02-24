@@ -1010,6 +1010,17 @@ local function draw(cam)
         data.timer:draw()
         lgx.setColor(1, 1, 1)
         lgx.draw(Particles.IMG, data.clock, 16 * 13 - 3, 8, 0, 1, 1)
+
+        if SAVE_DATA.best_time > 0 then
+            font = JM:get_font("pix5")
+            font:push()
+            font:set_line_space(0)
+            font:set_color(Utils:get_rgba3("dcffb3"))
+            local min, sec, dec = Timer.get_time2(Timer, SAVE_DATA.best_time)
+            font:print(string.format("best time:\n  <color-hex=e5f285>%02d\"%02d'%02d", min, sec, dec),
+                16 * 16, 16 * 10 - 4)
+            font:pop()
+        end
     end
     cam:attach(nil, State.subpixel)
     --================================================================
