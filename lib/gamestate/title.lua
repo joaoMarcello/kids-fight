@@ -64,7 +64,7 @@ local function load()
     imgs["chess"]:setFilter("nearest", "nearest")
     --========================================================================
     local Sound = JM.Sound
-    Sound:add_sfx("/data/sfx/UI/move up down 01.ogg", "ui-move", 0.25)
+    Sound:add_sfx("/data/sfx/UI/move up down 01.ogg", "ui-move", 0.5)
     Sound:add_sfx("/data/sfx/UI/back 01.ogg", "ui-back", 0.15)
     Sound:add_sfx("/data/sfx/UI/select 01 sinewave.ogg", "ui-select", 0.25)
     Sound:add_sfx("/data/sfx/UI/select 02 sawtooth.ogg", "ui-select 02", 0.25)
