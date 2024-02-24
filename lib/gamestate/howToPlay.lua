@@ -51,9 +51,9 @@ local function load()
     JM:get_font("pix5")
     JM:get_font("pix8")
 
-    JM.Sound:add_sfx("/data/sfx/flipping-through-a-bookmp3-14415.ogg", "flip", 1)
+    JM.Sound:add_sfx("/data/sfx/flipping-through-a-bookmp3-14415.ogg", "flip", 0.75)
 
-    JM.Sound:add_song("/data/song/The-8-Bit-March_Looping.ogg", "HowToPlay", 0.5)
+    JM.Sound:add_song("/data/song/The-8-Bit-March_Looping.ogg", "HowToPlay", 0.4)
 end
 
 local function finish()
