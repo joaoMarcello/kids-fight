@@ -881,7 +881,9 @@ local lim = 1 / 30
 local function update(dt)
     dt = dt > lim and lim or dt
 
-    if data.gamestate == States.game then
+    if data.gamestate == States.game
+        and not data:wave_is_over()
+    then
         data.time_game = data.time_game + dt
         data.timer:update(dt)
     end
@@ -1037,19 +1039,39 @@ local function draw(cam)
             lgx.setColor(Utils:hex_to_rgba_float("f4ffe8bf"))
             local x, y, w, h = (16 * 7), (16 * 2), (16 * 6), (16 * 2.5)
             lgx.rectangle("fill", x, y, w, h)
+
             if countdown_time > 1 then
                 if data.wave_number < 3 then
-                    font:printf(string.format("STARTING IN\n<color-hex=bf3526>%d",
-                            math.min(3, data.countdown_time)),
-                        x, y + 8, w, "center")
+                    if countdown_time > 3.1 then
+                        font:printx(
+                            string.format(
+                                "<effect=flickering,speed=0.2>STARTING IN</effect no-space> \n<color-hex=bf3526>%d",
+                                math.min(3, data.countdown_time)),
+                            x, y + 8, w, "center")
+                    else
+                        font:printx(
+                            string.format(
+                                "<sep>STARTING IN \n<color-hex=bf3526>%d",
+                                math.min(3, data.countdown_time)),
+                            x, y + 8, w, "center")
+                    end
                 else
-                    font:printf(string.format("FINAL FIGHT IN\n<color-hex=bf3526>%d",
-                            math.min(3, data.countdown_time)),
-                        x, y + 8, w, "center")
+                    if countdown_time > 3 then
+                        font:printx(
+                            string.format(
+                                "<effect=flickering, speed=0.2>FINAL FIGHT IN</effect no-space> \n<color-hex=bf3526>%d",
+                                math.min(3, data.countdown_time)),
+                            x, y + 8, w, "center")
+                    else
+                        font:printx(string.format("FINAL FIGHT IN \n<color-hex=bf3526>%d",
+                                math.min(3, data.countdown_time)),
+                            x, y + 8, w, "center")
+                    end
                 end
             else
                 font:printx("<effect=scream>FIGHT!!!", x, y + 14, w, "center")
             end
+
             font:pop()
         end
     end
