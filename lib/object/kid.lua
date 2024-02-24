@@ -528,6 +528,8 @@ function Kid:jump(height)
         )
         if not self.is_enemy then
             Play_sfx("jump", true)
+        else
+            Play_sfx("jump 2", true)
         end
         return bd2:jump(height or (16 * 2), -1)
     end
