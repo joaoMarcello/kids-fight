@@ -55,6 +55,7 @@ local function init(args)
     data.total_time = _data_.time_game or 0
     data.death_count = _data_.death_count or 0
     data.time_gamestate = 0.0
+    data.played_sfx = false
 
     data.star = data.star
         or love.graphics.newQuad(16 * 3, 0, 16, 16, Particle.IMG:getDimensions())
@@ -114,6 +115,8 @@ local function keypressed(key)
     then
         if not State.transition then
             Play_sfx("ui-select 02", true)
+            JM.Sound:stop_sfx("new record")
+
             return State:add_transition("fade", "out", { post_delay = 0.2 }, nil,
                 ---@param State JM.Scene
                 function(State)
@@ -181,6 +184,13 @@ local function update(dt)
     data.time_gamestate = data.time_gamestate + dt
     data.obj1:update(dt)
     data.obj2:update(dt)
+
+    if data.time_gamestate > 1.5 and not data.played_sfx
+        and data.is_the_best
+    then
+        data.played_sfx = true
+        Play_sfx("new record", true)
+    end
 end
 
 local function draw_star(self)
