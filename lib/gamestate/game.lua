@@ -503,10 +503,18 @@ end
 local function keypressed(key)
     if State.transition then return end
 
-    if key == 'o' then
-        State.camera:toggle_grid()
-        State.camera:toggle_world_bounds()
-    end
+    -- if key == 'c' and love.keyboard.isDown('lctrl') then
+    --     return JM:toggle_capture_mode {
+    --         id = tostring(os.time()),
+    --         frameskip = 1,
+    --         duration = 20.0,
+    --     }
+    -- end
+
+    -- if key == 'o' then
+    --     State.camera:toggle_grid()
+    --     State.camera:toggle_world_bounds()
+    -- end
 
     local P1 = data.player.controller
     local Button = P1.Button
