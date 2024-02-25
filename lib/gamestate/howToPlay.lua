@@ -174,11 +174,11 @@ end
 local function keypressed(key)
     if State.transition then return end
 
-    if key == 'o' then
-        State.camera:toggle_grid()
-        State.camera:toggle_world_bounds()
-        State.camera:toggle_debug()
-    end
+    -- if key == 'o' then
+    --     State.camera:toggle_grid()
+    --     State.camera:toggle_world_bounds()
+    --     State.camera:toggle_debug()
+    -- end
 
     -- if key == 's' then
     --     Game:init()
@@ -255,17 +255,22 @@ local function gamepadpressed(joy, button)
         or P1:pressed(Button.dpad_right, joy, button)
         or P1:pressed(Button.dpad_down, joy, button)
     then
-        return State:keypressed('right', 'right')
+        State:keypressed('right', 'right')
+        return P1:switch_to_joystick()
+        ---
     elseif P1:pressed(Button.L, joy, button)
         or P1:pressed(Button.dpad_left, joy, button)
         or P1:pressed(Button.dpad_up, joy, button)
     then
-        return State:keypressed('left', 'left')
+        State:keypressed('left', 'left')
+        return P1:switch_to_joystick()
     end
 
     if P1:pressed(Button.B, joy, button) then
-        return State:keypressed('escape')
+        State:keypressed('escape')
+        return P1:switch_to_joystick()
     end
+    return P1:switch_to_joystick()
 end
 
 local function gamepadaxis(joy, axis, value)
@@ -274,10 +279,13 @@ local function gamepadaxis(joy, axis, value)
 
     local r = P1:pressed(Button.left_stick_x, joy, axis, value)
     if r == 1 then
-        return State:keypressed('right', 'right')
+        State:keypressed('right', 'right')
+        return P1:switch_to_joystick()
     elseif r == -1 then
-        return State:keypressed('left', 'left')
+        State:keypressed('left', 'left')
+        return P1:switch_to_joystick()
     end
+    return P1:switch_to_joystick()
 end
 
 local function mousepressed(x, y, button, istouch, presses)
@@ -328,6 +336,8 @@ local function update(dt)
 
     data.layer_sawtooth:update(dt)
     data.aff:update(dt)
+
+    
 end
 
 ---@type love.Shader|nil
@@ -443,8 +453,15 @@ local function draw(cam)
     font:printf(string.format("%d/%d", box.cur_screen, box.amount_screens), x + w, y + h - 8, 16, "right")
 
     font:set_color(Utils:get_rgba(Utils:hex_to_rgba_float("352e99")))
-    font:printx("<effect=flickering, speed=1>press [enter] to play", 0, SCREEN_HEIGHT - 14, SCREEN_WIDTH - 8,
-        "right")
+
+    local P1 = JM.ControllerManager.P1
+    if P1:is_on_keyboard_mode() then
+        font:printx("<effect=flickering, speed=1>press [enter] to play", 0, SCREEN_HEIGHT - 14, SCREEN_WIDTH - 8,
+            "right")
+    elseif P1:is_on_joystick_mode() then
+        font:printx("<effect=flickering, speed=1>press [start] to play", 0, SCREEN_HEIGHT - 14, SCREEN_WIDTH - 8,
+            "right")
+    end
 
     local text = "goal"
     text = box.cur_screen == 2 and "controls" or text
