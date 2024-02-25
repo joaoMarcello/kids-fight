@@ -76,12 +76,32 @@ function Display:my_draw()
 
     local hp = self.kid.hp
     local max = self.kid.hp_init
-    if hp <= max * 0.33 then
-        lgx.setColor(Utils:hex_to_rgba_float("bf3526"))
-    elseif hp <= max * 0.66 then
-        lgx.setColor(Utils:hex_to_rgba_float("e6c45c"))
+
+    if max == 3 then
+        if hp <= 1 then
+            lgx.setColor(Utils:hex_to_rgba_float("bf3526"))
+        elseif hp <= 2 then
+            lgx.setColor(Utils:hex_to_rgba_float("e6c45c"))
+        else
+            lgx.setColor(Utils:hex_to_rgba_float("9ed921"))
+        end
+        ---
+    elseif max == 4 then
+        if hp == 1 then
+            lgx.setColor(Utils:hex_to_rgba_float("bf3526"))
+        elseif hp == 2 then
+            lgx.setColor(Utils:hex_to_rgba_float("e6c45c"))
+        else
+            lgx.setColor(Utils:hex_to_rgba_float("9ed921"))
+        end
     else
-        lgx.setColor(Utils:hex_to_rgba_float("9ed921"))
+        if hp <= max * 0.33 then
+            lgx.setColor(Utils:hex_to_rgba_float("bf3526"))
+        elseif hp <= max * 0.66 then
+            lgx.setColor(Utils:hex_to_rgba_float("e6c45c"))
+        else
+            lgx.setColor(Utils:hex_to_rgba_float("9ed921"))
+        end
     end
     lgx.rectangle("fill", self.x, self.y, self.w, self.h)
 
