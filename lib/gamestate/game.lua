@@ -186,6 +186,10 @@ function data:draw_dialogue(cam)
     local box = dialogue:get_cur_box()
     local speaker = id:match("bully") and data.leader or data.player
 
+    -- local g, w, final = box:get_current_glyph()
+    -- if w and w.text == "<void>" and not final then return end
+    if not box.is_visible then return end
+
     box.x = speaker.x + speaker.w * 0.5 - dialogue.w * 0.5
     box.y = speaker.y - 52 - dialogue.h
 
@@ -477,7 +481,7 @@ local function init(args)
     JM.Physics:newBody(data.world, 0, SCREEN_HEIGHT - 16, SCREEN_WIDTH, 16, "static")
 
     data.leader = nil
-    data.wave_number = args.wave_number or 1
+    data.wave_number = args.wave_number or 3
     load_wave(data.wave_number)
 
     data.displayHP = DisplayHP:new(data.player)
@@ -517,6 +521,14 @@ local function keypressed(key)
                 JM.Sound:fade_in(0.01)
                 State:add_transition("door", "in", { axis = "y", duration = 0.5, pause_scene = false }, nil)
             end)
+        return
+    end
+
+    if (P1:pressed(Button.A, key) or P1:pressed(Button.start, key))
+        and data.countdown_time
+        and data.countdown_time > 1
+    then
+        data.countdown_time = 0.9
         return
     end
 
