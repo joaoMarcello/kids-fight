@@ -338,6 +338,8 @@ local function load_wave(value)
     k.goingTo_speed = 1.5
     k.time_jump = 0.0
     table.insert(data.kids, k)
+    k.hp_init = 5
+    k.hp = k.hp_init
     data.leader = k
 
     if value == 1 then
@@ -483,7 +485,7 @@ local function init(args)
     JM.Physics:newBody(data.world, 0, SCREEN_HEIGHT - 16, SCREEN_WIDTH, 16, "static")
 
     data.leader = nil
-    data.wave_number = args.wave_number or 3
+    data.wave_number = args.wave_number or 1
     load_wave(data.wave_number)
 
     data.displayHP = DisplayHP:new(data.player)
@@ -526,13 +528,7 @@ local function keypressed(key)
         return
     end
 
-    if (P1:pressed(Button.A, key) or P1:pressed(Button.start, key))
-        and data.countdown_time
-        and data.countdown_time > 1
-    then
-        data.countdown_time = 0.9
-        return
-    end
+
 
     do
         local dialogue = data.dialogue
@@ -566,6 +562,15 @@ local function keypressed(key)
                 return
             end
         end
+    end
+
+    if (P1:pressed(Button.start, key))
+        and data.countdown_time
+        and data.countdown_time > 1
+        and not State:is_showing_black_bar()
+    then
+        data.countdown_time = 0.9
+        return
     end
 
     if (P1:pressed(Button.start, key)

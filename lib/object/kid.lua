@@ -42,7 +42,7 @@ local ACC = (16 * 12 * 60) --16 * 12  f = m * a   a = f / m
 local MAX_SPEED = 16 * 4.5
 local DACC = ACC * 2
 local MAX_STONE = 10
-local HP_MAX = 7
+local HP_MAX = 6
 local INVICIBLE_DURATION = 1
 
 local imgs
@@ -105,7 +105,7 @@ function Kid:__constructor__(gender, direction, is_enemy, move_type, ID)
     self.stones = not self.is_enemy and math.floor(MAX_STONE * 0.5) or 1000
     self.max_stones = not self.is_enemy and MAX_STONE or math.huge
 
-    self.hp = self.is_enemy and 2 or HP_MAX
+    self.hp = self.is_enemy and 3 or HP_MAX
     self.hp_init = self.hp
     -- self.hp = 2
     self.time_invincible = 0.0
@@ -969,9 +969,9 @@ function Kid:update(dt)
                 local data = self.gamestate:__get_data__()
 
                 if not data:leader_is_dead() then
-                    self.time_throw = 1 + 3 * random()
+                    self.time_throw = 1 + 2 * random()
                 else
-                    self.time_throw = 0.5 + 2 * random()
+                    self.time_throw = 0.5 + 1.5 * random()
                 end
                 self:attack()
             end

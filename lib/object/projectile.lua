@@ -68,7 +68,7 @@ function Projectile:__constructor__(id, bottom, direction, mult)
     bd:set_holder(self)
     self.body2 = bd
 
-    self.lifetime = 5.0
+    self.lifetime = 4.0
 
     --
     self.update = Projectile.update
