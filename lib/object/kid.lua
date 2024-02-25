@@ -336,6 +336,13 @@ function Kid:remove()
     self.body2 = nil
 end
 
+function Kid:set_hp(value, skip_max)
+    value = value or self.hp
+    self.hp_init = not skip_max and value or self.hp_init
+    self.hp = value
+    return self
+end
+
 function Kid:ressurect()
     self.hp = self.hp_init
     self:set_state(States.idle)
@@ -362,6 +369,7 @@ function Kid:set_delay(value)
         self.is_visible = false
         self.emitter_rundust.pause = true
     end
+    return self
 end
 
 ---@param new_state Kid.States
