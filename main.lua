@@ -93,7 +93,7 @@ function love.load()
                 screen_h = 288,
                 width = 1,
             })
-            shader:send("opacity", 0.125)
+            shader:send("opacity", 0.1)
 
             local ab = JM.Shader:get_shader("aberration", self, { aberration_x = 0.1, aberration_y = 0.15 })
             local filmgrain = JM.Shader:get_shader("filmgrain", self, { opacity = 0.3 })
@@ -108,7 +108,7 @@ function love.load()
                 end)
         end
     end)
-    return JM:load_initial_state("lib.gamestate.title", false)
+    return JM:load_initial_state("lib.gamestate.game", false)
     -- return JM:load_initial_state("jm-love2d-package.modules.editor.editor", false)
 end
 
