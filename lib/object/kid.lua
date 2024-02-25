@@ -226,7 +226,7 @@ function Kid:load()
         ["fall_boy_1"] = lgx.newImage("/data/img/boy_1/kid_fall-Sheet.png"),
         ["victory_boy_1"] = lgx.newImage("/data/img/boy_1/kid_victory-Sheet.png"),
         ["attack_boy_1"] = lgx.newImage("/data/img/boy_1/kid_atk-Sheet.png"),
-        ["damage_boy_1"] = lgx.newImage("/data/img/Boy_1/kid_damage-Sheet.png"),
+        ["damage_boy_1"] = lgx.newImage("/data/img/boy_1/kid_damage-Sheet.png"),
         ["hitGround_boy_1"] = lgx.newImage("/data/img/boy_1/kid_hit_ground-Sheet.png"),
         ---
         ["idle_boy_2"] = lgx.newImage("/data/img/boy_2/kid_idle-Sheet.png"),
@@ -236,7 +236,7 @@ function Kid:load()
         ["fall_boy_2"] = lgx.newImage("/data/img/boy_2/kid_fall-Sheet.png"),
         ["victory_boy_2"] = lgx.newImage("/data/img/boy_2/kid_victory-Sheet.png"),
         ["attack_boy_2"] = lgx.newImage("/data/img/boy_2/kid_atk-Sheet.png"),
-        ["damage_boy_2"] = lgx.newImage("/data/img/Boy_2/kid_damage-Sheet.png"),
+        ["damage_boy_2"] = lgx.newImage("/data/img/boy_2/kid_damage-Sheet.png"),
         ["hitGround_boy_2"] = lgx.newImage("/data/img/boy_2/kid_hit_ground-Sheet.png"),
         ---
         ["idle_boy_3"] = lgx.newImage("/data/img/boy_3/kid_idle-Sheet.png"),
@@ -246,7 +246,7 @@ function Kid:load()
         ["fall_boy_3"] = lgx.newImage("/data/img/boy_3/kid_fall-Sheet.png"),
         ["victory_boy_3"] = lgx.newImage("/data/img/boy_3/kid_victory-Sheet.png"),
         ["attack_boy_3"] = lgx.newImage("/data/img/boy_3/kid_atk-Sheet.png"),
-        ["damage_boy_3"] = lgx.newImage("/data/img/Boy_3/kid_damage-Sheet.png"),
+        ["damage_boy_3"] = lgx.newImage("/data/img/boy_3/kid_damage-Sheet.png"),
         ["hitGround_boy_3"] = lgx.newImage("/data/img/boy_3/kid_hit_ground-Sheet.png"),
         ---
         ["idle_boy_4"] = lgx.newImage("/data/img/boy_4/kid_idle-Sheet.png"),
@@ -256,7 +256,7 @@ function Kid:load()
         ["fall_boy_4"] = lgx.newImage("/data/img/boy_4/kid_fall-Sheet.png"),
         ["victory_boy_4"] = lgx.newImage("/data/img/boy_4/kid_victory-Sheet.png"),
         ["attack_boy_4"] = lgx.newImage("/data/img/boy_4/kid_atk-Sheet.png"),
-        ["damage_boy_4"] = lgx.newImage("/data/img/Boy_4/kid_damage-Sheet.png"),
+        ["damage_boy_4"] = lgx.newImage("/data/img/boy_4/kid_damage-Sheet.png"),
         ["hitGround_boy_4"] = lgx.newImage("/data/img/boy_4/kid_hit_ground-Sheet.png"),
         ---
     }
