@@ -1122,7 +1122,14 @@ local function draw(cam)
         font = JM:get_font("pix5")
         font:push()
         font:set_color(Utils:get_rgba(Utils:hex_to_rgba_float("f4ffe8")))
-        font:printf("[enter] skip", x, y, w, "center")
+
+        local P1 = JM.ControllerManager.P1
+        if P1:is_on_keyboard_mode() then
+            font:printf("[enter] skip", x, y, w, "center")
+            ---
+        elseif P1:is_on_joystick_mode() then
+            font:printf("[start] skip", x, y, w, "center")
+        end
         font:pop()
     end
 
