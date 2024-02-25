@@ -985,12 +985,12 @@ local function draw(cam)
     lgx.draw(State.canvas_layer, 0, 0, 0, 1 / State.subpixel)
 
     lgx.setColor(1, 1, 1)
-    lgx.draw(imgs["street_up"])
+    lgx.draw(imgs["street_up"], -16, -16)
 
     State:draw_game_object(cam, nil, sort_draw)
 
     lgx.setColor(Utils:hex_to_rgba_float("799299"))
-    lgx.draw(imgs["street_down"])
+    lgx.draw(imgs["street_down"], -16)
 
     local font = JM:get_font("pix5")
 
