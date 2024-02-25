@@ -433,16 +433,18 @@ function Kid:keypressed(key)
 
     local P1 = self.controller
     local Button = P1.Button
+    local last = P1.state
     P1:switch_to_keyboard()
 
     if P1:pressed(Button.A, key) then
-        return self:jump()
+        self:jump()
     elseif P1:pressed(Button.X, key)
         or P1:pressed(Button.L, key)
         or P1:pressed(Button.R, key)
     then
-        return self:attack()
+        self:attack()
     end
+    P1:set_state(last)
 end
 
 ---@param self Kid
