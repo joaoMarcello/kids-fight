@@ -487,7 +487,7 @@ local function init(args)
     JM.Physics:newBody(data.world, 0, SCREEN_HEIGHT - 16, SCREEN_WIDTH, 16, "static")
 
     data.leader = nil
-    data.wave_number = args.wave_number or 3
+    data.wave_number = args.wave_number or 1
     load_wave(data.wave_number)
 
     data.displayHP = DisplayHP:new(data.player)
