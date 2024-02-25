@@ -395,6 +395,7 @@ local __keypressed__ = {
     [States.credits] = function(self, key)
         local P1 = JM.ControllerManager.P1
         local Button = P1.Button
+        -- local last = P1.state
         P1:switch_to_keyboard()
 
         if P1:pressed(Button.B, key)
@@ -402,17 +403,18 @@ local __keypressed__ = {
         then
             _G.Play_sfx("ui-back", true)
             data:switch_state(States.options)
-            return data.container:switch_to_obj(data.bt_credits)
+            data.container:switch_to_obj(data.bt_credits)
         end
+        -- P1:set_state(last)
     end,
 }
 
 local function keypressed(key)
     if State.transition then return end
-    if key == 'o' then
-        State.camera:toggle_grid()
-        State.camera:toggle_world_bounds()
-    end
+    -- if key == 'o' then
+    --     State.camera:toggle_grid()
+    --     State.camera:toggle_world_bounds()
+    -- end
 
     return __keypressed__[data.state](__keypressed__, key)
 end
@@ -555,8 +557,15 @@ local __draw__ = {
     [States.pressToPlay] = function(self, cam)
         font:push()
         font:set_color(JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("334266")))
-        font:printx("<effect=ghost, min=0.1, max=1.15>Press [enter] to play", 0, 16 * 7, SCREEN_WIDTH,
-            "center")
+
+        local P1 = JM.ControllerManager.P1
+        if P1:is_on_keyboard_mode() then
+            font:printx("<effect=ghost, min=0.1, max=1.15>Press [enter] to play", 0, 16 * 7, SCREEN_WIDTH,
+                "center")
+        elseif P1:is_on_joystick_mode() then
+            font:printx("<effect=ghost, min=0.1, max=1.15>Press START to play", 0, 16 * 7, SCREEN_WIDTH,
+                "center")
+        end
 
         font:printf("©2024, JM", 0, 16 * 9, SCREEN_WIDTH, "center")
 
@@ -619,9 +628,9 @@ local __draw__ = {
 
             if py < 16 * 4.25 then
                 local P1 = JM.ControllerManager.P1
-                if P1.state == P1.State.keyboard then
+                if P1:is_on_keyboard_mode() then
                     font:print("[esc] Back", 16, TILE * 9.5)
-                elseif P1.state == P1.State.joystick then
+                elseif P1:is_on_joystick_mode() then
                     font:print(":bt_b: Back", 16, TILE * 9.5)
                 end
             end
