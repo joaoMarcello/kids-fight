@@ -450,25 +450,37 @@ local function gamepadpressed(joystick, button)
     local Button = P1.Button
 
     if P1:pressed(Button.dpad_up, joystick, button) then
-        return State:keypressed('up', 'up')
+        State:keypressed('up', 'up')
+        P1:switch_to_joystick()
+        return
     elseif P1:pressed(Button.dpad_down, joystick, button) then
-        return State:keypressed('down', 'down')
+        State:keypressed('down', 'down')
+        P1:switch_to_joystick()
+        return
     end
 
     if P1:pressed(Button.dpad_left, joystick, button) then
-        return State:keypressed('left', 'left')
+        State:keypressed('left', 'left')
+        P1:switch_to_joystick()
+        return
     elseif P1:pressed(Button.dpad_right, joystick, button) then
-        return State:keypressed('right', 'right')
+        State:keypressed('right', 'right')
+        P1:switch_to_joystick()
+        return
     end
 
     if P1:pressed(Button.start, joystick, button)
         or P1:pressed(Button.A, joystick, button)
     then
-        return State:keypressed('space', 'space')
+        State:keypressed('space', 'space')
+        P1:switch_to_joystick()
+        return
     end
 
     if P1:pressed(Button.B, joystick, button) then
-        return State:keypressed('escape', 'escape')
+        State:keypressed('escape', 'escape')
+        P1:switch_to_joystick()
+        return
     end
 end
 
@@ -483,17 +495,25 @@ local function gamepadaxis(joystick, axis, value)
     local y_axis = P1:pressed(Button.left_stick_y, joystick, axis, value)
 
     if y_axis == -1 then
-        return State:keypressed('up', 'up')
+        State:keypressed('up', 'up')
+        P1:switch_to_joystick()
+        return
     elseif y_axis == 1 then
-        return State:keypressed('down', 'down')
+        State:keypressed('down', 'down')
+        P1:switch_to_joystick()
+        return
     end
 
     local x_axis = P1:pressed(Button.left_stick_x, joystick, axis, value)
 
     if x_axis == 1 then
-        return State:keypressed('right', 'right')
+        State:keypressed('right', 'right')
+        P1:switch_to_joystick()
+        return
     elseif x_axis == -1 then
-        return State:keypressed('left', 'left')
+        State:keypressed('left', 'left')
+        P1:switch_to_joystick()
+        return
     end
 end
 
@@ -598,7 +618,12 @@ local __draw__ = {
                 math.max(py + 16, 16 * 6), SCREEN_WIDTH, "center")
 
             if py < 16 * 4.25 then
-                font:print("[esc] Back", 16, TILE * 9.5)
+                local P1 = JM.ControllerManager.P1
+                if P1.state == P1.State.keyboard then
+                    font:print("[esc] Back", 16, TILE * 9.5)
+                elseif P1.state == P1.State.joystick then
+                    font:print(":bt_b: Back", 16, TILE * 9.5)
+                end
             end
             font:pop()
         end
@@ -621,7 +646,14 @@ local function draw(cam)
     then
         font:push()
         font:set_color(color)
-        font:printf("[up/down] move\t [space] select\t [esc] back", 8, TILE * 10, SCREEN_WIDTH, "center")
+
+        local P1 = JM.ControllerManager.P1
+        if P1.state == P1.State.keyboard then
+            font:printf("[up/down] move\t [space] select\t [esc] back", 8, TILE * 10, SCREEN_WIDTH, "center")
+        elseif P1.state == P1.State.joystick then
+            font:printf("[up/down] move\t :bt_a: select\t :bt_b: back", 8, TILE * 10, SCREEN_WIDTH, "center")
+        end
+
         font:printf("[F11] toggle fullscreen\n [F10] toggle CRT-filter", 0, 16 * 2, SCREEN_WIDTH - 16, "right")
         font:pop()
 
