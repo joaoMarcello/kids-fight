@@ -81,7 +81,7 @@ local function init(args)
     restart_game()
 
     data.text = string.format(
-        "It:comma_end:s `#bf3526`WAR`#-`! The boys challenge you to a fight to settle the new `#795ce6`street owner`#-`. Defend yourself throwing `#575b66`stones`#` on them.<next>`#000000`Move:`#`\tA/D `#000000`or`#` left/right\n`#000000`Jump:`#`\tspace `#000000`or`#` Mouse RB\n`#000000`Attack:`#`\tF/J/E `#000000`or`#` Mouse LB<next>If running out of ammo, `#bf3526`collect the stones`#` left by your foes.")
+        "It:comma_end:s `#bf3526`WAR`#-`! The boys challenge you to a fight to settle the new `#795ce6`street owner`#-`. Defend yourself throwing `#575b66`stones`#` on them.<next>`#000000`Move:`#`\tA/D `#000000`or`#` left/right\n`#000000`Jump:`#`\tspace `#000000`or`#` Mouse RB\n`#000000`Attack:`#`\tF/J/E `#000000`or`#` Mouse LB<next>If running out of ammo, `#bf3526`collect the stones`#` left by your foes.<next>You can toggle fullscreen and CRT-filter modes `#bf3526`even on middle of gameplay`#` using F11 and F10, respectively.")
 
     local font = JM:get_font("pix8")
     font:push()
