@@ -530,7 +530,7 @@ function Kid:damage(value, obj)
             self.gamestate.camera:shake_y(3, 0.08, 0.3)
         end
         self.gamestate:pause(
-            is_the_last and 1 or 0.2,
+            is_the_last and 1 or 0.1,
             pause_action, self)
     end
     Play_sfx("foe hit", true)
