@@ -59,10 +59,12 @@ local function load()
     font_pix5 = font_pix5 or JM:get_font("pix5")
 
     imgs = imgs or {
-        ["chess"] = love.graphics.newImage("/data/img/chess_background.png")
+        ["chess"] = love.graphics.newImage("/data/img/chess_background.png"),
+        ["logo_high"] = love.graphics.newImage("/data/img/logo_high.png"),
     }
 
     imgs["chess"]:setFilter("nearest", "nearest")
+    imgs["logo_high"]:setFilter("nearest", "nearest")
     --========================================================================
     local Sound = JM.Sound
     Sound:add_sfx("/data/sfx/UI/move up down 01.ogg", "ui-move", 0.25)
@@ -217,86 +219,6 @@ local __init__ = {
         data.container:get_obj_at(1):set_focus(true)
 
         -- data.container:switch(1)
-    end,
-    ---
-    [States.playModes] = function()
-        data.container = Container:new {
-            x = TILE, y = TILE * 2.5, w = 128, h = 180,
-            on_focus = true,
-            space_vertical = 12,
-        }
-        data.container:set_type("vertical_list")
-
-        local draw = bt_draw
-        local on_focus = bt_gained_focus
-        local lose_focus = bt_lose_focus
-
-        data.bt_arcade = data.bt_arcade
-            or Component:new {
-                w = BT_WIDTH, h = BT_HEIGHT,
-                draw = draw,
-                text = "Solo",
-            }
-
-        data.bt_coop = data.bt_coop
-            or Component:new {
-                w = BT_WIDTH, h = BT_HEIGHT,
-                draw = draw,
-                text = 'Multiplayer',
-            }
-
-        local cont = data.container
-        cont:add(data.bt_arcade)
-        cont:add(data.bt_coop)
-        for i = 1, cont.N do
-            local obj = cont:get_obj_at(i)
-            obj:set_focus(false)
-            obj:on_event("gained_focus", on_focus)
-            obj:on_event("lose_focus", lose_focus)
-        end
-        cont:get_obj_at(1):set_focus(true)
-    end,
-    ---
-    [States.selectDifficultyArcade] = function()
-        data.container = Container:new {
-            x = TILE, y = TILE * 2.5, w = 128, h = 180,
-            on_focus = true,
-            space_vertical = 12,
-        }
-        data.container:set_type("vertical_list")
-
-        local draw = bt_draw
-        local gained_focus = bt_gained_focus
-        local lose_focus = bt_lose_focus
-
-        data.bt_normal_1 = data.bt_normal_1
-            or Component:new {
-                w = BT_WIDTH, h = BT_HEIGHT,
-                draw = draw,
-                text = 'Normal',
-            }
-        data.bt_hard_1 = data.bt_hard_1
-            or Component:new {
-                w = BT_WIDTH, h = BT_HEIGHT,
-                draw = draw,
-                text = 'Hard',
-            }
-
-        local cont = data.container
-        cont:add(data.bt_normal_1)
-        cont:add(data.bt_hard_1)
-
-        for i = 1, cont.N do
-            local obj = cont:get_obj_at(i)
-            obj:set_focus(false)
-            obj:on_event("gained_focus", gained_focus)
-            obj:on_event("lose_focus", lose_focus)
-        end
-        cont:get_obj_at(1):set_focus(true)
-    end,
-    ---
-    [States.data] = function()
-        data.container = nil
     end,
     ---
     [States.credits] = function()
@@ -470,106 +392,6 @@ local __keypressed__ = {
         end
     end,
     ---
-    [States.playModes] = function(self, key)
-        if State.transition then return end
-
-        local P1 = JM.ControllerManager.P1
-        local Button = P1.Button
-        P1:switch_to_keyboard()
-
-        if P1:pressed(Button.dpad_up, key) then
-            _G.Play_sfx("ui-move", true)
-            return data.container:switch_up()
-            ---
-        elseif P1:pressed(Button.dpad_down, key) then
-            _G.Play_sfx("ui-move", true)
-            return data.container:switch_down()
-            ---
-        end
-
-        if P1:pressed(Button.dpad_left, key)
-            or P1:pressed(Button.B, key)
-        then
-            _G.Play_sfx("ui-back", true)
-            return data:switch_state(States.options)
-            ---
-        elseif P1:pressed(Button.dpad_right, key) then
-            return self[States.playModes](self, 'space')
-            ---
-        end
-
-        if P1:pressed(Button.A, key)
-            or P1:pressed(Button.start, key)
-        then
-            _G.Play_sfx("ui-select", true)
-            local obj = data.container:get_cur_obj()
-
-            if obj == data.bt_arcade then
-                return data:switch_state(States.selectDifficultyArcade)
-                ---
-            elseif obj == data.bt_coop then
-                ---
-            end
-        end
-    end,
-    ---
-    [States.selectDifficultyArcade] = function(self, key)
-        if State.transition then return end
-
-        local P1 = JM.ControllerManager.P1
-        local Button = P1.Button
-        P1:switch_to_keyboard()
-
-        if P1:pressed(Button.dpad_up, key) then
-            _G.Play_sfx("ui-move", true)
-            return data.container:switch_up()
-        elseif P1:pressed(Button.dpad_down, key) then
-            _G.Play_sfx("ui-move", true)
-            return data.container:switch_down()
-        end
-
-        if P1:pressed(Button.dpad_left, key)
-            or P1:pressed(Button.B, key)
-        then
-            _G.Play_sfx("ui-back", true)
-            return data:switch_state(States.playModes)
-            ---
-        elseif P1:pressed(Button.dpad_right, key) then
-            return self[States.selectDifficultyArcade](self, 'space')
-            ---
-        end
-
-        if P1:pressed(Button.A, key)
-            or P1:pressed(Button.start, key)
-        then
-            JM.Sound:stop_all()
-            _G.Play_sfx("ui-select 02", true)
-
-            local obj = data.container:get_cur_obj()
-            if obj == data.bt_hard_1 then
-                return go_to_how_to_play()
-                ---
-            elseif obj == data.bt_normal_1 then
-                return go_to_how_to_play()
-                ---
-            end
-        end
-    end,
-    ---
-    [States.data] = function(self, key)
-        local P1 = JM.ControllerManager.P1
-        local Button = P1.Button
-        P1:switch_to_keyboard()
-
-        if P1:pressed(Button.B, key)
-            or P1:pressed(Button.dpad_left, key)
-        then
-            _G.Play_sfx("ui-back", true)
-            data:switch_state(States.options)
-            return data.container:switch_to_obj(data.bt_data)
-        end
-    end,
-    ---
     [States.credits] = function(self, key)
         local P1 = JM.ControllerManager.P1
         local Button = P1.Button
@@ -718,70 +540,36 @@ local __draw__ = {
 
         font:printf("©2024, JM", 0, 16 * 9, SCREEN_WIDTH, "center")
 
-        love.graphics.setColor(JM_Utils:hex_to_rgba_float("998e79"))
-        love.graphics.ellipse("fill", SCREEN_WIDTH * 0.5 + 1, 16 * 2 + 16 + 4 + 2, 64, 32)
-        love.graphics.setColor(1, 1, 1)
-        love.graphics.ellipse("fill", SCREEN_WIDTH * 0.5, 16 * 2 + 16 + 4, 64, 32)
-
-        font:set_font_size(18)
-        font:printf("KIDS\nFIGHT", 0, 16 * 2, SCREEN_WIDTH, "center")
-
+        -- love.graphics.setColor(JM_Utils:hex_to_rgba_float("998e79"))
+        -- love.graphics.ellipse("fill", SCREEN_WIDTH * 0.5 + 1, 16 * 2 + 16 + 4 + 2, 64, 32)
+        -- love.graphics.setColor(1, 1, 1)
+        -- love.graphics.ellipse("fill", SCREEN_WIDTH * 0.5, 16 * 2 + 16 + 4, 64, 32)
+        -- font:set_font_size(18)
+        -- font:printf("KIDS\nFIGHT", 0, 16 * 2, SCREEN_WIDTH, "center")
         font:pop()
+
+        love.graphics.setColor(1, 1, 1)
+        ---@type love.Image
+        local logo = imgs["logo_high"]
+        local w, h = logo:getDimensions()
+        love.graphics.draw(logo, SCREEN_WIDTH * 0.5 - w * 0.5, 16)
     end,
     ---
     [States.options] = function(self, cam)
         data.container:draw(cam)
     end,
     ---
-    [States.playModes] = function(self, cam)
-        font:push()
-        font:set_color(JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("242833")))
-        font:print("Select Mode:", TILE, TILE)
-        font:pop()
-        data.container:draw(cam)
-    end,
-    ---
-    [States.selectDifficultyArcade] = function(self, cam)
-        font:push()
-        font:set_color(JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("242833")))
-        font:print("Select difficulty:", TILE, TILE)
-        font:pop()
-
-        data.container:draw(cam)
-    end,
-    ---
-    -- [States.data] = function(self, cam)
-    --     local tile = _G.TILE
-    --     local h, m, s = unpack(SAVE_DATA.total_time)
-    --     local color = JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("332424"))
-    --     local left = tile * 2
-
-    --     font:push()
-    --     font:set_color(color)
-    --     local px, py = font:print(string.format("Playtime:\t%02d:%02d:%02d", h, m, s), left, tile)
-
-    --     px, py = font:print(string.format("Hi-score:\t%d", SAVE_DATA.hi_score), left, py + tile)
-
-    --     px, py = font:print(string.format("Total matches:\t%d", SAVE_DATA.total_match), left, py + tile)
-
-    --     px, py = font:print(string.format("Total finished matches:\t%d", SAVE_DATA.total_finished_match), left, py + tile)
-
-    --     px, py = font:print(string.format("Fish eated:\t%d", SAVE_DATA.player_data[1].fish_eated), left, py + tile)
-
-    --     px, py = font:print(string.format("Fish hitted:\t%d", SAVE_DATA.player_data[1].hit_count), left, py + tile)
-
-    --     px, py = font:print(string.format("Poison Fish hitted:\t%d", SAVE_DATA.player_data[1].poison_hit_count), left,
-    --         py + tile)
-
-    --     px, py = font:print(string.format("Total heart:\t%d", SAVE_DATA.player_data[1].heart_count), left, py + tile)
-
-    --     font:pop()
-    -- end,
     ---
     ---@param cam JM.Camera.Camera
     [States.credits] = function(self, cam)
-        love.graphics.setColor(1, 0, 0)
-        love.graphics.rectangle("line", SCREEN_WIDTH * 0.5 - 16 * 3, 0, 16 * 6, 16 * 4)
+        -- love.graphics.setColor(1, 0, 0)
+        -- love.graphics.rectangle("line", SCREEN_WIDTH * 0.5 - 16 * 3, 0, 16 * 6, 16 * 4)
+
+        love.graphics.setColor(1, 1, 1)
+        ---@type love.Image
+        local logo = imgs["logo_high"]
+        local w, h = logo:getDimensions()
+        love.graphics.draw(logo, SCREEN_WIDTH * 0.5 - w * 0.5 * 0.75, 4, 0, 0.75, 0.75)
 
         local sx, sy, sw, sh = love.graphics.getScissor()
 
