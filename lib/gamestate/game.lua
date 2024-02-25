@@ -157,7 +157,7 @@ function data:set_state(new_state)
                 w = 16 * 8,
                 n_lines = 2,
                 text_align = 3,
-                time_wait = 0.05,
+                time_wait = 0.1,
                 glyph_sfx = "glyph bip",
                 finish_sfx = "box end"
             }
@@ -286,6 +286,8 @@ local function load()
     Sound:add_sfx("/data/sfx/fist-punch-or-kick-7171.ogg", "foe hit", 0.75)
     Sound:add_sfx("/data/sfx/404747__owlstorm__retro-video-game-sfx-ouch.wav", "player damage", 0.75)
     Sound:add_sfx("/data/sfx/678385__deltacode__item-pickup-v2.wav", "pickup", 0.35)
+    Sound:add_sfx("/data/sfx/344696__scrampunk__charm.ogg", "new record", 0.75)
+
     --==============================================================
     Sound:add_song("/data/song/More-Coin-Op-Chaos.ogg", "game", 0.35)
 end
@@ -723,6 +725,7 @@ local function game_logic(dt)
                         w = 16 * 8,
                         n_lines = 2,
                         text_align = 3,
+                        time_wait = 0.1,
                         glyph_sfx = "glyph bip",
                         finish_sfx = "box end"
                     }
@@ -1023,7 +1026,7 @@ local function draw(cam)
         lgx.setColor(1, 1, 1)
         lgx.draw(Particles.IMG, data.clock, 16 * 13 - 3, 8, 0, 1, 1)
 
-        if SAVE_DATA.best_time > 0 then
+        if SAVE_DATA.best_time >= 0 then
             font = JM:get_font("pix5")
             font:push()
             font:set_line_space(0)
