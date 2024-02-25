@@ -109,6 +109,7 @@ local function keypressed(key)
 
     local P1 = JM.ControllerManager.P1
     local Button = P1.Button
+    P1:switch_to_keyboard()
 
     if P1:pressed(Button.start, key)
         or P1:pressed(Button.A, key)
@@ -164,7 +165,8 @@ local function gamepadpressed(joystick, button)
     if P1:pressed(Button.start, joystick, button)
         or P1:pressed(Button.A, joystick, button)
     then
-        return State:keypressed('return')
+        State:keypressed('space')
+        P1:switch_to_joystick()
     end
 end
 
