@@ -663,7 +663,7 @@ local function draw(cam)
             font:printf("[up/down] move\t :bt_a: select\t :bt_b: back", 8, TILE * 10, SCREEN_WIDTH, "center")
         end
 
-        font:printf("[F11] toggle fullscreen\n [F10] toggle CRT-filter", 0, 16 * 2, SCREEN_WIDTH - 16, "right")
+        font:printf("[F11] toggle fullscreen\n [F10] toggle CRT-filter", 16 * 12, 16 * 7, "left")
         font:pop()
 
         local font = FONT_THALEAH
