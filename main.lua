@@ -108,7 +108,7 @@ function love.load()
                 end)
         end
     end)
-    return JM:load_initial_state("lib.gamestate.title", false)
+    return JM:load_initial_state("lib.gamestate.title", true)
     -- return JM:load_initial_state("jm-love2d-package.modules.editor.editor", false)
 end
 
@@ -121,7 +121,7 @@ function love.keypressed(key, scancode, isrepeat)
         return love.graphics.captureScreenshot("img_" .. os.time() .. ".png")
     end
 
-    if key == 'f10' then
+    if scancode == 'f10' then
         SAVE_DATA.skip_crt = not SAVE_DATA.skip_crt
         local scene = JM.SceneManager.scene
         if scene then
