@@ -372,11 +372,11 @@ local function load_wave(value)
         k:set_target_position(16 * 15.5, 16 * 9)
         k:set_state(Kid.State.preparing)
         k:set_hp(3)
-            :set_delay(0.75)
+        k:set_delay(0.75)
         k.goingTo_speed = 1.5
         k.anchor_y = 16 * 9 - k.move_y_value
         k.time_move_y = math.pi * 0.5
-        k.anchor_x = 16 * 15
+        k.anchor_x = 16 * 15.5
         k.time_move_x = 0.0
         table.insert(data.kids, k)
 
@@ -401,6 +401,7 @@ local function load_wave(value)
         k:set_target_position(16 * 18, 16 * 7.5)
         k:set_state(k.State.preparing)
         k:set_hp(3)
+        k:set_delay(1)
         k.goingTo_speed = 1.5
         k.is_visible = false
         k.time_delay = 0.5
@@ -412,10 +413,11 @@ local function load_wave(value)
         k:set_target_position(16 * 14.5, 16 * 9)
         k:set_state(k.State.preparing)
         k:set_hp(4)
-        k.goingTo_speed = 2.5
+        k:set_delay(3)
+        k.goingTo_speed = 1.5
         k.anchor_y = 16 * 9 - k.move_y_value
         k.time_move_y = math.pi * 0.5
-        k.anchor_x = 16 * 14
+        k.anchor_x = 16 * 14.5
         k.is_visible = false
         k.time_delay = 0.25
         k.time_move_x = 0.0
@@ -427,7 +429,7 @@ local function load_wave(value)
         k:set_target_position(16 * 16.5, 16 * 5)
         k:set_state(k.State.preparing)
         k:set_hp(3)
-        k.goingTo_speed = 2
+        k.goingTo_speed = 1
         k.anchor_y = 16 * 5 + k.move_y_value
         k.time_move_y = -math.pi * 0.5
         table.insert(data.kids, k)
@@ -485,7 +487,7 @@ local function init(args)
     JM.Physics:newBody(data.world, 0, SCREEN_HEIGHT - 16, SCREEN_WIDTH, 16, "static")
 
     data.leader = nil
-    data.wave_number = args.wave_number or 1
+    data.wave_number = args.wave_number or 3
     load_wave(data.wave_number)
 
     data.displayHP = DisplayHP:new(data.player)
