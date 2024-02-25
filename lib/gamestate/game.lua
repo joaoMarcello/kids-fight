@@ -669,16 +669,16 @@ local function gamepadaxis(joystick, axis, value)
     local Button = P1.Button
 
     local x_axis = P1:pressed(Button.left_stick_x, joystick, axis, value)
-    if x_axis == 1 then
+    if x_axis < 0 then
         State:keypressed('right')
-    elseif x_axis == -1 then
+    elseif x_axis > 0 then
         State:keypressed('left')
     end
 
     local y_axis = P1:pressed(Button.left_stick_y, joystick, axis, value)
-    if y_axis == 1 then
+    if y_axis > 0 then
         State:keypressed('down')
-    elseif y_axis == -1 then
+    elseif y_axis < 0 then
         State:keypressed('up')
     end
 
