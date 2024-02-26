@@ -81,7 +81,7 @@ local function init(args)
     restart_game()
 
     data.text = string.format(
-        "It:comma_end:s `#bf3526`WAR`#-`! The boys challenge you to a fight to settle the new `#795ce6`street owner`#-`. Defend yourself throwing `#575b66`stones`#` on them.<next>`#000000`Move:`#`\tA/D `#000000`or`#` left/right\n`#000000`Jump:`#`\tSpace `#000000`or`#` Mouse RB `#000000`or`#` :bt_a:\n`#000000`Attack:`#`\tF/J/E `#000000`or`#` Mouse LB `#000000`or`#` :bt_x:<next>If running out of ammo, `#bf3526`collect the stones`#` left by your foes.<next>You can toggle the fullscreen and CRT-filter modes `#bf3526`even on middle of gameplay`#` using `#795ce6`F11`#` and `#795ce6`F10`#-`, respectively.")
+        "It:comma_end:s `#bf3526`WAR`#-`! The boys challenge you to a fight to settle the new `#795ce6`street owner`#-`. Defend yourself throwing `#575b66`stones`#` on them.<next>`#000000`Move:`#`\tWASD `#000000`or`#` Arrow Keys\n`#000000`Jump:`#`\tSpace `#000000`or`#` Mouse RB `#000000`or`#` :bt_a:\n`#000000`Attack:`#`\tF/J/E `#000000`or`#` Mouse LB `#000000`or`#` :bt_x:<next>If running out of ammo, `#bf3526`collect the stones`#` left by your foes.<next>You can toggle the fullscreen and CRT-filter modes `#bf3526`even on middle of gameplay`#` using `#795ce6`F11`#` and `#795ce6`F10`#-`, respectively.")
 
     local font = JM:get_font("pix8")
     font:push()
