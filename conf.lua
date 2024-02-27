@@ -13,8 +13,7 @@ function love.conf(t)
     t.audio.mixwithsystem = true   -- Keep background music playing when opening LOVE (boolean, iOS and Android only)
 
     -- t.window.title = "  JM Löve2D Package" -- The window title (string)
-    t.window.icon = nil -- Filepath to an image to use as the window's icon (string)
-
+    t.window.icon = "data/icon.png" -- Filepath to an image to use as the window's icon (string)
 
     -- local scale = 2
     -- local width = 320
@@ -22,6 +21,10 @@ function love.conf(t)
     -- 948 x 533
     t.window.width = 320 * 2.5  -- The window width (number)
     t.window.height = 180 * 2.5 -- The window height (number)
+
+    -- t.window.width = 948  -- The window width (number)
+    -- t.window.height = 533 -- The window height (number)
+
     -- t.window.width = 800
     -- t.window.height = 600
     t.window.x = 32
