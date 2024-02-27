@@ -52,7 +52,7 @@ local function init(args)
     local game = require "lib.gamestate.game"
     local _data_ = game:__get_data__()
 
-    data.total_time = _data_.time_game or 0
+    data.total_time = _data_.time_game or -1
     data.death_count = _data_.death_count or 0
     data.time_gamestate = 0.0
     data.played_sfx = false
