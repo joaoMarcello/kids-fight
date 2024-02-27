@@ -31,7 +31,7 @@ local call_save = false
 
 function data:save_to_disc()
     local sav = {}
-    for k, v in next, data do
+    for k, v in next, self do
         if type(v) ~= "function" then
             sav[k] = v
         end
@@ -49,7 +49,7 @@ function data:save_to_disc()
 
     -- saving without using thread
     -- love.filesystem.write("sav.txt", JM.Ldr.ser.pack(sav))
-    return JM.Ldr.save(sav, string.char(115, 97, 118, 46, 100, 97, 116))
+    return JM.Ldr.save(sav, "sav.dat")
 end
 
 function data:get_thread()
