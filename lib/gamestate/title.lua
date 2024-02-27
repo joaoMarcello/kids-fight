@@ -208,7 +208,10 @@ local __init__ = {
         -- data.container:add(data.bt_config)
         -- data.container:add(data.bt_data)
         data.container:add(data.bt_credits)
-        data.container:add(data.bt_quit)
+
+        if not _G.WEB then
+            data.container:add(data.bt_quit)
+        end
 
         for i = 1, data.container.N do
             local obj = data.container:get_obj_at(i)
@@ -540,6 +543,7 @@ local function update(dt)
         local P1 = JM.ControllerManager.P1
         local Button = P1.Button
         local speed = 16
+        local last = P1.state
         P1:switch_to_keyboard()
         if P1:pressing(Button.A)
             or (P1:switch_to_joystick()
@@ -549,6 +553,7 @@ local function update(dt)
         then
             speed = 48
         end
+        P1:set_state(last)
         data.credits_py = data.credits_py - speed * dt
     end
 end
@@ -663,7 +668,9 @@ local function draw(cam)
             font:printf("[up/down] move\t :bt_a: select\t :bt_b: back", 8, TILE * 10, SCREEN_WIDTH, "center")
         end
 
-        font:printf("[F11] toggle fullscreen\n [F10] toggle CRT-filter", 16 * 12, 16 * 7, "left")
+        if not _G.WEB then
+            font:printf("[F11] toggle fullscreen\n [F10] toggle CRT-filter", 16 * 12, 16 * 7, "left")
+        end
         font:pop()
 
         local font = FONT_THALEAH
