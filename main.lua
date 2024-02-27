@@ -121,6 +121,10 @@ function love.keypressed(key, scancode, isrepeat)
         return love.graphics.captureScreenshot("img_" .. os.time() .. ".png")
     end
 
+    if _G.WEB and scancode == 'f11' then
+        return
+    end
+
     if not _G.WEB and scancode == 'f10' then
         SAVE_DATA.skip_crt = not SAVE_DATA.skip_crt
         local scene = JM.SceneManager.scene
