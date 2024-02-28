@@ -8,8 +8,8 @@ function love.load()
     lgx.setLineStyle("rough")
     love.mouse.setVisible(false)
 
-    _G.SCREEN_WIDTH = JM.Utils:round(320) --398
-    _G.SCREEN_HEIGHT = JM.Utils:round(180)
+    _G.SCREEN_WIDTH = 320 --398
+    _G.SCREEN_HEIGHT = 180
 
     _G.WEB = false
     _G.SUBPIXEL = 4
@@ -35,7 +35,7 @@ function love.load()
         max_texturesize = 2048,
     }
     FONT_THALEAH:set_font_size(FONT_THALEAH.__ref_height)
-    FONT_THALEAH:set_color(JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("242833")))
+    FONT_THALEAH:set_color(JM_Utils:get_rgba3("242833"))
 
     ---@param State JM.Scene
     _G.RESIZE = function(State, w, h)
