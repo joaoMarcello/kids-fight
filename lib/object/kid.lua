@@ -49,6 +49,7 @@ local imgs
 local animas
 
 local random = love.math.random
+local sin = math.sin
 
 ---@param self Kid
 local function throw_stone(self)
@@ -102,7 +103,7 @@ function Kid:__constructor__(gender, direction, is_enemy, move_type, ID)
     self.is_enemy = is_enemy or false
     self.direction = direction
 
-    self.stones = not self.is_enemy and math.floor(MAX_STONE * 0.5) or 1000
+    self.stones = not self.is_enemy and math.floor(MAX_STONE * 0.5) or 10000
     self.max_stones = not self.is_enemy and MAX_STONE or math.huge
 
     self.hp = self.is_enemy and 3 or HP_MAX
@@ -406,9 +407,9 @@ function Kid:set_state(new_state)
         self.emitter_rundust.pause = true
 
         if self.is_enemy and self:is_the_last() then
-            local a = JM.Sound:get_current_song()
-            if a then
-                a.source:stop()
+            local song = JM.Sound:get_current_song()
+            if song then
+                song.source:stop()
             end
         end
         ---
@@ -438,12 +439,14 @@ function Kid:keypressed(key)
 
     if P1:pressed(Button.A, key) then
         self:jump()
+        ---
     elseif P1:pressed(Button.X, key)
         or P1:pressed(Button.L, key)
         or P1:pressed(Button.R, key)
     then
         self:attack()
     end
+
     P1:set_state(last)
 end
 
@@ -477,6 +480,7 @@ local earthquake_args = { range_y = 0, duration_y = 0.7, speed_y = 0.1, range_x 
 function Kid:damage(value, obj)
     value = value or 1
     if self:is_dead() or self.time_invincible ~= 0.0 then return false end
+
     do
         local state = self.state
         if state == States.preparing
@@ -495,18 +499,19 @@ function Kid:damage(value, obj)
         self.time_invincible = INVICIBLE_DURATION
     end
 
+    local camera = self.gamestate.camera
 
     if self.hp == 0 then
         self:set_state(States.dead)
 
         if not self.is_enemy then
-            self.gamestate.camera:shake_x(3, 0.08, 0.5)
-            self.gamestate.camera:shake_y(2, 0.08, 0.4)
+            camera:shake_x(3, 0.08, 0.5)
+            camera:shake_y(2, 0.08, 0.4)
         end
     else
         if not self.is_enemy then
-            self.gamestate.camera:shake_x(3, 0.08, 0.5)
-            self.gamestate.camera:shake_y(3, 0.08, 0.3)
+            camera:shake_x(3, 0.08, 0.5)
+            camera:shake_y(3, 0.08, 0.3)
         end
 
         self.displayHP:show()
@@ -525,13 +530,16 @@ function Kid:damage(value, obj)
         Play_sfx("player damage", true)
     else
         local is_the_last = self:is_dead() and self:is_the_last()
+
         if is_the_last then
-            self.gamestate.camera:shake_x(3, 0.08, 0.5)
-            self.gamestate.camera:shake_y(3, 0.08, 0.3)
+            camera:shake_x(3, 0.08, 0.5)
+            camera:shake_y(3, 0.08, 0.3)
         end
+
         self.gamestate:pause(
             is_the_last and 1 or 0.1,
-            pause_action, self)
+            pause_action, self
+        )
     end
     Play_sfx("foe hit", true)
 
@@ -559,6 +567,7 @@ function Kid:attack()
 
     do
         local state = self.state
+
         if state == States.idle
             or state == States.preparing
             or state == States.runAway
@@ -568,23 +577,30 @@ function Kid:attack()
         end
     end
 
-    local r = self:atk_action()
-    if not r and not self.is_enemy then
+    local success = self:atk_action()
+
+    if not success and not self.is_enemy then
         Play_sfx("atk fail", true)
-    elseif r then
-        -- Play_sfx("throw stone", not self.is_enemy)
+        ---
+    elseif success then
+        ---
         Play_sfx("slap", not self.is_enemy)
+
         if not self.is_enemy then
             Play_sfx("throw stone", true)
         end
+        ---
     end
-    return r
+
+    return success
 end
 
 function Kid:jump(height)
     if self:is_dead() then return false end
+
     do
         local state = self.state
+
         if state == States.preparing
             or state == States.idle
             or state == States.runAway
@@ -595,19 +611,23 @@ function Kid:jump(height)
     end
 
     local bd2 = self.body2
+
     if bd2.speed_y == 0 then
         self.is_jump = true
         bd2.allowed_gravity = true
         self:remove_effect("stretchSquash")
+
         self.emitter_rundust.pause = true
         self.gamestate:add_object(
             Emitters:Zup(self)
         )
+
         if not self.is_enemy then
             Play_sfx("jump", true)
         else
             Play_sfx("jump 2", true)
         end
+
         return bd2:jump(height or (16 * 2), -1)
     end
 end
@@ -629,6 +649,7 @@ function Kid:keep_on_bounds()
     local pr = 16 * 7
 
     local state = self.state
+
     if self.direction < 0 then
         px = 16 * 12
         pr = SCREEN_WIDTH - bd2.w - 2
@@ -647,13 +668,15 @@ function Kid:keep_on_bounds()
     end
 
     bd:refresh(math.min(math.max(px, bd.x), pr), math.min(py, bd.y))
-    if bd.x == 0 and bd.speed_x < 0
-        or (bd.x == pr and bd.speed_x > 0)
-    then
-        -- bd.speed_x = 0
-    end
-    if bd.y == py and bd.speed_y > 0 then
-        bd.speed_y = 0
+
+    -- if bd.x == 0 and bd.speed_x < 0
+    --     or (bd.x == pr and bd.speed_x > 0)
+    -- then
+    --     -- bd.speed_x = 0
+    -- end
+
+    if bd.y == py and bd.speed_y > 0.0 then
+        bd.speed_y = 0.0
     end
     bd2:refresh(bd.x)
 end
@@ -669,6 +692,7 @@ end
 local function auto_jump(self, dt)
     if not self.is_jump then
         self.time_jump = self.time_jump + dt
+
         if self.time_jump >= self.time_jump_interval then
             self.time_jump = 0.0
             self.time_jump_interval = random(2)
@@ -685,24 +709,29 @@ local function goingTo(self, dt)
     local diff_x = self.diff_x
     local diff_y = self.diff_y
 
-    local v = math.sin(self.time_going)
+    local v = sin(self.time_going)
 
     self:set_position(self.init_x - diff_x * v, self.init_y - diff_y * v)
 
     local domain = math.pi * 0.5
+
     self.time_going = Utils:clamp(
         self.time_going + (domain / self.goingTo_speed) * dt,
         0, domain
     )
 
     if self:is_on_target_position() then
+        ---
         if self:is_dead() then
             self:set_state(States.dead)
+            ---
         elseif self.state == States.preparing then
             self:set_state(States.idle)
+            ---
         else
             self:set_state(States.normal)
         end
+        ---
     end
 
     return 0, 0
@@ -718,11 +747,16 @@ local function movement(self, dt)
     if state == States.dead
         or state == States.idle
     then
+        ---
         self.emitter_rundust.pause = true
         return 0, 0
+        ---
     elseif state == States.victory then
+        ---
         if not self.is_jump then
+            ---
             self.time_jump = self.time_jump + dt
+
             if self.time_jump >= self.time_jump_interval then
                 self.time_jump = 0.0
                 self.time_jump_interval = 0.15 --0.1 + 0.4 * random()
@@ -730,12 +764,16 @@ local function movement(self, dt)
                 self:jump(16)
             end
         end
+
         return 0, 0
+        ---
     elseif (state == States.goingTo
             and not self.is_enemy)
         or state == States.preparing
     then
+        ---
         return goingTo(self, dt)
+        ---
     elseif state == States.runAway then
         return 1, 0
     end
@@ -767,7 +805,7 @@ local function movement(self, dt)
             if not self.is_jump then
                 self.time_move_y = self.time_move_y + dt
             end
-            local vy = self.move_y_value * math.sin(self.time_move_y)
+            local vy = self.move_y_value * sin(self.time_move_y)
 
             self:set_position(nil, self.anchor_y + vy)
 
@@ -829,8 +867,8 @@ local function movement(self, dt)
                 self.time_move_x = self.time_move_x + ((math.pi) / 5.0) * dt
             end
 
-            local vy = self.move_y_value * math.sin(self.time_move_y)
-            local vx = self.move_x_value * math.sin(self.time_move_x)
+            local vy = self.move_y_value * sin(self.time_move_y)
+            local vx = self.move_x_value * sin(self.time_move_x)
 
             self:set_position(self.anchor_x + vx, self.anchor_y + vy)
 
@@ -869,6 +907,7 @@ end
 function Kid:update(dt)
     if self.time_delay ~= 0 then
         self.time_delay = self.time_delay - dt
+
         if self.time_delay <= 0 then
             self.time_delay = 0
             self.is_visible = true
@@ -882,9 +921,6 @@ function Kid:update(dt)
     GC.update(self, dt)
     self.displayHP:update(dt)
 
-
-    -- local P1 = self.controller
-    -- local Button = P1.Button
     local bd = self.body   --shadow
     local bd2 = self.body2 -- player body
 
@@ -895,9 +931,11 @@ function Kid:update(dt)
 
     if self.state == States.runAway then
         if not self.gamestate.camera:rect_is_on_view(bd.x - 16, bd.y, bd.w + 32, bd.h) then
+            ---
             if self:is_leader() then
                 self.gamestate:__get_data__().leader = nil
             end
+
             return self:remove()
         end
     end
@@ -908,18 +946,16 @@ function Kid:update(dt)
     then
         self:apply_effect('flickering', args_flick)
     else
-        local eff = self.eff_actives and self.eff_actives['flickering']
-        if eff then
-            eff.__remove = true
-            self.eff_actives['flickering'] = nil
-            self:set_visible(true)
-        end
-    end
+        self:remove_effect("flickering")
+    end -- end flick when invincible block
+
 
     if self.time_invincible ~= 0 then
         self.time_invincible = Utils:clamp(self.time_invincible - dt, 0, INVICIBLE_DURATION)
     end
 
+
+    -- player movement
     if type(x_axis) == "number" and type(y_axis) == "number" then
         if bd.speed_x > 0 and x_axis == -1
             or bd.speed_x < 0 and x_axis == 1
@@ -938,8 +974,9 @@ function Kid:update(dt)
             self:move(0, y_axis)
             bd.dacc_y = DACC
         end
-    end
+    end -- end player movement block
 
+    -- jump action
     if self.is_jump then
         bd.max_speed_x = MAX_SPEED * 0.75
         bd.max_speed_y = MAX_SPEED * 0.75
@@ -965,15 +1002,17 @@ function Kid:update(dt)
             bd.max_speed_x = MAX_SPEED
             bd.max_speed_y = MAX_SPEED
         end
-    end
+    end -- end jump action block
 
     self:keep_on_bounds()
 
+    --- condition to auto throw stones
     if self.is_enemy or self.ia_mode then
         if self.state == States.normal
             or self.state == States.goingTo
         then
             self.time_throw = self.time_throw - dt
+
             if self.time_throw <= 0 then
                 ---@type GameState.Game.Data
                 local data = self.gamestate:__get_data__()
@@ -986,7 +1025,7 @@ function Kid:update(dt)
                 self:attack()
             end
         end
-    end
+    end -- end auto throw stones block
 
 
     local last = self.cur_anima
@@ -1047,6 +1086,7 @@ function Kid:get_cur_anima(state)
         else
             return anima
         end
+        ---
     elseif self.is_jump then
         if bd2.speed_y < 0 then
             return self.animas[AnimaState.jump]
@@ -1068,6 +1108,7 @@ function Kid:adjust_cur_anima()
     if not anima then return end
 
     anima:set_flip_x(self.direction == -1)
+
     if self.state == States.runAway then
         anima:set_flip_x(false)
         -- anima:set_rotation(0)
@@ -1080,7 +1121,7 @@ function Kid:adjust_cur_anima()
 end
 
 ---@param self Kid
-local my_draw = function(self)
+local kid_draw = function(self)
     -- local lgx = love.graphics
     -- lgx.setColor(1, 0, 0)
     -- lgx.rectangle("fill", self:rect())
@@ -1092,7 +1133,7 @@ local my_draw = function(self)
 end
 
 function Kid:draw()
-    GC.draw(self, my_draw)
+    GC.draw(self, kid_draw)
     return self.displayHP:draw()
 end
 
