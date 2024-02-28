@@ -69,7 +69,7 @@ function data:unlock_kids()
     end
 end
 
-function data:all_kids_on_position()
+function data:all_kids_are_on_position()
     local list = self.kids
     local player = self.player
 
@@ -113,7 +113,7 @@ end
 
 function data:start_game()
     if self.countdown_time and self.countdown_time <= 0
-        and self:all_kids_on_position()
+        and self:all_kids_are_on_position()
     then
         self:unlock_kids()
         self.countdown_time = nil
@@ -141,6 +141,21 @@ function data:wave_is_over(check_on_ground)
     return c == N
 end
 
+---@param file_name string # the dialogue file directory
+---@return JM.DialogueSystem.Dialogue dialogue # The Dialogue object
+function data:load_dialogue(file_name)
+    return JM.DialogueSystem:newDialogue(file_name, JM:get_font("pix8"),
+        {
+            align = "center",
+            w = 16 * 8,
+            n_lines = 2,
+            text_align = 3,
+            time_wait = 0.1,
+            glyph_sfx = "glyph bip",
+            finish_sfx = "box end"
+        })
+end
+
 ---@param new_state GameState.Game.States
 function data:set_state(new_state)
     if new_state == self.gamestate then return false end
@@ -149,18 +164,8 @@ function data:set_state(new_state)
     self.dialogue = nil
 
     if new_state == States.dialogue then
-        self.dialogue = JM.DialogueSystem:newDialogue(
-            string.format("/data/dialogue_%d.md", data.wave_number),
-            JM:get_font("pix8"),
-            {
-                align = "center",
-                w = 16 * 8,
-                n_lines = 2,
-                text_align = 3,
-                time_wait = 0.1,
-                glyph_sfx = "glyph bip",
-                finish_sfx = "box end"
-            }
+        self.dialogue = self:load_dialogue(
+            string.format("/data/dialogue_%d.md", data.wave_number)
         )
         ---
     elseif new_state == States.endGame then
@@ -181,6 +186,7 @@ end
 function data:draw_dialogue(cam)
     local dialogue = data.dialogue
     if not dialogue or not dialogue.is_visible then return end
+
     local lgx = love.graphics
     local id = dialogue:get_id()
     local box = dialogue:get_cur_box()
@@ -521,6 +527,7 @@ local function keypressed(key)
     P1:switch_to_keyboard()
     local state = data.gamestate
 
+    -- condition to skip cutscene
     if state ~= States.game
         and state ~= States.finishFight
         and state ~= States.endGame
@@ -528,13 +535,26 @@ local function keypressed(key)
         and not data.countdown_time
     then
         JM.Sound:fade_out()
-        State:add_transition("door", "out", { axis = "y", duration = 1, post_delay = 0.3, pause_scene = false }, nil,
+
+        State:add_transition("door", "out",
+            {
+                axis = "y",
+                duration = 1,
+                post_delay = 0.3
+            },
+
+            nil,
+
             ---@param State JM.Scene
             function(State)
                 data:skip_intro()
                 JM.Sound:fade_in(0.01)
-                State:add_transition("door", "in", { axis = "y", duration = 0.5, pause_scene = false }, nil)
-            end)
+                State:add_transition("door", "in",
+                    { axis = "y", duration = 0.5, pause_scene = false }
+                )
+            end
+        )
+
         return
     end
 
@@ -542,6 +562,7 @@ local function keypressed(key)
 
     do
         local dialogue = data.dialogue
+
         if dialogue
             and (P1:pressed(Button.A, key)
                 or P1:pressed(Button.dpad_right, key)
@@ -562,18 +583,23 @@ local function keypressed(key)
                 JM:flush()
                 return
             else
+                ---
                 if data.gamestate ~= States.endGame then
-                    dialogue:pressed()
+                    dialogue:next()
                 else
                     if data.player:is_on_target_position() then
-                        dialogue:pressed()
+                        dialogue:next()
                     end
                 end
+
                 return
+                ---
             end
         end
-    end
+    end -- end Dialogue handler code block
 
+
+    -- condition to skip countdown
     if (P1:pressed(Button.start, key))
         and data.countdown_time
         and data.countdown_time > 1
@@ -583,6 +609,8 @@ local function keypressed(key)
         return
     end
 
+
+    -- condition to pause the game
     if (P1:pressed(Button.start, key)
             or P1:pressed(Button.B, key))
         and not data.countdown_time
@@ -617,10 +645,13 @@ end
 local function mousepressed(x, y, button, istouch, presses)
     if button == 1 then
         return State:keypressed('f')
+        ---
     elseif button == 2 then
         return State:keypressed('space')
+        ---
     elseif button == 3 then
         return State:keypressed('escape')
+        --
     end
 end
 
@@ -646,23 +677,32 @@ local function gamepadpressed(joystick, button)
 
     if P1:pressed(Button.A, joystick, button) then
         State:keypressed('space')
+        --
     elseif P1:pressed(Button.B, joystick, button) then
         State:keypressed('escape')
+        --
     elseif P1:pressed(Button.start, joystick, button) then
         State:keypressed('enter')
+        --
     elseif P1:pressed(Button.dpad_left, joystick, button) then
         State:keypressed('left')
+        --
     elseif P1:pressed(Button.dpad_right, joystick, button) then
         State:keypressed('right')
+        --
     elseif P1:pressed(Button.dpad_up, joystick, button) then
         State:keypressed('up')
+        --
     elseif P1:pressed(Button.dpad_down, joystick, button) then
         State:keypressed('down')
+        --
     elseif P1:pressed(Button.X, joystick, button)
         or P1:pressed(Button.L, joystick, button)
         or P1:pressed(Button.R, joystick, button)
     then
+        --
         State:keypressed('f')
+        --
     end
 
     P1:switch_to_joystick()
@@ -677,17 +717,23 @@ local function gamepadaxis(joystick, axis, value)
     local Button = P1.Button
 
     local x_axis = P1:pressed(Button.left_stick_x, joystick, axis, value)
+
     if x_axis < 0 then
         State:keypressed('right')
+        --
     elseif x_axis > 0 then
         State:keypressed('left')
+        --
     end
 
     local y_axis = P1:pressed(Button.left_stick_y, joystick, axis, value)
+
     if y_axis > 0 then
         State:keypressed('down')
+        --
     elseif y_axis < 0 then
         State:keypressed('up')
+        --
     end
 
     P1:switch_to_joystick()
@@ -702,6 +748,7 @@ local function game_logic(dt)
     if State.transition then return end
 
     if state == States.game then
+        ---
         if data.player:is_dead() then
             data:enemy_victory()
             data.death_count = data.death_count + 1
@@ -728,23 +775,13 @@ local function game_logic(dt)
         end
         ---
     elseif state == States.endGame then
+        ---
         local player = data.player
         local dialogue = data.dialogue
+
         if player:is_on_target_position() then
             if not dialogue then
-                data.dialogue = JM.DialogueSystem:newDialogue(
-                    "/data/dialogue_final.md",
-                    JM:get_font("pix8"),
-                    {
-                        align = "center",
-                        w = 16 * 8,
-                        n_lines = 2,
-                        text_align = 3,
-                        time_wait = 0.1,
-                        glyph_sfx = "glyph bip",
-                        finish_sfx = "box end"
-                    }
-                )
+                data.dialogue = data:load_dialogue("/data/dialogue_final.md")
             end
             ---
         else
@@ -773,6 +810,7 @@ local function game_logic(dt)
         ---
     elseif state == States.finishFight then
         JM.GameObject.update(data.timer, dt)
+
         if data.time_gamestate >= 3 then
             if not data.player:is_dead() then
                 data:put_kids_to_run(false)
@@ -797,7 +835,8 @@ local function game_logic(dt)
             else
                 if not State.transition then
                     JM.Sound:fade_out()
-                    State:add_transition("door", "out", { axis = "y", post_delay = 0.2 }, nil,
+                    State:add_transition("door", "out",
+                        { axis = "y", post_delay = 0.2 }, nil,
                         ---@param State JM.Scene
                         function(State)
                             JM.Sound:fade_in(0.01)
@@ -818,7 +857,8 @@ local function game_logic(dt)
         end
         ---
     elseif state == States.preparingToTalk then
-        if data:all_kids_on_position() then
+        ---
+        if data:all_kids_are_on_position() then
             data:set_state(States.waveIsComing)
             load_wave(data.wave_number)
         else
@@ -827,7 +867,7 @@ local function game_logic(dt)
         ---
     elseif state == States.waveIsComing then
         if not data.countdown_time then
-            if data:all_kids_on_position() then
+            if data:all_kids_are_on_position() then
                 if State:is_current_active() then
                     -- data:start_countdown(3.6)
                     -- State:remove_black_bar()
@@ -836,17 +876,6 @@ local function game_logic(dt)
                     data:start_countdown(-0.5)
                 end
             else
-                -- local list = data.kids
-                -- for i = 1, #list do
-                --     ---@type Kid
-                --     local kid = list[i]
-
-                --     if kid.state == Kid.State.preparing
-                --         and kid.time_delay == 0
-                --     then
-                --         break
-                --     end
-                -- end
                 Play_sfx("footstep 01")
             end
         end
@@ -875,23 +904,28 @@ function data:skip_intro()
 
     do
         local objs = State.game_objects
+
         for i = #objs, 1, -1 do
             ---@type Kid|JM.Emitter|any
             local k = objs[i]
+
             if k.is_kid and not k.__remove and k ~= player then
                 k:remove()
-            elseif k.__is_emitter and k.lifetime ~= math.huge
+                ---
+            elseif k.__is_emitter
+                and k.lifetime ~= math.huge
                 and not k.__remove
             then
                 k:destroy()
                 k:remove()
             end
-        end
+        end -- end FOR
     end
     data.leader = nil
 
     load_wave(data.wave_number)
     list = data.kids
+
     for i = 1, #list do
         ---@type Kid
         local k = list[i]
@@ -959,8 +993,8 @@ local function update(dt)
 end
 
 local sort_draw = function(a, b)
-    local y1 = a.get_shadow and not a.__remove and a:get_shadow().y or a.y
-    local y2 = b.get_shadow and not b.__remove and b:get_shadow().y or b.y
+    local y1 = (a.get_shadow and not a.__remove and a:get_shadow().y) or a.y
+    local y2 = (b.get_shadow and not b.__remove and b:get_shadow().y) or b.y
     return y1 < y2
 end
 
@@ -974,6 +1008,7 @@ local function draw(cam)
 
     -- data.world:draw(true, nil, cam)
 
+    -- Drawing the Object's shadow
     local _canvas = lgx.getCanvas()
     lgx.setCanvas(State.canvas_layer)
     lgx.clear()
@@ -991,6 +1026,8 @@ local function draw(cam)
     lgx.setCanvas(_canvas)
     lgx.setColor(1, 1, 1, 0.5)
     lgx.draw(State.canvas_layer, 0, 0, 0, 1 / State.subpixel)
+    -- End drawing shadows
+
 
     lgx.setColor(1, 1, 1)
     lgx.draw(imgs["street_up"], -16, -16)
@@ -1003,6 +1040,7 @@ local function draw(cam)
     local font = JM:get_font("pix5")
 
     --================================================================
+    -- Drawing the UI
     cam:detach()
     local state = data.gamestate
     if state == States.game
@@ -1053,6 +1091,7 @@ local function draw(cam)
         end
     end
     cam:attach(nil, State.subpixel)
+    -- End drawing the UI
     --================================================================
 
     -- do
@@ -1070,7 +1109,8 @@ local function draw(cam)
     --     end
     -- end
 
-    do
+    do -- block to draw the countdown
+        ---
         local countdown_time = data.countdown_time
         if countdown_time and countdown_time > 0
             and not State:is_showing_black_bar()
@@ -1116,7 +1156,7 @@ local function draw(cam)
 
             font:pop()
         end
-    end
+    end -- end block to draw the countdown
 
     data:draw_dialogue(cam)
 
