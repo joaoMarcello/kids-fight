@@ -200,12 +200,12 @@ function data:draw_dialogue(cam)
     box.y = speaker.y - 52 - dialogue.h
 
     lgx.setColor(1, 1, 1)
-    lgx.draw(imgs["balloon"], data.balloon, box.x - 1, box.y)
+    lgx.draw(imgs["balloon"], data.quad_balloon, box.x - 1, box.y)
 
     if speaker == data.leader then
-        lgx.draw(imgs["balloon"], data.balloon_point, box.x + 40, box.y + box.h, 0, -1, 1, 16, 0)
+        lgx.draw(imgs["balloon"], data.quad_balloon_tail, box.x + 40, box.y + box.h, 0, -1, 1, 16, 0)
     else
-        lgx.draw(imgs["balloon"], data.balloon_point, box.x + 64, box.y + box.h, 0, 1, 1, 0, 0)
+        lgx.draw(imgs["balloon"], data.quad_balloon_tail, box.x + 64, box.y + box.h, 0, 1, 1, 0, 0)
     end
 
     dialogue:draw(cam)
@@ -459,12 +459,12 @@ local function init(args)
     data.time_gc = 0.0
     data.death_count = 0
 
-    data.clock = data.clock
+    data.quad_clock = data.quad_clock
         or love.graphics.newQuad(32, 0, 16, 16, Particles.IMG:getDimensions())
 
-    data.balloon = data.balloon
+    data.quad_balloon = data.quad_balloon
         or love.graphics.newQuad(0, 0, 16 * 9, 32, imgs["balloon"]:getDimensions())
-    data.balloon_point = data.balloon_point
+    data.quad_balloon_tail = data.quad_balloon_tail
         or love.graphics.newQuad(16 * 9, 0, 32, 16, imgs["balloon"]:getDimensions())
 
     data.countdown_time = nil
@@ -1077,7 +1077,7 @@ local function draw(cam)
     then
         data.timer:draw()
         lgx.setColor(1, 1, 1)
-        lgx.draw(Particles.IMG, data.clock, 16 * 13 - 3, 8, 0, 1, 1)
+        lgx.draw(Particles.IMG, data.quad_clock, 16 * 13 - 3, 8, 0, 1, 1)
 
         if SAVE_DATA.best_time >= 0 then
             font = JM:get_font("pix5")
