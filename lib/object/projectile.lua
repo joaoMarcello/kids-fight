@@ -79,7 +79,9 @@ end
 function Projectile:load()
     local lgx = love.graphics
     IMG = IMG or love.graphics.newImage("/data/img/projectiles.png")
+
     local w, h = IMG:getDimensions()
+
     QUADS = QUADS or {
         [Types.stone] = lgx.newQuad(0, 0, 16, 16, w, h),
         [Types.stoneMove] = lgx.newQuad(16, 0, 32, 16, w, h),
@@ -111,6 +113,7 @@ function Projectile:get_shadow()
 end
 
 local flick_args = { speed = 0.07 }
+
 function Projectile:update(dt)
     GC.update(self, dt)
 
@@ -119,6 +122,7 @@ function Projectile:update(dt)
 
     if self.time_force ~= 0 then
         self.time_force = self.time_force - dt
+
         if self.time_force <= 0 then
             self.time_force = 0
             bd.dacc_x = DACC
@@ -128,6 +132,7 @@ function Projectile:update(dt)
     end
 
     local cam = self.gamestate.camera
+
     if not cam:rect_is_on_view(bd:rect()) and bd.y > cam.y then
         return self:remove()
     end
@@ -146,15 +151,21 @@ function Projectile:update(dt)
 
     if self:on_ground() then
         self.lifetime = self.lifetime - dt
+
         if self.lifetime <= 0 then
             return self:remove()
+            ---
         elseif self.lifetime <= 1.6 then
             self:apply_effect("flickering", flick_args)
+            ---
         end
     end
     --==============================================================
 
-    local items = self.world:get_items_in_cell_obj(bd.x, bd.y, bd.w, bd.h, bd.empty_table())
+    local items = self.world:get_items_in_cell_obj(
+        bd.x, bd.y, bd.w, bd.h, bd.empty_table()
+    )
+
     if items then
         for item, _ in next, items do
             ---@type JM.Physics.Collide
@@ -164,11 +175,13 @@ function Projectile:update(dt)
 
             if kid and kid.is_kid then
                 local kbd = kid.body2
+
                 if bd:check_collision(kbd.x, kbd:bottom() - 16, kbd.w, 16)
                     and kid:distance() <= 8
                 then
                     if self:on_ground() then
                         local success = kid:add_stone()
+
                         if success then
                             if not kid.is_enemy then
                                 Play_sfx("pickup", true)
@@ -176,14 +189,6 @@ function Projectile:update(dt)
                             return self:remove()
                         end
                         ---
-                    else
-                        -- if self.direction ~= kid.direction then
-                        --     local cond = math.abs(kid:get_shadow():bottom() - bd2.y) <= 32
-                        --     local success = cond and kid:damage(1, self)
-                        --     if success then
-                        --         return self:remove()
-                        --     end
-                        -- end
                     end
                 end
 
@@ -191,8 +196,11 @@ function Projectile:update(dt)
                     and bd:check_collision(kbd:rect())
                 then
                     if self.direction ~= kid.direction then
-                        local cond = math.abs(kid:get_shadow():bottom() - bd2.y) <= 14
+                        local cond = math.abs(kid:get_shadow():bottom()
+                            - bd2.y) <= 14
+
                         local success = cond and kid:damage(1, self)
+
                         if success then
                             local px = bd.x + bd.w * 0.5
                             local e = Emitters:Paft(
@@ -202,11 +210,11 @@ function Projectile:update(dt)
                             return self:remove()
                         end
                     end
-                end
+                    ---
+                end -- END if on_ground
             end
         end
     end
-
 
     self.x, self.y = bd.x, bd.y
 end
@@ -227,14 +235,11 @@ local function my_draw(self)
         quad = QUADS[Types.stoneMove]
     end
     local vx, vy, vw, vh = quad:getViewport()
-    lgx.draw(IMG, quad, self.x + self.w * 0.5, self.y + self.h * 0.5, 0, self.direction, 1, vw * 0.5, vh * 0.5)
+    return lgx.draw(IMG, quad, self.x + self.w * 0.5, self.y + self.h * 0.5, 0, self.direction, 1, vw * 0.5, vh * 0.5)
 end
 
 function Projectile:draw()
-    GC.draw(self, my_draw)
-
-    love.graphics.setColor(0, 0, 0)
-    -- love.graphics.print(string.format("%.2f", self.body.speed_x), self.body.x, self.body.y - 16)
+    return GC.draw(self, my_draw)
 end
 
 return Projectile
