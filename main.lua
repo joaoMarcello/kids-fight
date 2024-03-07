@@ -88,23 +88,44 @@ function love.load()
             return
         end
 
+        -- do
+        --     local code = love.filesystem.read("/data/crt.frag")
+        --     local shader = love.graphics.newShader(code)
+        --     _G.Time = 0.0
+        --     self:set_shader({ shader }, function(self, shader, n)
+        --         if n == 1 then
+        --             Time = Time + love.timer.getDelta() * 20.0
+        --             shader:send("uTime", Time)
+        --             shader:send("uSeed", love.math.random())
+        --         end
+        --     end)
+        --     return
+        -- end
+
         do
             local shader = JM.Shader:get_shader("crt_scanline", self, {
                 screen_h = 288,
                 width = 1,
             })
-            shader:send("opacity", 0.1)
+            shader:send("opacity", 0.25)
 
             local ab = JM.Shader:get_shader("aberration", self, { aberration_x = 0.1, aberration_y = 0.15 })
-            local filmgrain = JM.Shader:get_shader("filmgrain", self, { opacity = 0.3 })
-            local noise = {}
-            self:set_shader({ ab, filmgrain, shader },
+            -- local filmgrain = JM.Shader:get_shader("filmgrain", self, { opacity = 0.3 })
+            -- local noise = {}
+
+            _G.Time = 0.0
+            self:set_shader({ ab, shader },
                 function(self, shader, n)
                     if n == 2 then
-                        noise[1] = love.math.random()
-                        noise[2] = love.math.random()
-                        shader:send("noise", noise)
+                        Time = Time - love.timer.getDelta() * 20.0
+                        shader:send("phase", Time)
                     end
+
+                    -- if n == 2 then
+                    --     noise[1] = love.math.random()
+                    --     noise[2] = love.math.random()
+                    --     shader:send("noise", noise)
+                    -- end
                 end)
         end
     end)
