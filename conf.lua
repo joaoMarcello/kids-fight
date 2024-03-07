@@ -1,7 +1,7 @@
 _G.FULLSCREEN_TYPE = 'desktop'
 function love.conf(t)
-    t.window.title = "Kids Fight"
-    t.identity = "kids-fight"      -- The name of the save directory (string)
+    t.window.title = "Limoeiro Fight: Eu Nunca Sofri Bullying"
+    t.identity = "limoeiro-fight"  -- The name of the save directory (string)
     t.appendidentity = false       -- Search files in source directory before save directory (boolean)
     -- t.version = "11.4"             -- The LÖVE version this game was made for (string)
     t.console = false              -- Attach a console (boolean, Windows only)
