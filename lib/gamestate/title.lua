@@ -159,7 +159,7 @@ local __init__ = {
             or JM.GUI.Component:new {
                 w = BT_WIDTH, h = BT_HEIGHT,
                 on_focus = false,
-                text = 'Play',
+                text = 'Jogar',
                 draw = draw,
             }
 
@@ -175,7 +175,7 @@ local __init__ = {
             or Component:new {
                 w = BT_WIDTH, h = BT_HEIGHT,
                 on_focus = false,
-                text = 'Settings',
+                text = 'Configurações',
                 draw = draw,
             }
 
@@ -183,7 +183,7 @@ local __init__ = {
             or Component:new {
                 w = BT_WIDTH, h = BT_HEIGHT,
                 on_focus = false,
-                text = 'About',
+                text = 'Sobre',
                 draw = draw,
             }
 
@@ -191,7 +191,7 @@ local __init__ = {
             or Component:new {
                 w = BT_WIDTH, h = BT_HEIGHT,
                 on_focus = false,
-                text = 'Data',
+                text = 'Dados',
                 draw = draw,
             }
 
@@ -199,7 +199,7 @@ local __init__ = {
             or Component:new {
                 w = BT_WIDTH, h = BT_HEIGHT,
                 on_focus = false,
-                text = 'Quit',
+                text = 'Sair',
                 draw = draw,
             }
 
@@ -565,10 +565,10 @@ local __draw__ = {
 
         local P1 = JM.ControllerManager.P1
         if P1:is_on_keyboard_mode() then
-            font:printx("<effect=ghost, min=0.1, max=1.15>Press [enter] to play", 0, 16 * 7, SCREEN_WIDTH,
+            font:printx("<effect=ghost, min=0.1, max=1.15>Pressione [enter] para jogar", 0, 16 * 7, SCREEN_WIDTH,
                 "center")
         elseif P1:is_on_joystick_mode() then
-            font:printx("<effect=ghost, min=0.1, max=1.15>Press START to play", 0, 16 * 7, SCREEN_WIDTH,
+            font:printx("<effect=ghost, min=0.1, max=1.15>Pressione START para jogar", 0, 16 * 7, SCREEN_WIDTH,
                 "center")
         end
 
@@ -628,15 +628,16 @@ local __draw__ = {
         do
             font:push()
             font:set_color(JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("332424")))
-            font:printf("Copyright, ©2024. `#334266`Kids Fight`#-`, by `#000000`JM`#-`.<br>All rights reserved.", 0,
+            font:printf(
+                "Copyright, ©2024. `#334266`Limoeiro Fight`#-`, por `#000000`JM`#-`.<br>Todos os direitos reservados.", 0,
                 math.max(py + 16, 16 * 6), SCREEN_WIDTH, "center")
 
             if py < 16 * 4.25 then
                 local P1 = JM.ControllerManager.P1
                 if P1:is_on_keyboard_mode() then
-                    font:print("[esc] Back", 16, TILE * 9.5)
+                    font:print("[esc] Voltar", 16, TILE * 9.5)
                 elseif P1:is_on_joystick_mode() then
-                    font:print(":bt_b: Back", 16, TILE * 9.5)
+                    font:print(":bt_b: Voltar", 16, TILE * 9.5)
                 end
             end
             font:pop()
@@ -663,20 +664,20 @@ local function draw(cam)
 
         local P1 = JM.ControllerManager.P1
         if P1.state == P1.State.keyboard then
-            font:printf("[up/down] move\t [space] select\t [esc] back", 8, TILE * 10, SCREEN_WIDTH, "center")
+            font:printf("[cima/baixo] mover\t [space] selecionar\t [esc] voltar", 8, TILE * 10, SCREEN_WIDTH, "center")
         elseif P1.state == P1.State.joystick then
-            font:printf("[up/down] move\t :bt_a: select\t :bt_b: back", 8, TILE * 10, SCREEN_WIDTH, "center")
+            font:printf("[cima/baixo] mover\t :bt_a: selecionar\t :bt_b: voltar", 8, TILE * 10, SCREEN_WIDTH, "center")
         end
 
         if not _G.WEB then
-            font:printf("[F11] toggle fullscreen\n [F10] toggle CRT-filter", 16 * 12, 16 * 7, "left")
+            font:printf("[F11] fullscreen\n [F10] CRT-filter", 16 * 12, 16 * 7, "left")
         end
         font:pop()
 
         local font = FONT_THALEAH
         font:push()
         font:set_color(JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("334266")))
-        font:printf('Select an option:', 24, 16, SCREEN_WIDTH, "left")
+        font:printf('Selecione uma opcao:', 24, 16, SCREEN_WIDTH, "left")
         font:pop()
         ---
     elseif state ~= States.data
@@ -684,7 +685,7 @@ local function draw(cam)
     then
         font_pix5:push()
         font_pix5:set_color(color)
-        font_pix5:printf(string.format("%s %s", "version ", "1.0.0"), 0, 16 * 10, SCREEN_WIDTH - 16, "right")
+        font_pix5:printf(string.format("%s %s", "versão ", "1.0.0"), 0, 16 * 10, SCREEN_WIDTH - 16, "right")
         font_pix5:pop()
     end
 
