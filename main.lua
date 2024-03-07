@@ -39,7 +39,7 @@ function love.load()
 
     ---@param State JM.Scene
     _G.RESIZE = function(State, w, h)
-        local percent = 0.02
+        local percent = 0.005
         if not State.shader then
             percent = 0
         end
