@@ -605,7 +605,7 @@ local function keypressed(key)
         and data.countdown_time > 1
         and not State:is_showing_black_bar()
     then
-        data.countdown_time = 0.9
+        data.countdown_time = 1
         return
     end
 
@@ -1002,6 +1002,7 @@ end
 local function draw(cam)
     local lgx = love.graphics
     local Utils = JM_Utils
+    -- State.canvas:setFilter("nearest", "nearest")
 
     lgx.setColor(1, 1, 1)
     lgx.draw(imgs["field"])
@@ -1180,6 +1181,8 @@ local function draw(cam)
         end
         font:pop()
     end
+
+    -- State.canvas:setFilter("linear", "linear")
 
     -- font:print(string.format("%.1f", data.time_game), 16, 16 * 6)
 end
