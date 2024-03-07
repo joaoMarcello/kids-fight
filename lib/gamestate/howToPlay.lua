@@ -81,7 +81,7 @@ local function init(args)
     restart_game()
 
     data.text = string.format(
-        "It:comma_end:s `#bf3526`WAR`#-`! The boys challenge you to a fight to settle the new `#795ce6`street owner`#-`. Defend yourself throwing `#575b66`stones`#` on them.<next>`#000000`Move:`#`\tWASD `#000000`or`#` Arrow Keys\n`#000000`Jump:`#`\tSpace `#000000`or`#` Mouse RB `#000000`or`#` :bt_a:\n`#000000`Attack:`#`\tF/J/E `#000000`or`#` Mouse LB `#000000`or`#` :bt_x:<next>If running out of ammo, `#bf3526`collect the stones`#` left by your foes.<next>You can toggle the fullscreen and CRT-filter modes `#bf3526`even on middle of gameplay`#` using `#795ce6`F11`#` and `#795ce6`F10`#-`, respectively.")
+        "É `#bf3526`GUERRA`#-`! Os garotos desafiaram Mônica para decidir o novo `#795ce6`dono da rua`#-`. Defenda seu posto jogando `#575b66`pedras`#` neles.<next>`#000000`Mover:`#`\tWASD `#000000`ou`#` Teclas de seta\n`#000000`Pular:`#`\tEspaço `#000000`ou`#` Mouse BD `#000000`ou`#` :bt_a:\n`#000000`Atacar:`#`\tF/J/E `#000000`ou`#` Mouse RB `#000000`ou`#` :bt_x:<next>Se acabar a munição, `#bf3526`pegue as pedras`#` deixadas pelos seus inimigos.<next>Você pode trocar os modos tela cheia e filtro CRT `#bf3526`mesmo durante o jogo`#` usando `#795ce6`F11`#` e `#795ce6`F10`#-`, respectivamente.")
 
     local font = JM:get_font("pix8")
     font:push()
@@ -393,7 +393,7 @@ local function draw(cam)
     font:push()
     font:set_line_space(3)
     font:set_color(Utils:get_rgba3("f4ffe8"))
-    font:printf("HOW TO\nPLAY", 0, TILE, 96, "center")
+    font:printf("COMO\nJOGAR", 0, TILE, 96, "center")
     font:pop()
 
     local font = JM:get_font("pix8")
@@ -454,16 +454,16 @@ local function draw(cam)
 
     local P1 = JM.ControllerManager.P1
     if P1:is_on_keyboard_mode() then
-        font:printx("<effect=flickering, speed=1>press [enter] to play", 0, SCREEN_HEIGHT - 14, SCREEN_WIDTH - 8,
+        font:printx("<effect=flickering, speed=1>pressione [enter] para jogar", 0, SCREEN_HEIGHT - 14, SCREEN_WIDTH - 8,
             "right")
     elseif P1:is_on_joystick_mode() then
-        font:printx("<effect=flickering, speed=1>press [start] to play", 0, SCREEN_HEIGHT - 14, SCREEN_WIDTH - 8,
+        font:printx("<effect=flickering, speed=1>pressione [start] para jogar", 0, SCREEN_HEIGHT - 14, SCREEN_WIDTH - 8,
             "right")
     end
 
-    local text = "goal"
-    text = box.cur_screen == 2 and "controls" or text
-    text = box.cur_screen >= 3 and "tips" or text
+    local text = "objetivo"
+    text = box.cur_screen == 2 and "controles" or text
+    text = box.cur_screen >= 3 and "dicas" or text
     font:set_color(JM.Utils:get_rgba(1, 1, 1))
     font:printf(text, x - 16, y - 12, 16 * 4, "center")
     font:pop()
