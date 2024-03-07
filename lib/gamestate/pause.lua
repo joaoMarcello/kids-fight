@@ -192,21 +192,21 @@ local function init(args)
         data.bt_resume = data.bt_resume
             or JM.GUI.Component:new {
                 w = BT_WIDTH, h = BT_HEIGHT,
-                text = "Resume",
+                text = "Continuar",
                 draw = bt_draw,
             }
 
         data.bt_restart = data.bt_restart
             or JM.GUI.Component:new {
                 w = BT_WIDTH, h = BT_HEIGHT,
-                text = "Restart",
+                text = "Recomeçar",
                 draw = bt_draw,
             }
 
         data.bt_quit = data.bt_quit
             or JM.GUI.Component:new {
                 w = BT_WIDTH, h = BT_HEIGHT,
-                text = "Quit",
+                text = "Sair",
                 draw = bt_draw,
             }
 
@@ -429,7 +429,7 @@ local function draw(cam)
     local font = _G.FONT_THALEAH --JM:get_font()
     font:push()
     font:set_color(Utils:get_rgba(Utils:hex_to_rgba_float("d96c21")))
-    font:printx("<effect=wave>PAUSE", 0, 32, State.screen_w, "center")
+    font:printx("<effect=wave>PAUSADO", 0, 32, State.screen_w, "center")
     font:pop()
     -- love.graphics.setColor(1, 1, 0)
     -- love.graphics.printf("PAUSE", 0, State.screen_h * 0.15, State.screen_w, "center")

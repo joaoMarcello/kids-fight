@@ -670,7 +670,7 @@ local function draw(cam)
         end
 
         if not _G.WEB then
-            font:printf("[F11] fullscreen\n [F10] CRT-filter", 16 * 12, 16 * 7, "left")
+            font:printf("[F11] tela cheia\n [F10] filtro-CRT", 16 * 12, 16 * 7, "left")
         end
         font:pop()
 
