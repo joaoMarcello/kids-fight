@@ -66,7 +66,7 @@ local function init(args)
         -- data.obj1:apply_effect("swing")
         data.obj1.ox = 8
         data.obj1.oy = 8
-        data.obj1.x = 16 * 3.5
+        data.obj1.x = 16 * 3
         data.obj1.y = 18
     end
     if not data.obj2 then
@@ -77,7 +77,7 @@ local function init(args)
         -- eff.__speed = 3.75
         data.obj2.ox = 8
         data.obj2.oy = 8
-        data.obj2.x = 16 * 15.5
+        data.obj2.x = 16 * 16
         data.obj2.y = 18
     end
 
@@ -207,12 +207,13 @@ local function draw(cam)
     font:push()
     font:set_color(Utils:get_rgba(Utils:hex_to_rgba_float("e5f285")))
 
-    font:printf(string.format("N. deaths: <color-hex=d96c21>%d", data.death_count), 0, 16 * 3.5, SCREEN_WIDTH, "center")
+    font:printf(string.format("Nº de mortes: <color-hex=d96c21>%d", data.death_count), 0, 16 * 3.5, SCREEN_WIDTH,
+        "center")
 
     local min, sec, dec = Timer.get_time2(Timer, data.total_time)
 
     font:printf(
-        string.format("Your time was\n<color-hex=d96c21>%02d:comma_end::comma_end:%02d:comma_end:%02d", min, sec, dec),
+        string.format("Seu tempo foi \n<color-hex=d96c21>%02d:comma_end::comma_end:%02d:comma_end:%02d", min, sec, dec),
         0,
         16 * 5,
         SCREEN_WIDTH, "center")
@@ -220,13 +221,13 @@ local function draw(cam)
     -- font:set_font_size(font.__font_size * 2)
     if data.time_gamestate > 3.0 then
         font:set_color(Utils:get_rgba(Utils:hex_to_rgba_float("bf91b4")))
-        font:printx("<effect=flickering, speed=1>Press [space] to continue", 0, 16 * 9.5, SCREEN_WIDTH,
+        font:printx("<effect=flickering, speed=1>Pressione [space] para continuar", 0, 16 * 9.5, SCREEN_WIDTH,
             "center")
     end
 
     if data.time_gamestate > 1.5 and data.is_the_best then
         font:set_color(Utils:get_rgba3("f4ffe8"))
-        font:printx("<effect=wave>It's your best time!", 0, 16 * 7, SCREEN_WIDTH, "center")
+        font:printx("<effect=wave>É o seu melhor tempo!", 0, 16 * 7, SCREEN_WIDTH, "center")
     end
 
     font:pop()
@@ -235,7 +236,7 @@ local function draw(cam)
     font:push()
     font:set_color(Utils:get_rgba(Utils:hex_to_rgba_float("e5f285")))
     -- font:set_font_size(font.__font_size * 2)
-    font:printf("you defeat the bullies!", 0, 16 * 1.5, SCREEN_WIDTH, "center")
+    font:printf("voce derrotou os moleques!", 0, 16 * 1.5, SCREEN_WIDTH, "center")
     font:pop()
 
     local lgx = love.graphics

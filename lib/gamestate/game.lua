@@ -1062,9 +1062,9 @@ local function draw(cam)
                     string.format("ammo x %d <effect=flickering, speed=0.5><color-hex=ff0000>max", data.player.stones),
                     px, py)
             elseif data.player.stones <= 0 then
-                font:printx(string.format("<effect=flickering, speed=0.5><color-hex=ff0000>no ammo"), px, py)
+                font:printx(string.format("<effect=flickering, speed=0.5><color-hex=ff0000>sem munição"), px, py)
             else
-                font:printf(string.format("ammo x %d", data.player.stones), px, py)
+                font:printf(string.format("pedras x %d", data.player.stones), px, py)
             end
         end
     end
@@ -1086,7 +1086,7 @@ local function draw(cam)
             font:set_line_space(0)
             font:set_color(Utils:get_rgba3("dcffb3"))
             local min, sec, dec = Timer.get_time2(Timer, SAVE_DATA.best_time)
-            font:print(string.format("best time:\n  <color-hex=e5f285>%02d\"%02d'%02d", min, sec, dec),
+            font:print(string.format("melhor tempo:\n  <color-hex=e5f285>%02d\"%02d'%02d", min, sec, dec),
                 16 * 16, 16 * 10 - 4)
             font:pop()
         end
@@ -1128,13 +1128,13 @@ local function draw(cam)
                     if countdown_time > 3.1 then
                         font:printx(
                             string.format(
-                                "<effect=flickering,speed=0.2>STARTING IN</effect no-space> \n<color-hex=bf3526>%d",
+                                "<effect=flickering,speed=0.2>COMECANDO...</effect no-space> \n<color-hex=bf3526>%d",
                                 math.min(3, data.countdown_time)),
                             x, y + 8, w, "center")
                     else
                         font:printx(
                             string.format(
-                                "<sep>STARTING IN \n<color-hex=bf3526>%d",
+                                "<sep>COMECANDO...\n<color-hex=bf3526>%d",
                                 math.min(3, data.countdown_time)),
                             x, y + 8, w, "center")
                     end
@@ -1142,17 +1142,17 @@ local function draw(cam)
                     if countdown_time > 3 then
                         font:printx(
                             string.format(
-                                "<effect=flickering, speed=0.2>FINAL FIGHT IN</effect no-space> \n<color-hex=bf3526>%d",
+                                "<effect=flickering, speed=0.2>LUTA FINAL...</effect no-space> \n<color-hex=bf3526>%d",
                                 math.min(3, data.countdown_time)),
                             x, y + 8, w, "center")
                     else
-                        font:printx(string.format("FINAL FIGHT IN \n<color-hex=bf3526>%d",
+                        font:printx(string.format("LUTA FINAL...\n<color-hex=bf3526>%d",
                                 math.min(3, data.countdown_time)),
                             x, y + 8, w, "center")
                     end
                 end
             else
-                font:printx("<effect=scream>FIGHT!!!", x, y + 14, w, "center")
+                font:printx("<effect=scream>LUTEM!!!", x, y + 14, w, "center")
             end
 
             font:pop()
@@ -1174,10 +1174,10 @@ local function draw(cam)
 
         local P1 = JM.ControllerManager.P1
         if P1:is_on_keyboard_mode() then
-            font:printf("[enter] skip", x, y, w, "center")
+            font:printf("[enter] pular", x, y, w, "center")
             ---
         elseif P1:is_on_joystick_mode() then
-            font:printf("[start] skip", x, y, w, "center")
+            font:printf("[start] pular", x, y, w, "center")
         end
         font:pop()
     end
