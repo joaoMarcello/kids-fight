@@ -221,7 +221,7 @@ local function draw(cam)
     -- font:set_font_size(font.__font_size * 2)
     if data.time_gamestate > 3.0 then
         font:set_color(Utils:get_rgba(Utils:hex_to_rgba_float("bf91b4")))
-        font:printx("<effect=flickering, speed=1>Pressione [space] para continuar", 0, 16 * 9.5, SCREEN_WIDTH,
+        font:printx("<effect=flickering, speed=1>Pressione [espaço] para continuar", 0, 16 * 9.5, SCREEN_WIDTH,
             "center")
     end
 

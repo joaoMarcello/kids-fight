@@ -59,7 +59,7 @@ local function load()
     font_pix5 = font_pix5 or JM:get_font("pix5")
 
     imgs = imgs or {
-        ["chess"] = love.graphics.newImage("/data/img/chess_background.png"),
+        ["chess"] = love.graphics.newImage("/data/img/new_background_01.png"),
         ["logo_high"] = love.graphics.newImage("/data/img/logo_high.png"),
     }
 
@@ -629,8 +629,11 @@ local __draw__ = {
             font:push()
             font:set_color(JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("332424")))
             font:printf(
-                "Copyright, ©2024. `#334266`Limoeiro Fight`#-`, por `#000000`JM`#-`.<br>Todos os direitos reservados.", 0,
-                math.max(py + 16, 16 * 6), SCREEN_WIDTH, "center")
+                "Copyright, ©2024. `#334266`Limoeiro Fight: Eu Nunca\n Sofri Bullying</color no-space>, por `#000000`JM`#-`.\n Todos os direitos reservados.",
+                0,
+                math.max(py + 16, 16 * 6),
+                -- 16 * 7,
+                SCREEN_WIDTH, "center")
 
             if py < 16 * 4.25 then
                 local P1 = JM.ControllerManager.P1
@@ -664,7 +667,7 @@ local function draw(cam)
 
         local P1 = JM.ControllerManager.P1
         if P1.state == P1.State.keyboard then
-            font:printf("[cima/baixo] mover\t [space] selecionar\t [esc] voltar", 8, TILE * 10, SCREEN_WIDTH, "center")
+            font:printf("[cima/baixo] mover\t [espaço] selecionar\t [esc] voltar", 8, TILE * 10, SCREEN_WIDTH, "center")
         elseif P1.state == P1.State.joystick then
             font:printf("[cima/baixo] mover\t :bt_a: selecionar\t :bt_b: voltar", 8, TILE * 10, SCREEN_WIDTH, "center")
         end
