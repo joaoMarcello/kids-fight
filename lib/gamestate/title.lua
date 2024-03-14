@@ -94,11 +94,12 @@ local bt_draw = function(self)
     local x, y = self:rect()
     local right, bottom = self.right, self.bottom
     local on_focus = self.on_focus
+    local Utils = JM_Utils
 
     if on_focus then
-        lgx.setColor(JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("f4ffe8")))
+        lgx.setColor(Utils:get_rgba3("99752e"))
     else
-        lgx.setColor(JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("664433")))
+        lgx.setColor(Utils:get_rgba3("664433"))
     end
     lgx.polygon("fill",
         x + 4 + 2, y + 2,
@@ -108,9 +109,9 @@ local bt_draw = function(self)
     )
 
     if on_focus then
-        lgx.setColor(JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("d96c21")))
+        lgx.setColor(Utils:get_rgba3("e6c45c"))
     else
-        lgx.setColor(JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("99752e")))
+        lgx.setColor(Utils:get_rgba3("99752e"))
     end
     lgx.polygon("fill",
         x + 4, y,
@@ -121,11 +122,18 @@ local bt_draw = function(self)
 
     font:push()
     if on_focus then
-        font:set_color(JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("f4ffe8")))
+        font:set_color(Utils:get_rgba3("664433"))
     else
-        font:set_color(JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("bfbf91")))
+        font:set_color(Utils:get_rgba3("bfbf91"))
     end
-    font:printf(self.text, self.x - 32, self.y + (self.h - font.__font_size - font.__line_space) * 0.5,
+    local func = font.printf
+
+    if data.press_play and self == data.bt_play then
+        func = font.printx
+        self.text = "<effect=flickering, speed=0.1>Jogar"
+    end
+
+    func(font, self.text, self.x - 32, self.y + (self.h - font.__font_size - font.__line_space) * 0.5,
         self.w + 64, "center")
     font:pop()
 end
@@ -247,6 +255,8 @@ local function init(args)
 
     local px, py = 0, 0
 
+    data.press_play = false
+
     data.layers = {
         [1] = State:newLayer {
             infinity_scroll_x = true,
@@ -292,7 +302,7 @@ local function go_to_how_to_play()
         -- JM.Sound:fade_out()
         -- JM.Sound:stop_all()
 
-        return State:add_transition("fade", "out", { duration = 1, post_delay = 0.1 }, nil, function(self)
+        return State:add_transition("fade", "out", { duration = 1, post_delay = 0.1, delay = 1 }, nil, function(self)
             self:change_gamestate(require "lib.gamestate.howToPlay",
                 {
                     unload = path,
@@ -382,6 +392,7 @@ local __keypressed__ = {
             elseif obj == data.bt_play then
                 JM.Sound:stop_all()
                 _G.Play_sfx("ui-select 02", true)
+                data.press_play = true
                 return go_to_how_to_play()
                 ---
             elseif obj == data.bt_quit then
@@ -561,7 +572,7 @@ end
 local __draw__ = {
     [States.pressToPlay] = function(self, cam)
         font:push()
-        font:set_color(JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("334266")))
+        font:set_color(JM_Utils:get_rgba3("332424"))
 
         local P1 = JM.ControllerManager.P1
         if P1:is_on_keyboard_mode() then
@@ -655,7 +666,7 @@ local function draw(cam)
     data.layers[1].angle = -math.pi * 0.015
     data.layers[1]:draw(cam)
 
-    local color = JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("334266"))
+    local color = JM_Utils:get_rgba3("332424")
     local state = data.state
 
     if state ~= States.pressToPlay
@@ -679,7 +690,7 @@ local function draw(cam)
 
         local font = FONT_THALEAH
         font:push()
-        font:set_color(JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("334266")))
+        font:set_color(JM_Utils:get_rgba3("664433"))
         font:printf('Selecione uma opcao:', 24, 16, SCREEN_WIDTH, "left")
         font:pop()
         ---
