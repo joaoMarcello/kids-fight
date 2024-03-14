@@ -25,6 +25,7 @@ local State = JM.Scene:new {
     canvas_filter = _G.CANVAS_FILTER or 'linear',
     cam_scale = 1,
     use_canvas_layer = true,
+    use_vpad = true,
 }
 
 ---@enum GameState.Game.States
@@ -643,6 +644,22 @@ local function keyreleased(key)
 end
 
 local function mousepressed(x, y, button, istouch, presses)
+    if State.use_vpad then
+        -- return State:get_vpad():mousepressed(x, y, button, istouch, presses)
+        local vpad = State:get_vpad()
+        if vpad.A:is_pressed() then
+            State:keypressed('space')
+        end
+        if vpad.B:is_pressed() then
+            State:keypressed('f')
+        end
+        if vpad.Start:is_pressed() then
+            State:keypressed('return')
+        end
+
+        return
+    end
+
     if button == 1 then
         return State:keypressed('f')
         ---
@@ -1086,7 +1103,7 @@ local function draw(cam)
             font:set_line_space(0)
             font:set_color(Utils:get_rgba3("dcffb3"))
             local min, sec, dec = Timer.get_time2(Timer, SAVE_DATA.best_time)
-            font:print(string.format("melhor tempo:\n  <color-hex=e5f285>%02d\"%02d'%02d", min, sec, dec),
+            font:print(string.format("melhor tempo:\n  <color-hex=e5f285>%02d'%02d\"%02d", min, sec, dec),
                 16 * 16, 16 * 10 - 4)
             font:pop()
         end
