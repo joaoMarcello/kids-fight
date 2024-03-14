@@ -46,6 +46,8 @@ function State:__get_data__()
     return data
 end
 
+local img_chess
+
 local function load()
     Game = require "lib.gamestate.game"
     Game:load()
@@ -55,11 +57,18 @@ local function load()
     JM.Sound:add_sfx("/data/sfx/flipping-through-a-bookmp3-14415.ogg", "flip", 0.75)
 
     JM.Sound:add_song("/data/song/The-8-Bit-March_Looping.ogg", "HowToPlay", 0.4)
+
+    img_chess = img_chess or love.graphics.newImage("/data/img/new_background_01.png")
 end
 
 local function finish()
     JM.Sound:remove_sfx("flip")
     JM.Sound:remove_song("HowToPlay")
+
+    if img_chess then
+        img_chess:release()
+        img_chess = nil
+    end
 
     for k, v in next, data do
         if type(v) == "table" then
@@ -111,6 +120,29 @@ local function init(args)
         end,
         draw = function(cam)
             data:sawtooth()
+        end
+    }
+
+    local px, py = 0, 0
+
+    data.layer_chess = State:newLayer {
+        infinity_scroll_x = true,
+        infinity_scroll_y = true,
+        width = img_chess:getWidth(),   -- 64
+        height = img_chess:getHeight(), --64
+        -- factor_x = 0.5,
+        -- factor_y = 0.5,
+        ---
+        update = function(self, dt)
+            px = px - 16 * dt
+            py = py + 16 * dt
+            self.px = JM_Utils:round(px) -- * self.factor_x
+            self.py = JM_Utils:round(py) -- * self.factor_y
+        end,
+        draw = function(cam)
+            -- lgx.setColor(JM_Utils:hex_to_rgba_float("dcffb3"))
+            lgx.setColor(1, 1, 1)
+            lgx.draw(img_chess)
         end
     }
 
@@ -335,6 +367,7 @@ local function update(dt)
     data.textbox:update(dt)
 
     data.layer_sawtooth:update(dt)
+    data.layer_chess:update(dt)
     data.aff:update(dt)
 end
 
@@ -349,7 +382,7 @@ if not _G.WEB then
 end
 
 function data:sawtooth()
-    lgx.setColor(JM_Utils:hex_to_rgba_float("a2a9d9"))
+    lgx.setColor(JM_Utils:hex_to_rgba_float("d2dbc8"))
     local px = (TILE * 6)
     local h = TILE * 1.5
     local h2 = TILE * 0.5
@@ -373,23 +406,19 @@ local draw_arrow = function(self)
 end
 
 local function draw(cam)
-    -- lgx.setColor(JM.Utils:hex_to_rgba_float("f4ffe8"))
-    -- lgx.rectangle("fill", cam.x, cam.y, cam.viewport_w, cam.viewport_h)
-
     local sx = data.w / State.screen_w
     local sy = data.h / State.screen_h
 
     local Utils = JM_Utils
 
-    -- lgx.setColor(Utils:hex_to_rgba_float("e6c45c"))
-    -- lgx.rectangle("fill", 0, 0, 96, SCREEN_HEIGHT)
+    data.layer_chess:draw(cam)
+
     data.layer_sawtooth.angle = -math.pi * 0.015
     data.layer_sawtooth:draw(cam)
-    -- data:sawtooth()
 
     lgx.setColor(Utils:hex_to_rgba_float("d96c21"))
     lgx.ellipse("fill", 48, 24, 40, 16, 10)
-    local font = _G.FONT_THALEAH --JM:get_font("pix8")
+    local font = _G.FONT_THALEAH
     font:push()
     font:set_line_space(3)
     font:set_color(Utils:get_rgba3("f4ffe8"))
