@@ -213,7 +213,7 @@ local function draw(cam)
     local min, sec, dec = Timer.get_time2(Timer, data.total_time)
 
     font:printf(
-        string.format("Seu tempo foi \n<color-hex=d96c21>%02d:comma_end::comma_end:%02d:comma_end:%02d", min, sec, dec),
+        string.format("Seu tempo foi \n<color-hex=d96c21>%02d:comma_end:%02d:comma_end::comma_end:%02d", min, sec, dec),
         0,
         16 * 5,
         SCREEN_WIDTH, "center")
