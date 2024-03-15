@@ -25,7 +25,7 @@ local State = JM.Scene:new {
     canvas_filter = _G.CANVAS_FILTER or 'linear',
     cam_scale = 1,
     use_canvas_layer = true,
-    use_vpad = true,
+    -- use_vpad = true,
 }
 
 ---@enum GameState.Game.States
@@ -645,7 +645,8 @@ end
 
 local function mousepressed(x, y, button, istouch, presses)
     if State.use_vpad then
-        -- return State:get_vpad():mousepressed(x, y, button, istouch, presses)
+        if istouch then return end
+
         local vpad = State:get_vpad()
         if vpad.A:is_pressed() then
             State:keypressed('space')
@@ -655,6 +656,12 @@ local function mousepressed(x, y, button, istouch, presses)
         end
         if vpad.Start:is_pressed() then
             State:keypressed('return')
+        end
+        if vpad.X:is_pressed() then
+            State:keypressed('escape')
+        end
+        if vpad.Select:is_pressed() then
+            State:keypressed('escape')
         end
 
         return
@@ -681,7 +688,28 @@ local function mousemoved(x, y, dx, dy, istouch)
 end
 
 local function touchpressed(id, x, y, dx, dy, pressure)
+    -- if State.use_vpad then
+    --     local vpad = State:get_vpad()
 
+    --     if vpad.A:is_pressed() then
+    --         State:keypressed('space')
+    --     end
+    --     if vpad.B:is_pressed() then
+    --         State:keypressed('f')
+    --     end
+    --     if vpad.Start:is_pressed() then
+    --         State:keypressed('return')
+    --     end
+    --     if vpad.X:is_pressed() then
+    --         State:keypressed('escape')
+    --     end
+    --     if vpad.Select:is_pressed() then
+    --         State:keypressed('escape')
+    --     end
+
+    --     return
+    -- end
+    return mousepressed(x, y, 1, false)
 end
 
 local function touchreleased(id, x, y, dx, dy, pressure)
@@ -961,6 +989,8 @@ end
 
 local lim = 1 / 30
 local function update(dt)
+    State.use_vpad = _G.USE_VPAD
+
     dt = dt > lim and lim or dt
 
     if data.gamestate == States.game

@@ -575,10 +575,12 @@ local __draw__ = {
         font:set_color(JM_Utils:get_rgba3("332424"))
 
         local P1 = JM.ControllerManager.P1
+
         if P1:is_on_keyboard_mode() then
             font:printx("<effect=ghost, min=0.1, max=1.15>Pressione [enter] para jogar", 0, 16 * 7, SCREEN_WIDTH,
                 "center")
-        elseif P1:is_on_joystick_mode() then
+            ---
+        elseif P1:is_on_joystick_mode() or P1:is_on_vpad_mode() then
             font:printx("<effect=ghost, min=0.1, max=1.15>Pressione START para jogar", 0, 16 * 7, SCREEN_WIDTH,
                 "center")
         end
@@ -677,9 +679,11 @@ local function draw(cam)
         font:set_color(color)
 
         local P1 = JM.ControllerManager.P1
-        if P1.state == P1.State.keyboard then
+
+        if P1:is_on_keyboard_mode() then
             font:printf("[cima/baixo] mover\t [espaço] selecionar\t [esc] voltar", 8, TILE * 10, SCREEN_WIDTH, "center")
-        elseif P1.state == P1.State.joystick then
+            ---
+        elseif P1:is_on_joystick_mode() or P1:is_on_vpad_mode() then
             font:printf("[cima/baixo] mover\t :bt_a: selecionar\t :bt_b: voltar", 8, TILE * 10, SCREEN_WIDTH, "center")
         end
 

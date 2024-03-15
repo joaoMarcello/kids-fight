@@ -321,6 +321,24 @@ local function gamepadaxis(joy, axis, value)
 end
 
 local function mousepressed(x, y, button, istouch, presses)
+    if State.use_vpad then
+        if istouch then return end
+
+        local vpad = State:get_vpad()
+
+        if vpad.A:is_pressed() then
+            State:keypressed('space')
+        end
+        if vpad.Start:is_pressed() then
+            return State:keypressed('return')
+        end
+        if vpad.B:is_pressed() then
+            return State:keypressed('escape')
+        end
+
+        return
+    end
+
     if button == 1 then
         return State:keypressed('space', 'space')
     elseif button == 2 then
@@ -337,7 +355,7 @@ local function mousemoved(x, y, dx, dy, istouch)
 end
 
 local function touchpressed(id, x, y, dx, dy, pressure)
-
+    return mousepressed(x, y, 1, false)
 end
 
 local function touchreleased(id, x, y, dx, dy, pressure)
@@ -350,6 +368,7 @@ end
 
 local function update(dt)
     if dt > 1 / 30 then dt = 1 / 30 end
+    State.use_vpad = _G.USE_VPAD
 
     data.time_state = data.time_state + dt
 
@@ -485,7 +504,7 @@ local function draw(cam)
     if P1:is_on_keyboard_mode() then
         font:printx("<effect=flickering, speed=1>pressione [enter] para jogar", 0, SCREEN_HEIGHT - 14, SCREEN_WIDTH - 8,
             "right")
-    elseif P1:is_on_joystick_mode() then
+    elseif P1:is_on_joystick_mode() or P1:is_on_vpad_mode() then
         font:printx("<effect=flickering, speed=1>pressione [start] para jogar", 0, SCREEN_HEIGHT - 14, SCREEN_WIDTH - 8,
             "right")
     end
