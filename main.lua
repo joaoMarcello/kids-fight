@@ -6,7 +6,7 @@ function love.load()
     lgx.setBackgroundColor(0.1, 0.1, 0.1, 1)
     lgx.setDefaultFilter("nearest", "nearest")
     lgx.setLineStyle("rough")
-    love.mouse.setVisible(false)
+    love.mouse.setVisible(true)
 
     _G.SCREEN_WIDTH = 320 --398
     _G.SCREEN_HEIGHT = 180
@@ -16,6 +16,7 @@ function love.load()
     _G.TILE = 16
     _G.CANVAS_FILTER = "linear"
     _G.TARGET = love.system.getOS()
+    _G.USE_VPAD = true
 
     if WEB then
         JM.Sound:set_song_mode("static")
@@ -23,18 +24,28 @@ function love.load()
 
     require "data"
 
-    _G.FONT_THALEAH = JM.FontGenerator:new_by_ttf {
-        name = "thaleah",
-        dir = "data/font/ThaleahFat.ttf",
-        dpi = 16,
+    -- _G.FONT_THALEAH = JM.FontGenerator:new_by_ttf {
+    --     name = "thaleah",
+    --     dir = "data/font/ThaleahFat.ttf",
+    --     dpi = 16,
+    --     character_space = 1,
+    --     word_space = 3,
+    --     line_space = 8,
+    --     min_filter = 'linear',
+    --     max_filter = 'nearest',
+    --     max_texturesize = 2048,
+    --     save = true,
+    -- }
+    _G.FONT_THALEAH = JM.FontGenerator:new {
+        name = 'thaleah',
+        dir = "data/font/thaleah.png",
+        glyphs = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿĀāĂăĄąĆćĈĉĊċČčĎďĐđĒēĔĕĖėĘęĚěĜĝĞğĠġĢģĤĥĦħĨĩĪīĬĭĮįİıĲĳĴĵĶķĸĹĺĻļĽľĿŀŁłŃńŅņŇňŉŊŋŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŲųŴŵŶŷŸŹźŻżŽžſ",
+        min_filter = "linear",
+        max_filter = "nearest",
         character_space = 1,
-        word_space = 3,
         line_space = 8,
-        min_filter = 'linear',
-        max_filter = 'nearest',
-        max_texturesize = 2048,
     }
-    FONT_THALEAH:set_font_size(FONT_THALEAH.__ref_height)
+    FONT_THALEAH:set_font_size(7)
     FONT_THALEAH:set_color(JM_Utils:get_rgba3("242833"))
 
     ---@param State JM.Scene
@@ -59,6 +70,7 @@ function love.load()
     P1.button_to_key[P1.Button.B] = { 'escape', 'backspace' }
     P1.button_to_key[P1.Button.R] = { 'f', 'rshift' }
     P1.button_to_key[P1.Button.L] = { 'f', 'lshift' }
+    P1:set_vpad(JM.Vpad)
 
     local P2 = JM.ControllerManager.P2
     P2.button_to_key[Button.A] = { 'i' }
@@ -104,10 +116,11 @@ function love.load()
 
         do
             local shader = JM.Shader:get_shader("crt_scanline", self, {
-                screen_h = 288,
-                width = 1,
+                screen_h = 256,
+                width = 0.85,
             })
-            shader:send("opacity", 0.25)
+            shader:send("opacity", 0.2)
+            shader:send("uNoise", { 0.15, 1.0 })
 
             local ab = JM.Shader:get_shader("aberration", self, { aberration_x = 0.1, aberration_y = 0.15 })
             -- local filmgrain = JM.Shader:get_shader("filmgrain", self, { opacity = 0.3 })
@@ -119,6 +132,7 @@ function love.load()
                     if n == 2 then
                         Time = Time - love.timer.getDelta() * 20.0
                         shader:send("phase", Time)
+                        shader:send("uSeed", love.math.random())
                     end
 
                     -- if n == 2 then
@@ -129,8 +143,7 @@ function love.load()
                 end)
         end
     end)
-    return JM:load_initial_state("lib.gamestate.title", false)
-    -- return JM:load_initial_state("jm-love2d-package.modules.editor.editor", false)
+    return JM:load_initial_state("lib.gamestate.game", false)
 end
 
 function love.textinput(t)
@@ -189,6 +202,10 @@ function love.wheelmoved(x, y)
 end
 
 function love.touchpressed(id, x, y, dx, dy, pressure)
+    if not _G.USE_VPAD then
+        _G.USE_VPAD = true
+        JM.Vpad:resize(love.graphics.getDimensions())
+    end
     return JM:touchpressed(id, x, y, dx, dy, pressure)
 end
 
