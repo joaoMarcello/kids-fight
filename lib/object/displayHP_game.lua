@@ -19,7 +19,8 @@ local quad2
 
 ---@type love.Shader|nil
 local outline
-if not _G.WEB then
+-- if not _G.WEB then
+do
     outline = JM.Shader:get_exclusive_shader("outline")
 end
 
