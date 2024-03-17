@@ -1223,7 +1223,7 @@ local function draw(cam)
         if P1:is_on_keyboard_mode() then
             font:printf("[enter] pular", x, y, w, "center")
             ---
-        elseif P1:is_on_joystick_mode() then
+        elseif P1:is_on_joystick_mode() or P1:is_on_vpad_mode() then
             font:printf("[start] pular", x, y, w, "center")
         end
         font:pop()
