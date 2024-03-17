@@ -438,6 +438,23 @@ local function keyreleased(key)
 end
 
 local function mousepressed(x, y, button, istouch, presses)
+    if _G.USE_VPAD and data.container then
+        if istouch then return end
+
+        data.container:verify_mouse_collision(x, y)
+
+        local obj = data.container:get_cur_obj()
+
+        if obj and obj.is_enable and obj.is_visible and obj.on_focus then
+            return State:keypressed('space', 'space')
+        end
+
+        if data.state == States.credits then
+            return State:keypressed('escape')
+        end
+        return
+    end
+
     if button == 1 then
         return State:keypressed('return', 'return')
     elseif button == 2 then
@@ -450,11 +467,17 @@ local function mousereleased(x, y, button, istouch, presses)
 end
 
 local function mousemoved(x, y, dx, dy, istouch)
-
+    if istouch or true then
+        local container = data.container
+        if container then
+            container:verify_mouse_collision(x, y)
+        end
+    end
 end
 
 local function touchpressed(id, x, y, dx, dy, pressure)
-
+    x, y = State:real_to_screen(x, y)
+    return mousepressed(x, y, 1, false)
 end
 
 local function touchreleased(id, x, y, dx, dy, pressure)
