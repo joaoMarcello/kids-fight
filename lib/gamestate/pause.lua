@@ -299,6 +299,7 @@ local function mousepressed(x, y, button, istouch, presses)
     if _G.USE_VPAD then
         if istouch then return end
 
+        data.container:verify_mouse_collision(x, y)
         local obj = data.container:get_cur_obj()
 
         if obj and obj.is_enable and obj.is_visible and obj.on_focus then
@@ -320,11 +321,14 @@ local function mousereleased(x, y, button, istouch, presses)
 end
 
 local function mousemoved(x, y, dx, dy, istouch)
-    data.container:verify_mouse_collision(x, y)
+    if istouch then
+        data.container:verify_mouse_collision(x, y)
+    end
 end
 
 local function touchpressed(id, x, y, dx, dy, pressure)
-
+    x, y = State:real_to_screen(x, y)
+    return mousepressed(x, y, 1, false)
 end
 
 local function touchreleased(id, x, y, dx, dy, pressure)
@@ -378,7 +382,8 @@ end
 
 ---@type love.Shader|nil
 local blur
-if not _G.WEB then
+-- if not _G.WEB then
+do
     blur = JM.Shader:get_exclusive_shader("boxblur", State)
     blur:send("radius", 1.0)
 end
