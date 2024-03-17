@@ -16,7 +16,7 @@ function love.load()
     _G.TILE = 16
     _G.CANVAS_FILTER = "linear"
     _G.TARGET = love.system.getOS()
-    _G.USE_VPAD = true
+    _G.USE_VPAD = false
 
     if WEB then
         JM.Sound:set_song_mode("static")
@@ -43,10 +43,13 @@ function love.load()
         min_filter = "linear",
         max_filter = "nearest",
         character_space = 1,
+        word_space = 3,
         line_space = 8,
     }
     FONT_THALEAH:set_font_size(7)
     FONT_THALEAH:set_color(JM_Utils:get_rgba3("242833"))
+
+    JM.Vpad:set_font(FONT_THALEAH)
 
     ---@param State JM.Scene
     _G.RESIZE = function(State, w, h)
@@ -60,7 +63,7 @@ function love.load()
         State.h = h - State.y
     end
 
-    JM:get_font():set_font_size(8)
+    -- JM:get_font():set_font_size(8)
     JM.esc_to_quit = false
 
     local P1 = JM.ControllerManager.P1
@@ -90,7 +93,7 @@ function love.load()
     JM.Scene.set_default_scene_config(function(self)
         if self.is_splash_screen
             or _G.WEB
-        -- or true
+            or true
         then
             return
         end
@@ -119,8 +122,8 @@ function love.load()
                 screen_h = 256,
                 width = 0.85,
             })
-            shader:send("opacity", 0.2)
-            shader:send("uNoise", { 0.15, 1.0 })
+            shader:send("opacity", 0.15)
+            shader:send("uNoise", { 0.125, 1.0 })
 
             local ab = JM.Shader:get_shader("aberration", self, { aberration_x = 0.1, aberration_y = 0.15 })
             -- local filmgrain = JM.Shader:get_shader("filmgrain", self, { opacity = 0.3 })
@@ -143,7 +146,7 @@ function love.load()
                 end)
         end
     end)
-    return JM:load_initial_state("lib.gamestate.game", false)
+    return JM:load_initial_state("lib.gamestate.title", true, true)
 end
 
 function love.textinput(t)
@@ -159,7 +162,9 @@ function love.keypressed(key, scancode, isrepeat)
         return
     end
 
-    if not _G.WEB and scancode == 'f10' then
+    if scancode == 'f10'
+        and not _G.WEB
+    then
         SAVE_DATA.skip_crt = not SAVE_DATA.skip_crt
         local scene = JM.SceneManager.scene
         if scene then
@@ -269,6 +274,9 @@ end
 
 function love.draw()
     JM:draw()
+
+    -- love.graphics.setColor(1, 1, 0)
+    -- love.graphics.print(tostring(JM:has_default_font()), 32, 32)
 
     do
         -- local font = JM.Font.current
