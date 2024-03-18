@@ -16,7 +16,7 @@ function love.load()
     _G.TILE = 16
     _G.CANVAS_FILTER = "linear"
     _G.TARGET = love.system.getOS()
-    _G.USE_VPAD = false
+    _G.USE_VPAD = true
 
     if WEB then
         JM.Sound:set_song_mode("static")
@@ -59,7 +59,7 @@ function love.load()
         end
         State.x = math.floor(w * percent)
         State.w = w - State.x
-        State.y = math.floor(w * percent)
+        State.y = math.floor(w * percent) -- + h * 0.15
         State.h = h - State.y
     end
 

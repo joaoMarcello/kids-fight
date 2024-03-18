@@ -654,7 +654,7 @@ local function mousepressed(x, y, button, istouch, presses)
         if vpad.B:is_pressed() then
             State:keypressed('f')
         end
-        if vpad.Start:is_pressed() then
+        if vpad.Start:is_pressed() or vpad.Home:is_pressed() then
             State:keypressed('return')
         end
         if vpad.X:is_pressed() then
@@ -662,6 +662,9 @@ local function mousepressed(x, y, button, istouch, presses)
         end
         if vpad.Select:is_pressed() then
             State:keypressed('escape')
+        end
+        if vpad.R:is_pressed() or vpad.L:is_pressed() then
+            State:keypressed('f')
         end
 
         return

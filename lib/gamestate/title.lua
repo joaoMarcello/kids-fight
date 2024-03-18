@@ -467,7 +467,7 @@ local function mousereleased(x, y, button, istouch, presses)
 end
 
 local function mousemoved(x, y, dx, dy, istouch)
-    if istouch or true then
+    if istouch then
         local container = data.container
         if container then
             container:verify_mouse_collision(x, y)

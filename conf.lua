@@ -34,7 +34,7 @@ function love.conf(t)
 
 
     t.window.borderless = false -- Remove all border visuals from the window (boolean)
-    t.window.resizable = true   -- Let the window be user-resizable (boolean)
+    t.window.resizable = false  -- Let the window be user-resizable (boolean)
     t.window.minwidth = 320     -- Minimum window width if the window is resizable (number)
     t.window.minheight = 180    -- Minimum window height if the window is resizable (number)
     t.window.vsync = 1          -- Vertical sync mode (number)

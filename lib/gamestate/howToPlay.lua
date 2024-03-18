@@ -335,6 +335,11 @@ local function mousepressed(x, y, button, istouch, presses)
         if vpad.B:is_pressed() then
             return State:keypressed('escape')
         end
+        if vpad.R:is_pressed() then
+            return State:keypressed('right')
+        elseif vpad.L:is_pressed() then
+            return State:keypressed('left')
+        end
 
         return
     end
