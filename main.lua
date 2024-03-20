@@ -146,7 +146,7 @@ function love.load()
                 end)
         end
     end)
-    return JM:load_initial_state("lib.gamestate.title", true, true)
+    return JM:load_initial_state("lib.gamestate.HowToPlay", false, true)
 end
 
 function love.textinput(t)
