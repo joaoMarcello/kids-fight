@@ -321,33 +321,79 @@ local function gamepadaxis(joy, axis, value)
 end
 
 local function mousepressed(x, y, button, istouch, presses)
-    if State.use_vpad then
-        if istouch then return end
+    if State.use_vpad or State.transition then return end
+    -- if State.use_vpad then
+    --     if istouch then return end
 
-        local vpad = State:get_vpad()
+    --     local vpad = State:get_vpad()
 
-        if vpad.A:is_pressed() then
-            State:keypressed('space')
-        end
-        if vpad.Start:is_pressed() then
-            return State:keypressed('return')
-        end
-        if vpad.B:is_pressed() then
-            return State:keypressed('escape')
-        end
-        if vpad.R:is_pressed() then
-            return State:keypressed('right')
-        elseif vpad.L:is_pressed() then
-            return State:keypressed('left')
-        end
+    --     if vpad.A:is_pressed() then
+    --         return State:keypressed('space')
+    --     end
+    --     if vpad.Start:is_pressed() then
+    --         return State:keypressed('return')
+    --     end
+    --     if vpad:B_is_pressed() then
+    --         return State:keypressed('escape')
+    --     end
+    --     if vpad.R:is_pressed()
+    --         or vpad.Dpad_right:is_pressed()
 
-        return
-    end
+    --     then
+    --         return State:keypressed('right')
+    --         ---
+    --     elseif vpad.L:is_pressed()
+    --         or vpad:X_is_pressed()
+    --         or vpad.Dpad_left:is_pressed()
+    --     then
+    --         return State:keypressed('left')
+    --     end
+
+    --     return
+    -- end
 
     if button == 1 then
         return State:keypressed('space', 'space')
     elseif button == 2 then
         return State:keypressed('return', 'return')
+    end
+end
+
+local function vpadpressed(button)
+    if button == "dpleft" or button == "leftshoulder"
+        or button == "x"
+    then
+        return State:keypressed('left')
+    elseif button == "dpright" or button == "rightshoulder" then
+        return State:keypressed('right')
+    elseif button == "start" then
+        return State:keypressed('return')
+    elseif button == "b" then
+        return State:keypressed('escape')
+    elseif button == "a" then
+        return State:keypressed('space')
+    end
+end
+
+local function vpadaxis(axis, value)
+    if axis == "leftx" and value == 1 then
+        return State:keypressed('right')
+    elseif axis == "leftx" and value == -1 then
+        return State:keypressed('left')
+    end
+
+    if axis == "rightx" then
+        -- if value == 1 then
+        --     return State:keypressed('right')
+        -- elseif value == -1 then
+        --     return State:keypressed('left')
+        -- end
+    elseif axis == "righty" then
+        if value == 1 then
+            return State:keypressed('space')
+        elseif value == -1 then
+            -- return State:keypressed('left')
+        end
     end
 end
 
@@ -551,6 +597,8 @@ State:implements {
     mousemoved = mousemoved,
     touchpressed = touchpressed,
     touchreleased = touchreleased,
+    vpadpressed = vpadpressed,
+    vpadaxis = vpadaxis,
     resize = resize,
     update = update,
     draw = draw,
