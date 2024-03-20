@@ -644,31 +644,7 @@ local function keyreleased(key)
 end
 
 local function mousepressed(x, y, button, istouch, presses)
-    if State.use_vpad then
-        if istouch then return end
-
-        local vpad = State:get_vpad()
-        if vpad.A:is_pressed() then
-            State:keypressed('space')
-        end
-        if vpad.B:is_pressed() then
-            State:keypressed('f')
-        end
-        if vpad.Start:is_pressed() or vpad.Home:is_pressed() then
-            State:keypressed('return')
-        end
-        if vpad.X:is_pressed() then
-            State:keypressed('escape')
-        end
-        if vpad.Select:is_pressed() then
-            State:keypressed('escape')
-        end
-        if vpad.R:is_pressed() or vpad.L:is_pressed() then
-            State:keypressed('f')
-        end
-
-        return
-    end
+    if State.use_vpad then return end
 
     if button == 1 then
         return State:keypressed('f')
@@ -691,27 +667,6 @@ local function mousemoved(x, y, dx, dy, istouch)
 end
 
 local function touchpressed(id, x, y, dx, dy, pressure)
-    -- if State.use_vpad then
-    --     local vpad = State:get_vpad()
-
-    --     if vpad.A:is_pressed() then
-    --         State:keypressed('space')
-    --     end
-    --     if vpad.B:is_pressed() then
-    --         State:keypressed('f')
-    --     end
-    --     if vpad.Start:is_pressed() then
-    --         State:keypressed('return')
-    --     end
-    --     if vpad.X:is_pressed() then
-    --         State:keypressed('escape')
-    --     end
-    --     if vpad.Select:is_pressed() then
-    --         State:keypressed('escape')
-    --     end
-
-    --     return
-    -- end
     return mousepressed(x, y, 1, false)
 end
 
@@ -785,6 +740,47 @@ local function gamepadaxis(joystick, axis, value)
     end
 
     P1:switch_to_joystick()
+end
+
+local function vpadpressed(button)
+    -- local P1 = JM.ControllerManager.P1
+    -- local Button = P1.Button
+
+    -- if P1:pressed(Button.A) then
+    --     return State:keypressed('space')
+    -- elseif P1:pressed(Button.B)
+    --     or P1:pressed(Button.L)
+    --     or P1:pressed(Button.R)
+    -- then
+    --     return State:keypressed('f')
+    --     ---
+    -- elseif P1:pressed(Button.X)
+    --     or P1:pressed(Button.select)
+    -- then
+    --     return State:keypressed('escape')
+    --     ---
+    -- elseif P1:pressed(Button.start)
+    --     or P1:pressed(Button.home)
+    -- then
+    --     return State:keypressed('return')
+    -- end
+
+    if button == "a" then
+        return State:keypressed('space')
+        ---
+    elseif (button == "x"
+            or (button == "b" and not State:get_vpad().X.on_focus))
+        or button == "leftshoulder"
+        or button == "rightshoulder"
+    then
+        return State:keypressed('f')
+        ---
+    elseif button == "b" or button == "back" then
+        return State:keypressed('escape')
+        ---
+    elseif button == "start" or button == "guide" then
+        return State:keypressed('return')
+    end
 end
 
 local function resize(w, h)
@@ -1253,6 +1249,7 @@ State:implements {
     gamepadpressed = gamepadpressed,
     gamepadreleased = gamepadreleased,
     gamepadaxis = gamepadaxis,
+    vpadpressed = vpadpressed,
     resize = resize,
     update = update,
     draw = draw,
