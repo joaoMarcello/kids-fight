@@ -438,6 +438,8 @@ local function keyreleased(key)
 end
 
 local function mousepressed(x, y, button, istouch, presses)
+    if State.transition then return end
+
     if _G.USE_VPAD and data.container then
         if istouch then return end
 
