@@ -206,7 +206,7 @@ function Projectile:update(dt)
                             local e = Emitters:Paft(
                                 px, self.y
                             )
-                            self.gamestate:add_object(e)
+                            self.group:add_object(e)
                             return self:remove()
                         end
                     end
