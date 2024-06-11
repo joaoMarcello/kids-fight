@@ -1,7 +1,8 @@
 local path = ...
 ---@type GameState.Game|any
 local Game
-local Textbox = JM.GUI.TextBox
+local Textbox = _G.JM.GUI.TextBox
+local Utils = _G.JM_Utils
 local lgx = love.graphics
 
 do
@@ -12,10 +13,6 @@ end
 
 ---@class GameState.HowToPlay : JM.Scene
 local State = JM.Scene:new {
-    x = nil,
-    y = nil,
-    w = nil,
-    h = nil,
     canvas_w = _G.SCREEN_WIDTH or 320,
     canvas_h = _G.SCREEN_HEIGHT or 180,
     tile = _G.TILE,
@@ -26,10 +23,7 @@ local State = JM.Scene:new {
     use_canvas_layer = true,
 }
 
-State:set_color(JM.Utils:hex_to_rgba_float("c5bde6")) --e5f285
--- State.camera:set_viewport(nil, nil, State.screen_w * 0.75, State.screen_h * 0.5)
--- State.camera:set_viewport(nil, nil, State.screen_w * 0.75, State.screen_h * 0.5)
-
+State:set_color(JM.Utils:hex_to_rgba_float("c5bde6"))
 --============================================================================
 ---@class GameState.HowToPlay.Data
 local data = {
@@ -90,12 +84,12 @@ local function init(args)
     restart_game()
 
     data.text = string.format(
-        "É `#bf3526`GUERRA`#-`! Os garotos desafiaram Mônica para decidir o novo `#795ce6`dono da rua`#-`. Defenda seu posto jogando `#575b66`pedras`#` neles.<next>`#000000`Mover:`#`\tWASD `#000000`ou`#` Teclas de seta\n`#000000`Pular:`#`\tEspaço `#000000`ou`#` Mouse BD `#000000`ou`#` :bt_a:\n`#000000`Atacar:`#`\tF/J/E `#000000`ou`#` Mouse RB `#000000`ou`#` :bt_x:<next>Se acabar a munição, `#bf3526`pegue as pedras`#` deixadas pelos seus inimigos.<next>Você pode trocar os modos tela cheia e filtro CRT `#bf3526`mesmo durante o jogo`#` usando `#795ce6`F11`#` e `#795ce6`F10`#-`, respectivamente.")
+        "É `#bf3526`GUERRA`#-`! Os garotos desafiaram Mônica para decidir o novo `#795ce6`dono da rua`#-`. Defenda seu posto jogando `#575b66`pedras`#` neles.<next>`#000000`Mover:`#`\tWASD `#000000`ou`#` Teclas de seta\n`#000000`Pular:`#`\tEspaço `#000000`ou`#` Mouse BD `#000000`ou`#` :bt_a:\n`#000000`Atacar:`#`\tF/J/E `#000000`ou`#` Mouse BE `#000000`ou`#` :bt_x:<next>Se acabar a munição, `#bf3526`pegue as pedras`#` deixadas pelos seus inimigos.<next>Você pode trocar os modos tela cheia e filtro CRT `#bf3526`mesmo durante o jogo`#` usando `#795ce6`F11`#` e `#795ce6`F10`#-`, respectivamente.")
 
     local font = JM:get_font("pix8")
     font:push()
     -- font:set_font_size(font.__font_size * 2)
-    font:set_color(JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("242833")))
+    font:set_color(Utils:get_rgba3("242833"))
     data.textbox = Textbox:new {
         text = data.text,
         font = JM:get_font("pix8"),
@@ -116,14 +110,12 @@ local function init(args)
         infinity_scroll_y = true,
         height = TILE * 1.5,
         update = function(self, dt)
-            self.py = self.py + 16 * dt
+            self.py = (self.py + 16 * dt) % self.height
         end,
         draw = function(cam)
             data:sawtooth()
         end
     }
-
-    local px, py = 0, 0
 
     data.layer_chess = State:newLayer {
         infinity_scroll_x = true,
@@ -134,15 +126,12 @@ local function init(args)
         -- factor_y = 0.5,
         ---
         update = function(self, dt)
-            px = px - 16 * dt
-            py = py + 16 * dt
-            self.px = JM_Utils:round(px) -- * self.factor_x
-            self.py = JM_Utils:round(py) -- * self.factor_y
+            self.px = (self.px - 16 * dt) % self.width
+            self.py = (self.py + 16 * dt) % self.height
         end,
         draw = function(cam)
-            -- lgx.setColor(JM_Utils:hex_to_rgba_float("dcffb3"))
             lgx.setColor(1, 1, 1)
-            lgx.draw(img_chess)
+            return lgx.draw(img_chess)
         end
     }
 
@@ -382,6 +371,14 @@ local function vpadaxis(axis, value)
         return State:keypressed('left')
     end
 
+    if axis == "lefty" then
+        if value == 1 then
+            return State:keypressed('right')
+        elseif value == -1 then
+            return State:keypressed('left')
+        end
+    end
+
     if axis == "rightx" then
         -- if value == 1 then
         --     return State:keypressed('right')
@@ -392,7 +389,7 @@ local function vpadaxis(axis, value)
         if value == 1 then
             return State:keypressed('space')
         elseif value == -1 then
-            -- return State:keypressed('left')
+            return State:keypressed('left')
         end
     end
 end
@@ -443,7 +440,8 @@ end
 
 ---@type love.Shader|nil
 local overlay
-if not _G.WEB then
+-- if not _G.WEB then
+do
     local code = love.filesystem.read("/jm-love2d-package/data/shader/overlay.glsl")
     overlay = love.graphics.newShader(code)
     local color = { JM_Utils:hex_to_rgba_float("e5f285") }
@@ -470,7 +468,7 @@ end
 local draw_arrow = function(self)
     local font = JM:get_font("pix8")
     font:push()
-    font:set_color(JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("352e99")))
+    font:set_color(Utils:get_rgba3("352e99"))
     font:print(" :arw_head_fr:", self.x, self.y)
     font:pop()
 end
@@ -478,8 +476,6 @@ end
 local function draw(cam)
     local sx = data.w / State.screen_w
     local sy = data.h / State.screen_h
-
-    local Utils = JM_Utils
 
     data.layer_chess:draw(cam)
 
