@@ -11,12 +11,12 @@ function love.load()
     _G.SCREEN_WIDTH = 320 --398
     _G.SCREEN_HEIGHT = 180
 
-    _G.WEB = false
+    _G.WEB = true
     _G.SUBPIXEL = 4
     _G.TILE = 16
     _G.CANVAS_FILTER = "linear"
     _G.TARGET = love.system.getOS()
-    _G.USE_VPAD = true
+    _G.USE_VPAD = false
 
     if WEB then
         JM.Sound:set_song_mode("static")
@@ -74,6 +74,13 @@ function love.load()
     P1.button_to_key[P1.Button.R] = { 'f', 'rshift' }
     P1.button_to_key[P1.Button.L] = { 'f', 'lshift' }
     P1:set_vpad(JM.Vpad)
+    do
+        local pad = JM.Vpad
+        pad.Stick:turn_off_dpad()
+        pad:turn_off_button("Home")
+        pad:turn_off_button("L")
+        pad:turn_off_button("R")
+    end
 
     local P2 = JM.ControllerManager.P2
     P2.button_to_key[Button.A] = { 'i' }
@@ -122,15 +129,15 @@ function love.load()
                 screen_h = 256,
                 width = 0.85,
             })
-            shader:send("opacity", 0.15)
-            shader:send("uNoise", { 0.125, 1.0 })
+            shader:send("opacity", 0.125)
+            shader:send("uNoise", { 0.125, 0.0 })
 
             local ab = JM.Shader:get_shader("aberration", self, { aberration_x = 0.1, aberration_y = 0.15 })
             -- local filmgrain = JM.Shader:get_shader("filmgrain", self, { opacity = 0.3 })
             -- local noise = {}
 
             _G.Time = 0.0
-            self:set_shader({ ab, shader },
+            self:set_shader({ shader },
                 function(self, shader, n)
                     if n == 2 then
                         Time = Time - love.timer.getDelta() * 20.0
@@ -146,7 +153,11 @@ function love.load()
                 end)
         end
     end)
-    return JM:load_initial_state("lib.gamestate.HowToPlay", false, true)
+
+    if WEB then
+        JM:show_fullscreen_button()
+    end
+    return JM:load_initial_state("lib.gamestate.title", false, true)
 end
 
 function love.textinput(t)
@@ -279,7 +290,7 @@ function love.draw()
     -- love.graphics.print(tostring(JM:has_default_font()), 32, 32)
 
     do
-        -- local font = JM.Font.current
+        -- local font = JM:get_font()
         -- font:push()
         -- font:set_font_size(32)
         -- font:set_color(JM_Utils:get_rgba(1, 0, 0))
