@@ -253,7 +253,7 @@ end
 local function init(args)
     data.state = args and args.state or States.pressToPlay
 
-    local px, py = 0, 0
+    -- local px, py = 0, 0
 
     data.press_play = false
 
@@ -267,22 +267,13 @@ local function init(args)
             -- factor_y = 0.5,
             ---
             update = function(self, dt)
-                px = px - 16 * dt
-                py = py + 16 * dt
-                self.px = JM_Utils:round(px) -- * self.factor_x
-                self.py = JM_Utils:round(py) -- * self.factor_y
+                self.px = (self.px - 16 * dt) % self.width
+                self.py = (self.py + 16 * dt) % self.height
             end,
             draw = function(cam)
                 local lgx = love.graphics
-                -- lgx.setColor(JM_Utils:hex_to_rgba_float("d1dbf2"))
-                -- lgx.rectangle("fill", 0, 0, 32, 32)
-                -- lgx.rectangle("fill", 32, 32, 32, 32)
-                -- lgx.setColor(JM_Utils:hex_to_rgba_float("e9e8ff"))
-                -- lgx.rectangle("fill", 32, 0, 32, 32)
-                -- lgx.rectangle("fill", 0, 32, 32, 32)
-
                 lgx.setColor(1, 1, 1)
-                lgx.draw(imgs["chess"])
+                return lgx.draw(imgs["chess"])
             end
         },
         ---
@@ -438,7 +429,7 @@ local function keyreleased(key)
 end
 
 local function mousepressed(x, y, button, istouch, presses)
-    if State.transition then return end
+    if State.transition or istouch then return end
 
     if _G.USE_VPAD and data.container then
         if istouch then return end
@@ -650,8 +641,8 @@ local __draw__ = {
         )
 
         local list = data.credits.boxes
-        local py = math.floor(data.credits_py + 0.5)
-        -- local py = data.credits_py
+        -- local py = math.floor(data.credits_py + 0.5)
+        local py = data.credits_py
 
         for i = 1, data.credits.n_boxes do
             ---@type JM.GUI.TextBox
@@ -667,7 +658,7 @@ local __draw__ = {
             font:push()
             font:set_color(JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("332424")))
             font:printf(
-                "Copyright, ©2024. `#334266`Limoeiro Fight: Eu Nunca\n Sofri Bullying</color no-space>, por `#000000`JM`#-`.\n Todos os direitos reservados.",
+                "©2024, `#334266`Limoeiro Fight: Eu Nunca\n Sofri Bullying</color no-space>, por `#000000`JM`#-`.",
                 0,
                 math.max(py + 16, 16 * 6),
                 -- 16 * 7,
