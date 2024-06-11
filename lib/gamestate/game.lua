@@ -224,7 +224,8 @@ function data:leader_is_dead()
 end
 
 function data:remove_all_projectiles()
-    local list = State.game_objects
+    local list = self.group.list
+
     for i = 1, #list do
         ---@type Projectile|any
         local obj = list[i]
@@ -320,6 +321,8 @@ end
 local function load_wave(value)
     value = value or 1
     data.wave_number = value
+    local group = data.group
+
     data:set_state(States.waveIsComing)
 
     if State:is_current_active() and not State:is_showing_black_bar() then
@@ -333,7 +336,8 @@ local function load_wave(value)
     end
 
     ---@type Kid
-    local k = data.leader or State:add_object(Kid:new(SCREEN_WIDTH, 16 * 7, Kid.Gender.boy, -1, true, 2, 2))
+    local k = data.leader
+        or group:add_object(Kid:new(SCREEN_WIDTH, 16 * 7, Kid.Gender.boy, -1, true, 2, 2))
 
     if k.state ~= Kid.State.idle then
         k:set_position(SCREEN_WIDTH, 16 * 7)
@@ -357,7 +361,7 @@ local function load_wave(value)
         ---
     elseif value == 2 then
         ---@type Kid
-        k = State:add_object(Kid:new(16 * 15, 16 * 9, Kid.Gender.boy, -1, true, 3, 3))
+        k = group:add_object(Kid:new(16 * 15, 16 * 9, Kid.Gender.boy, -1, true, 3, 3))
         k:set_position(SCREEN_WIDTH, 16 * 9)
         k:set_target_position(16 * 14, 16 * 9)
         k:set_state(k.State.preparing)
@@ -374,7 +378,7 @@ local function load_wave(value)
         leader:set_hp(4)
 
         ---@type Kid
-        k = State:add_object(Kid:new(16 * 15, 16 * 9, Kid.Gender.boy, -1, true, 3, 4))
+        k = group:add_object(Kid:new(16 * 15, 16 * 9, Kid.Gender.boy, -1, true, 3, 4))
         k:set_position(SCREEN_WIDTH, 16 * 9)
         k:set_target_position(16 * 15.5, 16 * 9)
         k:set_state(Kid.State.preparing)
@@ -388,7 +392,7 @@ local function load_wave(value)
         table.insert(data.kids, k)
 
         ---@type Kid
-        k = State:add_object(Kid:new(16 * 4, 16 * 5, Kid.Gender.boy, -1, true, 2, 5))
+        k = group:add_object(Kid:new(16 * 4, 16 * 5, Kid.Gender.boy, -1, true, 2, 5))
         k:set_position(SCREEN_WIDTH, 16 * 5)
         k:set_target_position(16 * 15, 16 * 5)
         k:set_state(Kid.State.preparing)
@@ -403,7 +407,7 @@ local function load_wave(value)
         leader:set_hp(5)
 
         ---@type Kid
-        k = State:add_object(Kid:new(16 * 12, 16 * 4, Kid.Gender.boy, -1, true, 2, 5))
+        k = group:add_object(Kid:new(16 * 12, 16 * 4, Kid.Gender.boy, -1, true, 2, 5))
         k:set_position(SCREEN_WIDTH, 16 * 7.5)
         k:set_target_position(16 * 18, 16 * 7.5)
         k:set_state(k.State.preparing)
@@ -415,7 +419,7 @@ local function load_wave(value)
         table.insert(data.kids, k)
 
         ---@type Kid
-        k = State:add_object(Kid:new(16 * 15, 16 * 9, Kid.Gender.boy, -1, true, 3, 4))
+        k = group:add_object(Kid:new(16 * 15, 16 * 9, Kid.Gender.boy, -1, true, 3, 4))
         k:set_position(SCREEN_WIDTH, 16 * 9)
         k:set_target_position(16 * 14.5, 16 * 9)
         k:set_state(k.State.preparing)
@@ -431,7 +435,7 @@ local function load_wave(value)
         table.insert(data.kids, k)
 
         ---@type Kid
-        k = State:add_object(Kid:new(16 * 17, 16 * 5, Kid.Gender.boy, -1, true, 1, 3))
+        k = group:add_object(Kid:new(16 * 17, 16 * 5, Kid.Gender.boy, -1, true, 1, 3))
         k:set_position(SCREEN_WIDTH, 16 * 5)
         k:set_target_position(16 * 16.5, 16 * 5)
         k:set_state(k.State.preparing)
@@ -477,7 +481,10 @@ local function init(args)
     JM.ParticleSystem.time_to_flush = math.huge
     JM.ParticleSystem:init_module(data.world, State)
 
-    State.game_objects = {}
+    data.group = JM.Group:new(State, data.world)
+    local group = data.group
+
+    -- State.game_objects = nil --{}
 
     data.player = Kid:new(16 * 7, 16 * 7, 1)
     data.player:set_position(-50, 16 * 7)
@@ -488,13 +495,14 @@ local function init(args)
         data.player.is_visible = false
     end
 
-    State:add_object(data.player)
+    -- State:add_object(data.player)
+    group:add_object(data.player)
 
     JM.Physics:newBody(data.world, 0, 0, SCREEN_WIDTH, 16 * 3, "static")
     JM.Physics:newBody(data.world, 0, SCREEN_HEIGHT - 16, SCREEN_WIDTH, 16, "static")
 
     data.leader = nil
-    data.wave_number = args.wave_number or 1
+    data.wave_number = args.wave_number or 2
     load_wave(data.wave_number)
 
     data.displayHP = DisplayHP:new(data.player)
@@ -947,7 +955,8 @@ function data:skip_intro()
     end
 
     do
-        local objs = State.game_objects
+        -- local objs = State.game_objects
+        local objs = self.group.list
 
         for i = #objs, 1, -1 do
             ---@type Kid|JM.Emitter|any
@@ -1012,7 +1021,8 @@ local function update(dt)
     end
 
     data.world:update(dt)
-    State:update_game_objects(dt)
+    -- State:update_game_objects(dt)
+    data.group:update(dt)
 
     if data.gamestate == States.game
         or (data.countdown_time and data.countdown_time > 0
@@ -1059,7 +1069,7 @@ local function draw(cam)
     local _canvas = lgx.getCanvas()
     lgx.setCanvas(State.canvas_layer)
     lgx.clear()
-    local list = State.game_objects
+    local list = data.group.list -- State.game_objects
     for i = 1, #list do
         ---@type GameObject|BodyObject|Kid|Projectile|any
         local obj = list[i]
@@ -1079,7 +1089,8 @@ local function draw(cam)
     lgx.setColor(1, 1, 1)
     lgx.draw(imgs["street_up"], -16, -16)
 
-    State:draw_game_object(cam, nil, sort_draw)
+    -- State:draw_game_object(cam, nil, sort_draw)
+    data.group:draw(cam, nil, sort_draw)
 
     lgx.setColor(Utils:hex_to_rgba_float("799299"))
     lgx.draw(imgs["street_down"], -16)
