@@ -35,7 +35,7 @@ local function rundust_action(self, dt, args)
         p.anima:set_flip_x(obj.direction == 1)
         e:add_particle(p)
         e.lifetime = -1000
-        self.gamestate:add_object(e)
+        self:add_object(e)
         self.duration = 0.22
     end
 end
