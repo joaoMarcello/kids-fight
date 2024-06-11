@@ -64,7 +64,7 @@ local function throw_stone(self)
         self.direction
     )
 
-    self.gamestate:add_object(p)
+    self:add_object(p)
     self.stones = self.stones - 1
 
     self.cur_anima = self.animas[AnimaState.atk]
@@ -193,7 +193,7 @@ function Kid:__constructor__(gender, direction, is_enemy, move_type, ID)
     self:keep_on_bounds()
 
     self.emitter_rundust = Emitters:RunDust(self)
-    self.gamestate:add_object(self.emitter_rundust)
+    self:add_object(self.emitter_rundust)
 
     self:set_state(States.normal)
 
@@ -618,7 +618,7 @@ function Kid:jump(height)
         self:remove_effect("stretchSquash")
 
         self.emitter_rundust.pause = true
-        self.gamestate:add_object(
+        self:add_object(
             Emitters:Zup(self)
         )
 
@@ -823,7 +823,8 @@ local function movement(self, dt)
                         )
                     else
                         if self.stones <= 0 then
-                            local list = self.gamestate.game_objects
+                            -- local list = self.gamestate.game_objects
+                            local list = self.group.list
                             local found = false
                             for i = 1, #list do
                                 ---@type Projectile|any
@@ -993,7 +994,7 @@ function Kid:update(dt)
             self.cur_anima:reset()
 
             local e = Emitters:FallDust(self)
-            self.gamestate:add_object(e)
+            self:add_object(e)
         end
     else
         if not self.is_jump then
