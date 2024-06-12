@@ -1130,7 +1130,8 @@ local kid_draw = function(self)
     -- lgx.setColor(0, 0, 1)
     -- lgx.rectangle("line", self.body2:rect())
 
-    return self.cur_anima:draw_rec(self.body2:rect())
+    local x, y, w, h = self.body2:rect()
+    return self.cur_anima:draw_rec(x, y, w, h)
 end
 
 function Kid:draw()
