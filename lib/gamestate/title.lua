@@ -1,6 +1,7 @@
 local path = ...
 local Container = JM.GUI.Container
 local Component = JM.GUI.Component
+local Particles = require "lib.particles"
 
 do
     _G.SUBPIXEL = _G.SUBPIXEL or 3
@@ -140,8 +141,7 @@ end
 
 ---@param self JM.GUI.Component
 local bt_gained_focus = function(self)
-    -- return self:set_effect_transform("ox", -8)
-    self:apply_effect("earthquake", { range_y = 0, duration_x = 0.3, range_x = 5 })
+    return self:apply_effect("earthquake", { range_y = 0, duration_x = 0.3, range_x = 5 }, true)
 end
 
 ---@param self JM.GUI.Component
@@ -270,7 +270,7 @@ local function init(args)
                 self.px = (self.px - 16 * dt) % self.width
                 self.py = (self.py + 16 * dt) % self.height
             end,
-            draw = function(cam)
+            draw = function()
                 local lgx = love.graphics
                 lgx.setColor(1, 1, 1)
                 return lgx.draw(imgs["chess"])
@@ -279,6 +279,19 @@ local function init(args)
         ---
         ---
     }
+
+    do
+        local img = Particles.IMG
+        local hand_quad = love.graphics.newQuad(0, 16, 16, 16, Particles.IMG:getDimensions())
+        data.hand = JM.GameObject:new(32, 32, 16, 16, nil, nil)
+        data.hand:set_custom_draw(function(self)
+            local lgx = love.graphics
+            lgx.setColor(1, 1, 1)
+            -- lgx.rectangle("line", self:rect())
+            lgx.draw(img, hand_quad, self.x, self.y)
+        end)
+        data.hand:apply_effect("pointing", { range = 2, speed = 0.75 })
+    end
 
     _G.Play_song("title")
     -- JM.Sound:fade_in()
@@ -583,6 +596,14 @@ local function update(dt)
         P1:set_state(last)
         data.credits_py = data.credits_py - speed * dt
     end
+
+    if data.state ~= States.pressToPlay then
+        local obj = data.container:get_cur_obj()
+        local hand = data.hand
+        hand.y = obj.y + obj.h * 0.5 - hand.h * 0.5
+        hand.x = obj.x - 3
+        hand:update(dt)
+    end
 end
 
 local __draw__ = {
@@ -725,7 +746,14 @@ local function draw(cam)
 
     -- local font = _G.FONT_THALEAH
     -- font:print("teste", 16, 16)
-    return __draw__[data.state](__draw__, cam)
+    __draw__[data.state](__draw__, cam)
+
+    if state ~= States.pressToPlay
+        and state ~= States.credits
+        and not State.transition
+    then
+        data.hand:draw()
+    end
 end
 --============================================================================
 State:implements {
