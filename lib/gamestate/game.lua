@@ -153,7 +153,8 @@ function data:load_dialogue(file_name)
             text_align = 3,
             time_wait = 0.1,
             glyph_sfx = "glyph bip",
-            finish_sfx = "box end"
+            finish_sfx = "box end",
+            do_round = true,
         })
 end
 
@@ -361,7 +362,7 @@ local function load_wave(value)
         ---
     elseif value == 2 then
         ---@type Kid
-        k = group:add_object(Kid:new(16 * 15, 16 * 9, Kid.Gender.boy, -1, true, 3, 3))
+        k = group:add_object(Kid:new(16 * 15, 16 * 9, Kid.Gender.boy, -1, true, 3, 5))
         k:set_position(SCREEN_WIDTH, 16 * 9)
         k:set_target_position(16 * 14, 16 * 9)
         k:set_state(k.State.preparing)
@@ -392,7 +393,7 @@ local function load_wave(value)
         table.insert(data.kids, k)
 
         ---@type Kid
-        k = group:add_object(Kid:new(16 * 4, 16 * 5, Kid.Gender.boy, -1, true, 2, 5))
+        k = group:add_object(Kid:new(16 * 4, 16 * 5, Kid.Gender.boy, -1, true, 2, 3))
         k:set_position(SCREEN_WIDTH, 16 * 5)
         k:set_target_position(16 * 15, 16 * 5)
         k:set_state(Kid.State.preparing)
@@ -502,7 +503,7 @@ local function init(args)
     JM.Physics:newBody(data.world, 0, SCREEN_HEIGHT - 16, SCREEN_WIDTH, 16, "static")
 
     data.leader = nil
-    data.wave_number = args.wave_number or 2
+    data.wave_number = args.wave_number or 1
     load_wave(data.wave_number)
 
     data.displayHP = DisplayHP:new(data.player)
