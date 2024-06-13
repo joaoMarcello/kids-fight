@@ -98,9 +98,9 @@ local bt_draw = function(self)
     local Utils = JM_Utils
 
     if on_focus then
-        lgx.setColor(Utils:get_rgba3("99752e"))
+        lgx.setColor(Utils:get_rgba3("5d6633")) --99752e
     else
-        lgx.setColor(Utils:get_rgba3("664433"))
+        lgx.setColor(Utils:get_rgba3("243324")) --664433
     end
     lgx.polygon("fill",
         x + 4 + 2, y + 2,
@@ -110,9 +110,9 @@ local bt_draw = function(self)
     )
 
     if on_focus then
-        lgx.setColor(Utils:get_rgba3("e6c45c"))
+        lgx.setColor(Utils:get_rgba3("3dbf26")) -- e6c45c
     else
-        lgx.setColor(Utils:get_rgba3("99752e"))
+        lgx.setColor(Utils:get_rgba3("336634")) -- 99752e
     end
     lgx.polygon("fill",
         x + 4, y,
@@ -123,9 +123,9 @@ local bt_draw = function(self)
 
     font:push()
     if on_focus then
-        font:set_color(Utils:get_rgba3("664433"))
+        font:set_color(Utils:get_rgba3("e8fff0")) -- 664433
     else
-        font:set_color(Utils:get_rgba3("bfbf91"))
+        font:set_color(Utils:get_rgba3("2e9955")) -- bfbf91
     end
     local func = font.printf
 
@@ -608,8 +608,10 @@ end
 
 local __draw__ = {
     [States.pressToPlay] = function(self, cam)
+        local Utils = JM_Utils
+
         font:push()
-        font:set_color(JM_Utils:get_rgba3("332424"))
+        font:set_color(Utils:get_rgba3("332424"))
 
         local P1 = JM.ControllerManager.P1
 
@@ -622,7 +624,7 @@ local __draw__ = {
                 "center")
         end
 
-        font:printf("©2024, JM", 0, 16 * 9, SCREEN_WIDTH, "center")
+        -- font:printf("©2024, JM", 0, 16 * 9, SCREEN_WIDTH, "center")
 
         -- love.graphics.setColor(JM_Utils:hex_to_rgba_float("998e79"))
         -- love.graphics.ellipse("fill", SCREEN_WIDTH * 0.5 + 1, 16 * 2 + 16 + 4 + 2, 64, 32)
@@ -630,6 +632,12 @@ local __draw__ = {
         -- love.graphics.ellipse("fill", SCREEN_WIDTH * 0.5, 16 * 2 + 16 + 4, 64, 32)
         -- font:set_font_size(18)
         -- font:printf("KIDS\nFIGHT", 0, 16 * 2, SCREEN_WIDTH, "center")
+        font:pop()
+
+        local font = JM:get_font("pix5")
+        font:push()
+        font:set_color(Utils:get_rgba3("5f5766"))
+        font:printf("(c)2024, jm", 0, 16 * 9, SCREEN_WIDTH, "center")
         font:pop()
 
         love.graphics.setColor(1, 1, 1)
