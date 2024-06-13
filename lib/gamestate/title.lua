@@ -62,10 +62,12 @@ local function load()
     imgs = imgs or {
         ["chess"] = love.graphics.newImage("/data/img/new_background_01.png"),
         ["logo_high"] = love.graphics.newImage("/data/img/logo_high.png"),
+        banner = love.graphics.newImage("/data/img/title_banner.png"),
     }
 
     imgs["chess"]:setFilter("nearest", "nearest")
     imgs["logo_high"]:setFilter("nearest", "nearest")
+    imgs.banner:setFilter("nearest", "nearest")
     --========================================================================
     local Sound = JM.Sound
     Sound:add_sfx("/data/sfx/UI/move up down 01.ogg", "ui-move", 0.25)
@@ -649,6 +651,10 @@ local __draw__ = {
     ---
     [States.options] = function(self, cam)
         data.container:draw(cam)
+
+        local lgx = love.graphics
+        lgx.setColor(1, 1, 1)
+        lgx.draw(imgs.banner, 96 + 64, 48)
     end,
     ---
     ---
@@ -687,7 +693,7 @@ local __draw__ = {
             font:push()
             font:set_color(JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("332424")))
             font:printf(
-                "©2024, `#334266`Limoeiro Fight: Eu Nunca\n Sofri Bullying</color no-space>, por `#000000`JM`#-`.",
+                "©2024, `#334266`Limoeiro Fight</color no-space>, por `#000000`JM`#-`.",
                 0,
                 math.max(py + 16, 16 * 6),
                 -- 16 * 7,
