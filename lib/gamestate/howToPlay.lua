@@ -84,12 +84,12 @@ local function init(args)
     restart_game()
 
     data.text = string.format(
-        "É `#bf3526`GUERRA`#-`! Os garotos desafiaram Mônica para decidir o novo `#795ce6`dono da rua`#-`. Defenda seu posto jogando `#575b66`pedras`#` neles.<next>`#000000`Mover:`#`\tWASD `#000000`ou`#` Teclas de seta\n`#000000`Pular:`#`\tEspaço `#000000`ou`#` Mouse BD `#000000`ou`#` :bt_a:\n`#000000`Atacar:`#`\tF/J/E `#000000`ou`#` Mouse BE `#000000`ou`#` :bt_x:<next>Se acabar a munição, `#bf3526`pegue as pedras`#` deixadas pelos seus inimigos.<next>Você pode trocar os modos tela cheia e filtro CRT `#bf3526`mesmo durante o jogo`#` usando `#795ce6`F11`#` e `#795ce6`F10`#-`, respectivamente.")
+        "É `#bf3526`GUERRA`#-`! Os garotos desafiaram Mônica para decidir o novo `#266bbf`dono da rua`#-`. Defenda seu posto jogando pedras neles.<next>`#000000`Mover:`#`\tWASD `#000000`ou`#` Teclas de seta\n`#000000`Pular:`#`\tEspaço `#000000`ou`#` Mouse BD `#000000`ou`#` :bt_a:\n`#000000`Atacar:`#`\tF/J/E `#000000`ou`#` Mouse BE `#000000`ou`#` :bt_x:<next>Se acabar a munição, `#bf3526`pegue as pedras`#` deixadas pelos seus inimigos.<next>Você pode trocar os modos tela cheia e filtro CRT `#bf3526`mesmo durante o jogo`#` usando `#795ce6`F11`#` e `#795ce6`F10`#-`, respectivamente.")
 
     local font = JM:get_font("pix8")
     font:push()
     -- font:set_font_size(font.__font_size * 2)
-    font:set_color(Utils:get_rgba3("242833"))
+    font:set_color(Utils:get_rgba3("332424")) -- 242833
     data.textbox = Textbox:new {
         text = data.text,
         font = JM:get_font("pix8"),
@@ -516,17 +516,17 @@ local function draw(cam)
     end
 
     local box = data.textbox
-    lgx.setColor(Utils:hex_to_rgba_float("f4ffe8")) --e8fff0
+    lgx.setColor(Utils:hex_to_rgba_float("e6c45c")) --f4ffe8
     local x, y, w, h = box:rect()
     lgx.rectangle("fill", x - 8, y - 4, w + 16 + 16, h + 8, 2, 2)
     box:draw(cam)
 
     -- box outline
-    lgx.setColor(Utils:hex_to_rgba_float("334266"))
+    lgx.setColor(Utils:hex_to_rgba_float("33242d")) -- 334266
     lgx.rectangle("line", x - 8, y - 4, w + 16 + 16, h + 8, 2, 2)
 
     -- orange box shadow
-    lgx.setColor(Utils:hex_to_rgba_float("334266"))
+    lgx.setColor(Utils:hex_to_rgba_float("33242d")) -- 334266
     lgx.polygon("fill",
         x - 16 + 4 + 1, y - 12 + 1,
         x - 12 + 16 * 4 + 1, y - 12 + 1,
@@ -534,7 +534,7 @@ local function draw(cam)
         x - 16 + 1, y + 1
     )
     -- orange box
-    lgx.setColor(Utils:hex_to_rgba_float("213ad9")) --d96c21
+    lgx.setColor(Utils:hex_to_rgba_float("99752e")) --213ad9
     lgx.polygon("fill",
         x - 16 + 4, y - 12,
         x - 12 + 16 * 4, y - 12,
@@ -561,7 +561,7 @@ local function draw(cam)
     local text = "objetivo"
     text = box.cur_screen == 2 and "controles" or text
     text = box.cur_screen >= 3 and "dicas" or text
-    font:set_color(JM.Utils:get_rgba(1, 1, 1))
+    font:set_color(Utils:get_rgba(1, 1, 1))
     font:printf(text, x - 16, y - 12, 16 * 4, "center")
     font:pop()
 
