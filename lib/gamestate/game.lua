@@ -155,6 +155,7 @@ function data:load_dialogue(file_name)
             glyph_sfx = "glyph bip",
             finish_sfx = "box end",
             do_round = true,
+            speed = 0.04,
         })
 end
 
