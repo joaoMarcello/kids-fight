@@ -157,7 +157,7 @@ function love.load()
     if WEB then
         JM:show_fullscreen_button()
     end
-    return JM:load_initial_state("lib.gamestate.title", false, true)
+    return JM:load_initial_state("lib.gamestate.title", true, true)
 end
 
 function love.textinput(t)
