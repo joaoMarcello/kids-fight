@@ -450,7 +450,7 @@ do
 end
 
 function data:sawtooth()
-    lgx.setColor(JM_Utils:hex_to_rgba_float("d2dbc8"))
+    lgx.setColor(JM_Utils:hex_to_rgba_float("d2dbc8")) -- d2dbc8
     local px = (TILE * 6)
     local h = TILE * 1.5
     local h2 = TILE * 0.5
@@ -482,11 +482,13 @@ local function draw(cam)
     data.layer_sawtooth.angle = -math.pi * 0.015
     data.layer_sawtooth:draw(cam)
 
-    lgx.setColor(Utils:hex_to_rgba_float("d96c21"))
+    lgx.setColor(Utils:hex_to_rgba_float("3dbf26"))
     lgx.ellipse("fill", 48, 24, 40, 16, 10)
     local font = _G.FONT_THALEAH
     font:push()
     font:set_line_space(3)
+    font:set_color(Utils:get_rgba3("00000085"))
+    font:printf("COMO\nJOGAR", 1, TILE + 1, 96, "center")
     font:set_color(Utils:get_rgba3("f4ffe8"))
     font:printf("COMO\nJOGAR", 0, TILE, 96, "center")
     font:pop()
