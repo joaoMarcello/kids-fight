@@ -141,6 +141,28 @@ local function init(args)
 
     data.time_state = 0.0
 
+    do
+        local obj = JM.GameObject:new(0, 16, 96, 32, 1, 1)
+        obj.ox = obj.w * 0.5
+        obj.oy = obj.h * 0.5
+
+        -- obj:apply_effect("swing", { range = math.pi * 0.25 * 0.015, speed = 3 })
+        obj:apply_effect("pulse", { range = 0.025, speed = 2 })
+        data.howtoplay_obj = obj
+        obj:set_custom_draw(function(self)
+            lgx.setColor(Utils:hex_to_rgba_float("3dbf26"))
+            lgx.ellipse("fill", 48, 24, 40, 16, 10)
+            local font = _G.FONT_THALEAH
+            font:push()
+            font:set_line_space(3)
+            font:set_color(Utils:get_rgba3("00000085"))
+            font:printf("COMO\nJOGAR", 1, TILE + 1, 96, "center")
+            font:set_color(Utils:get_rgba3("f4ffe8"))
+            font:printf("COMO\nJOGAR", 0, TILE, 96, "center")
+            font:pop()
+        end)
+    end
+
     JM.Sound:play_song("HowToPlay", true)
 end
 
@@ -436,6 +458,7 @@ local function update(dt)
     data.layer_sawtooth:update(dt)
     data.layer_chess:update(dt)
     data.aff:update(dt)
+    data.howtoplay_obj:update(dt)
 end
 
 ---@type love.Shader|nil
@@ -445,7 +468,7 @@ do
     local code = love.filesystem.read("/jm-love2d-package/data/shader/overlay.glsl")
     overlay = love.graphics.newShader(code)
     local color = { JM_Utils:hex_to_rgba_float("e5f285") }
-    color[4] = 0.3
+    color[4] = 0.4 --0.3
     overlay:sendColor("c", color)
 end
 
@@ -482,16 +505,17 @@ local function draw(cam)
     data.layer_sawtooth.angle = -math.pi * 0.015
     data.layer_sawtooth:draw(cam)
 
-    lgx.setColor(Utils:hex_to_rgba_float("3dbf26"))
-    lgx.ellipse("fill", 48, 24, 40, 16, 10)
-    local font = _G.FONT_THALEAH
-    font:push()
-    font:set_line_space(3)
-    font:set_color(Utils:get_rgba3("00000085"))
-    font:printf("COMO\nJOGAR", 1, TILE + 1, 96, "center")
-    font:set_color(Utils:get_rgba3("f4ffe8"))
-    font:printf("COMO\nJOGAR", 0, TILE, 96, "center")
-    font:pop()
+    -- lgx.setColor(Utils:hex_to_rgba_float("3dbf26"))
+    -- lgx.ellipse("fill", 48, 24, 40, 16, 10)
+    -- local font = _G.FONT_THALEAH
+    -- font:push()
+    -- font:set_line_space(3)
+    -- font:set_color(Utils:get_rgba3("00000085"))
+    -- font:printf("COMO\nJOGAR", 1, TILE + 1, 96, "center")
+    -- font:set_color(Utils:get_rgba3("f4ffe8"))
+    -- font:printf("COMO\nJOGAR", 0, TILE, 96, "center")
+    -- font:pop()
+    data.howtoplay_obj:draw(cam)
 
     local font = JM:get_font("pix8")
 
