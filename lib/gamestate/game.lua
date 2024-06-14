@@ -14,10 +14,6 @@ end
 
 ---@class GameState.Game : JM.Scene
 local State = JM.Scene:new {
-    x = nil,
-    y = nil,
-    w = nil,
-    h = nil,
     canvas_w = _G.SCREEN_WIDTH or 320,
     canvas_h = _G.SCREEN_HEIGHT or 180,
     tile = _G.TILE,
@@ -25,7 +21,7 @@ local State = JM.Scene:new {
     canvas_filter = _G.CANVAS_FILTER or 'linear',
     cam_scale = 1,
     use_canvas_layer = true,
-    -- use_vpad = true,
+    use_vpad = _G.USE_VPAD,
 }
 
 ---@enum GameState.Game.States
