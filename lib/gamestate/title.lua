@@ -11,10 +11,6 @@ end
 
 ---@class GameState.Title : JM.Scene
 local State = JM.Scene:new {
-    x = nil,
-    y = nil,
-    w = nil,
-    h = nil,
     canvas_w = _G.SCREEN_WIDTH or 320,
     canvas_h = _G.SCREEN_HEIGHT or 180,
     tile = _G.TILE,
@@ -81,7 +77,10 @@ end
 
 local function finish()
     if imgs then
-        imgs["chess"]:release()
+        for k, img in next, imgs do
+            img:release()
+            imgs[k] = nil
+        end
     end
     ---@diagnostic disable-next-line: cast-local-type
     imgs = nil
@@ -150,7 +149,6 @@ end
 
 ---@param self JM.GUI.Component
 local bt_lose_focus = function(self)
-    -- return self:set_effect_transform("ox", 0)
     self.__effect_manager:clear()
 end
 
@@ -257,8 +255,6 @@ end
 local function init(args)
     data.state = args and args.state or States.pressToPlay
 
-    -- local px, py = 0, 0
-
     data.press_play = false
 
     data.layers = {
@@ -267,8 +263,6 @@ local function init(args)
             infinity_scroll_y = true,
             width = imgs["chess"]:getWidth(),   -- 64
             height = imgs["chess"]:getHeight(), --64
-            -- factor_x = 0.5,
-            -- factor_y = 0.5,
             ---
             update = function(self, dt)
                 self.px = (self.px - 16 * dt) % self.width
@@ -291,7 +285,6 @@ local function init(args)
         data.hand:set_custom_draw(function(self)
             local lgx = love.graphics
             lgx.setColor(1, 1, 1)
-            -- lgx.rectangle("line", self:rect())
             lgx.draw(img, hand_quad, self.x, self.y)
         end)
         data.hand:apply_effect("pointing", { range = 2, speed = 0.75 })
@@ -301,9 +294,8 @@ local function init(args)
         local w, h = imgs.banner:getDimensions()
 
         local obj = JM.GameObject:new(96 + 64, 40, w, h, 1, 1)
-        obj.ox = obj.w * 0.5 -- - 20
-        obj.oy = obj.h * 0.5 -- - 40
-        -- obj:apply_effect("swing", { speed = 4, range = math.pi * 0.25 * 0.0075 })
+        obj.ox = obj.w * 0.5
+        obj.oy = obj.h * 0.5
         obj:apply_effect("float", { range = 2, speed = 3.5 })
         data.banner_obj = obj
         obj:set_custom_draw(function(self)
@@ -595,7 +587,6 @@ local function update(dt)
 
     if data.credits and data.state == States.credits then
         for i = 1, data.credits.n_boxes do
-            ---@type JM.GUI.TextBox
             local box = data.credits.boxes[i]
             box:update(dt)
         end
@@ -645,16 +636,9 @@ local __draw__ = {
             font:printx("<effect=ghost, min=0.1, max=1.15>Pressione START para jogar", 0, 16 * 7, SCREEN_WIDTH,
                 "center")
         end
-
-        -- font:printf("©2024, JM", 0, 16 * 9, SCREEN_WIDTH, "center")
-
-        -- love.graphics.setColor(JM_Utils:hex_to_rgba_float("998e79"))
-        -- love.graphics.ellipse("fill", SCREEN_WIDTH * 0.5 + 1, 16 * 2 + 16 + 4 + 2, 64, 32)
-        -- love.graphics.setColor(1, 1, 1)
-        -- love.graphics.ellipse("fill", SCREEN_WIDTH * 0.5, 16 * 2 + 16 + 4, 64, 32)
-        -- font:set_font_size(18)
-        -- font:printf("KIDS\nFIGHT", 0, 16 * 2, SCREEN_WIDTH, "center")
         font:pop()
+
+
 
         local font = JM:get_font("pix5")
         font:push()
@@ -677,9 +661,6 @@ local __draw__ = {
     ---
     ---@param cam JM.Camera.Camera
     [States.credits] = function(self, cam)
-        -- love.graphics.setColor(1, 0, 0)
-        -- love.graphics.rectangle("line", SCREEN_WIDTH * 0.5 - 16 * 3, 0, 16 * 6, 16 * 4)
-
         love.graphics.setColor(1, 1, 1)
         ---@type love.Image
         local logo = imgs["logo_high"]
@@ -693,14 +674,11 @@ local __draw__ = {
         )
 
         local list = data.credits.boxes
-        -- local py = math.floor(data.credits_py + 0.5)
         local py = data.credits_py
 
         for i = 1, data.credits.n_boxes do
-            ---@type JM.GUI.TextBox
             local box = list[i]
 
-            -- box.y = math.floor(py + 0.5)
             box.y = py
             box:draw(cam)
             py = py + box.h + 16
@@ -713,14 +691,13 @@ local __draw__ = {
                 "©2024, `#334266`Limoeiro Fight</color no-space>, por `#000000`JM`#-`.",
                 0,
                 math.max(py + 16, 16 * 6),
-                -- 16 * 7,
                 SCREEN_WIDTH, "center")
 
             if py < 16 * 4.25 then
                 local P1 = JM.ControllerManager.P1
                 if P1:is_on_keyboard_mode() then
                     font:print("[esc] Voltar", 16, TILE * 9.5)
-                elseif P1:is_on_joystick_mode() then
+                elseif P1:is_on_joystick_mode() or P1:is_on_vpad_mode() then
                     font:print(":bt_b: Voltar", 16, TILE * 9.5)
                 end
             end
@@ -775,8 +752,6 @@ local function draw(cam)
         font_pix5:pop()
     end
 
-    -- local font = _G.FONT_THALEAH
-    -- font:print("teste", 16, 16)
     __draw__[data.state](__draw__, cam)
 
     if state ~= States.pressToPlay
