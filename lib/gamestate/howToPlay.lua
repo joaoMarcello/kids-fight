@@ -21,6 +21,7 @@ local State = JM.Scene:new {
     cam_scale = 1,
     show_border = false,
     use_canvas_layer = true,
+    use_vpad = _G.USE_VPAD,
 }
 
 State:set_color(JM.Utils:hex_to_rgba_float("c5bde6"))
@@ -468,7 +469,7 @@ do
     local code = love.filesystem.read("/jm-love2d-package/data/shader/overlay.glsl")
     overlay = love.graphics.newShader(code)
     local color = { JM_Utils:hex_to_rgba_float("e5f285") }
-    color[4] = 0.4 --0.3
+    color[4] = 0.3 --0.3
     overlay:sendColor("c", color)
 end
 
