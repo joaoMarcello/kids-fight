@@ -41,6 +41,7 @@ State:set_color(1, 0, 0, 1)
 ---@class GameState.Title.Data
 local data = {}
 
+---@type table<string, love.Image>
 local imgs
 
 --============================================================================
@@ -82,6 +83,7 @@ local function finish()
     if imgs then
         imgs["chess"]:release()
     end
+    ---@diagnostic disable-next-line: cast-local-type
     imgs = nil
     font = nil
     font_pix5 = nil
@@ -293,6 +295,22 @@ local function init(args)
             lgx.draw(img, hand_quad, self.x, self.y)
         end)
         data.hand:apply_effect("pointing", { range = 2, speed = 0.75 })
+    end
+
+    do
+        local w, h = imgs.banner:getDimensions()
+
+        local obj = JM.GameObject:new(96 + 64, 40, w, h, 1, 1)
+        obj.ox = obj.w * 0.5 -- - 20
+        obj.oy = obj.h * 0.5 -- - 40
+        -- obj:apply_effect("swing", { speed = 4, range = math.pi * 0.25 * 0.0075 })
+        obj:apply_effect("float", { range = 2, speed = 3.5 })
+        data.banner_obj = obj
+        obj:set_custom_draw(function(self)
+            local lgx = love.graphics
+            lgx.setColor(1, 1, 1)
+            lgx.draw(imgs.banner, self.x, self.y)
+        end)
     end
 
     _G.Play_song("title")
@@ -605,6 +623,8 @@ local function update(dt)
         hand.y = obj.y + obj.h * 0.5 - hand.h * 0.5
         hand.x = obj.x - 3
         hand:update(dt)
+
+        data.banner_obj:update(dt)
     end
 end
 
@@ -651,10 +671,7 @@ local __draw__ = {
     ---
     [States.options] = function(self, cam)
         data.container:draw(cam)
-
-        local lgx = love.graphics
-        lgx.setColor(1, 1, 1)
-        lgx.draw(imgs.banner, 96 + 64, 48)
+        data.banner_obj:draw(cam)
     end,
     ---
     ---
@@ -753,7 +770,7 @@ local function draw(cam)
         and state ~= States.credits
     then
         font_pix5:push()
-        font_pix5:set_color(color)
+        font_pix5:set_color(JM_Utils:get_rgba3("5f5766"))
         font_pix5:printf(string.format("%s %s", "versão ", "1.0.0"), 0, 16 * 10, SCREEN_WIDTH - 16, "right")
         font_pix5:pop()
     end
