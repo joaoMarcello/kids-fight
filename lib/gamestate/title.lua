@@ -666,7 +666,7 @@ local __draw__ = {
         ---@type love.Image
         local logo = imgs["logo_high"]
         local w, h = logo:getDimensions()
-        love.graphics.draw(logo, SCREEN_WIDTH * 0.5 - w * 0.5, 16)
+        love.graphics.draw(logo, SCREEN_WIDTH * 0.5 - w * 0.5, 8)
     end,
     ---
     [States.options] = function(self, cam)
