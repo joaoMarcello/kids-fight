@@ -128,12 +128,13 @@ local bt_draw = function(self)
     local x, y = self:rect()
     local right, bottom = self.right, self.bottom
     local on_focus = self.on_focus
+    local Utils = JM_Utils
     local font = JM:get_font("pix8")
 
     if on_focus then
-        lgx.setColor(JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("664433")))
+        lgx.setColor(Utils:get_rgba3("5d6633")) --99752e
     else
-        lgx.setColor(JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("664433")))
+        lgx.setColor(Utils:get_rgba3("243324")) --664433
     end
     lgx.polygon("fill",
         x + 4 + 2, y + 2,
@@ -143,9 +144,9 @@ local bt_draw = function(self)
     )
 
     if on_focus then
-        lgx.setColor(JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("d96c21")))
+        lgx.setColor(Utils:get_rgba3("3dbf26")) -- e6c45c
     else
-        lgx.setColor(JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("99752e")))
+        lgx.setColor(Utils:get_rgba3("336634")) -- 99752e
     end
     lgx.polygon("fill",
         x + 4, y,
@@ -156,9 +157,9 @@ local bt_draw = function(self)
 
     font:push()
     if on_focus then
-        font:set_color(JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("f4ffe8")))
+        font:set_color(Utils:get_rgba3("e8fff0")) -- 664433
     else
-        font:set_color(JM_Utils:get_rgba(JM_Utils:hex_to_rgba_float("bfbf91")))
+        font:set_color(Utils:get_rgba3("2e9955")) -- bfbf91
     end
     font:printf(self.text, self.x - 32, self.y + (self.h - font.__font_size - font.__line_space) * 0.5,
         self.w + 64, "center")
@@ -431,22 +432,22 @@ local function draw(cam)
     local Utils = JM_Utils
     local lgx = love.graphics
     local x, y, w, h = TILE * 5, TILE * 1.5, TILE * 10, TILE * 9
-    lgx.setColor(JM_Utils:hex_to_rgba_float("665c57"))
-    lgx.rectangle("fill", x, y + 4, w, h, 2, 2)
-    lgx.setColor(JM_Utils:hex_to_rgba_float("eef2d1"))
+    -- lgx.setColor(Utils:hex_to_rgba_float("665c57")) --665c57
+    -- lgx.rectangle("fill", x, y + 4, w, h, 2, 2)
+    lgx.setColor(Utils:hex_to_rgba_float("eef2d1")) --eef2d1
     lgx.rectangle("fill", x, y, w, h, 2, 2)
 
     local line_width = lgx.getLineWidth()
     lgx.setLineWidth(2)
-    lgx.setColor(JM_Utils:hex_to_rgba_float("e6c45c"))
+    lgx.setColor(Utils:hex_to_rgba_float("a2d9ab")) --e6c45c
     lgx.rectangle("line", x, y, w, h, 2, 2)
     lgx.setLineWidth(line_width)
 
     cam:detach()
-    local font = _G.FONT_THALEAH --JM:get_font()
+    local font = _G.FONT_THALEAH              --JM:get_font()
     font:push()
-    font:set_color(Utils:get_rgba(Utils:hex_to_rgba_float("d96c21")))
-    font:printx("<effect=wave>PAUSA", 0, 32, State.screen_w, "center")
+    font:set_color(Utils:get_rgba3("336634")) --d96c21
+    font:printx("<effect=wave>PAUSA", 0, y + 8, State.screen_w, "center")
     font:pop()
     -- love.graphics.setColor(1, 1, 0)
     -- love.graphics.printf("PAUSE", 0, State.screen_h * 0.15, State.screen_w, "center")
