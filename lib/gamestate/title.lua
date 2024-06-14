@@ -579,6 +579,8 @@ local resize = function(w, h)
 end
 
 local function update(dt)
+    State.use_vpad = false
+
     data.layers[1]:update(dt)
 
     if data.container then
