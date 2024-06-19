@@ -958,7 +958,7 @@ function data:skip_intro()
         local objs = self.group.list
 
         for i = #objs, 1, -1 do
-            ---@type Kid|JM.Emitter|any
+            ---@type Kid|JM.Emitter|Projectile|any
             local k = objs[i]
 
             if k.is_kid and not k.__remove and k ~= player then
@@ -969,6 +969,10 @@ function data:skip_intro()
                 and not k.__remove
             then
                 k:destroy()
+                k:remove()
+            elseif k:is_an(package.loaded["lib.object.projectile"])
+                and not k.__remove
+            then
                 k:remove()
             end
         end -- end FOR
