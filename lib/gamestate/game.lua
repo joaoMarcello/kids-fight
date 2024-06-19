@@ -21,7 +21,9 @@ local State = JM.Scene:new {
     canvas_filter = _G.CANVAS_FILTER or 'linear',
     cam_scale = 1,
     use_canvas_layer = true,
+    -- scale_type = "pixel perfect",
     use_vpad = _G.USE_VPAD,
+    color = "3dbf26",
 }
 
 ---@enum GameState.Game.States
@@ -37,7 +39,6 @@ local States = {
     endGame = 9,
 }
 
-State:set_color(JM_Utils:hex_to_rgba_float("3dbf26"))
 local imgs
 --============================================================================
 ---@class GameState.Game.Data
