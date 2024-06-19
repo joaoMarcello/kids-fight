@@ -10,25 +10,18 @@ end
 
 ---@class GameState.Victory : JM.Scene
 local State = JM.Scene:new {
-    x = nil,
-    y = nil,
-    w = nil,
-    h = nil,
     canvas_w = _G.SCREEN_WIDTH or 320,
     canvas_h = _G.SCREEN_HEIGHT or 180,
     tile = _G.TILE,
     subpixel = _G.SUBPIXEL or 3,
     canvas_filter = _G.CANVAS_FILTER or 'linear',
-    bound_top = 0,
-    bound_left = 0,
-    bound_right = 1366,
-    bound_bottom = 1366,
-    cam_scale = 1,
     use_canvas_layer = true,
+    scale_type = _G.SCALE_TYPE,
+    color = SCENE_COLOR,
 }
 
 -- State:set_color(JM_Utils:hex_to_rgba_float("2c2433"))
-State:set_color(0, 0, 0, 1)
+-- State:set_color(0, 0, 0, 1)
 --============================================================================
 ---@class GameState.Victory.Data
 local data = {}

@@ -16,8 +16,10 @@ local State = JM.Scene:new {
     tile = _G.TILE,
     subpixel = _G.SUBPIXEL or 3,
     canvas_filter = _G.CANVAS_FILTER or 'linear',
+    scale_type = _G.SCALE_TYPE,
     cam_scale = 1,
     use_canvas_layer = true,
+    color = SCENE_COLOR,
 }
 
 ---@enum GameState.Title.States
@@ -32,7 +34,7 @@ local States = {
 }
 
 -- State:set_color(JM_Utils:hex_to_rgba_float("b3f1ff"))
-State:set_color(1, 0, 0, 1)
+-- State:set_color(1, 0, 0, 1)
 --============================================================================
 ---@class GameState.Title.Data
 local data = {}

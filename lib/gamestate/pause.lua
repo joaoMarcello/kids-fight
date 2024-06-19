@@ -8,20 +8,17 @@ end
 
 ---@class GameState.Pause : JM.Scene
 local State = JM.Scene:new {
-    x = nil,
-    y = nil,
-    w = nil,
-    h = nil,
     canvas_w = _G.SCREEN_WIDTH or 320,
     canvas_h = _G.SCREEN_HEIGHT or 180,
     tile = _G.TILE,
     subpixel = _G.SUBPIXEL or 3,
     canvas_filter = _G.CANVAS_FILTER or 'linear',
-    cam_scale = 1,
+    scale_type = _G.SCALE_TYPE,
     use_canvas_layer = true,
+    color = SCENE_COLOR,
 }
 
-State:set_color(JM.Utils:hex_to_rgba_float("242833"))
+-- State:set_color(JM.Utils:hex_to_rgba_float("242833"))
 
 --============================================================================
 ---@class GameState.Pause.Data

@@ -21,9 +21,9 @@ local State = JM.Scene:new {
     canvas_filter = _G.CANVAS_FILTER or 'linear',
     cam_scale = 1,
     use_canvas_layer = true,
-    -- scale_type = "pixel perfect",
+    scale_type = _G.SCALE_TYPE,
     use_vpad = _G.USE_VPAD,
-    color = "3dbf26",
+    color = SCENE_COLOR,
 }
 
 ---@enum GameState.Game.States
@@ -1064,7 +1064,7 @@ local function draw(cam)
     -- State.canvas:setFilter("nearest", "nearest")
 
     lgx.setColor(1, 1, 1)
-    lgx.draw(imgs["field"])
+    lgx.draw(imgs["field"], -16, -16)
 
     -- data.world:draw(true, nil, cam)
 

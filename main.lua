@@ -14,7 +14,9 @@ function love.load()
     _G.WEB = true
     _G.SUBPIXEL = 4
     _G.TILE = 16
-    _G.CANVAS_FILTER = "linear"
+    _G.CANVAS_FILTER = "nearest"
+    _G.SCALE_TYPE = "pixel perfect"
+    _G.SCENE_COLOR = { 0.1, 0.1, 0.1, 1 }
     _G.TARGET = love.system.getOS()
     _G.USE_VPAD = false
 

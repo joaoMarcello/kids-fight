@@ -18,13 +18,15 @@ local State = JM.Scene:new {
     tile = _G.TILE,
     subpixel = _G.SUBPIXEL or 3,
     canvas_filter = _G.CANVAS_FILTER or 'linear',
+    scale_type = _G.SCALE_TYPE,
     cam_scale = 1,
     show_border = false,
     use_canvas_layer = true,
     use_vpad = _G.USE_VPAD,
+    color = SCENE_COLOR,
 }
 
-State:set_color(JM.Utils:hex_to_rgba_float("c5bde6"))
+-- State:set_color(JM.Utils:hex_to_rgba_float("c5bde6"))
 --============================================================================
 ---@class GameState.HowToPlay.Data
 local data = {
