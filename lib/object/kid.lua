@@ -52,7 +52,57 @@ local random = love.math.random
 local sin = math.sin
 
 ---@param self Kid
+local function check_parry(self)
+    if self.is_enemy then
+        return false
+    end
+
+    local kbd = self.body2
+
+    local x, y, w, h = kbd:rect()
+    x = x - 16
+    w = w + 32
+    y = y - 8
+    h = h + 16
+    local items = self.world:get_items_in_cell_obj(x, y, w, h, kbd.empty_table())
+
+    if items then
+        local success = false
+
+        for item, _ in next, items do
+            local obj = item.holder --[[@as Projectile|nil]]
+
+            if obj and obj:is_an(Projectile)
+                and not obj.__remove
+                and not obj:on_ground()
+                and obj.direction ~= self.direction
+                and obj.body:check_collision(x, y, w, h)
+            then
+                local cond = math.abs(self:get_shadow():bottom()
+                    - obj.body2.y) <= 16
+                if cond then
+                    obj:parry()
+                    success = true
+                end
+            end
+        end
+
+        return success
+    end
+
+    return false
+    -- for i = 1, self.group.N do
+    --     local obj = list[i] --[[@as Projectile]]
+    --     if obj.is_projectile then
+
+    --     end
+    -- end
+end
+
+---@param self Kid
 local function throw_stone(self)
+    local control = self.controller
+
     if self.stones <= 0 then return false end
     local bd = self.body2
 
@@ -576,8 +626,15 @@ function Kid:attack()
             return false
         end
     end
+    local success = false
 
-    local success = self:atk_action()
+    success = check_parry(self)
+    if success then
+        self.gamestate:pause(0.15, pause_action, self)
+        return
+    end
+
+    success = self:atk_action() or success
 
     if not success and not self.is_enemy then
         Play_sfx("atk fail", true)

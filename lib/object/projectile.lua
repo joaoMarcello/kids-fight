@@ -102,6 +102,26 @@ function Projectile:remove()
     self.body2 = nil
 end
 
+function Projectile:parry()
+    self.direction = -self.direction
+    self.time_force = 0.5
+
+    local bd = self.body
+    bd.speed_x = MAX_SPEED * self.direction * 1.2
+    bd.allowed_gravity = false
+    -- bd.allowed_air_dacc = false
+    bd.dacc_x = nil
+    bd.dacc_y = nil
+    bd.speed_y = 0
+    bd.force_y = 0.0
+    bd.acc_y = 0.0
+
+    -- bd = self.body2
+    -- bd.speed_y = 0.0
+    -- bd.dacc_y = 0.0
+    -- bd.force_y = 0.0
+end
+
 function Projectile:on_ground()
     local bd = self.body   -- projectile collider
     local bd2 = self.body2 -- the projectile shadow
