@@ -167,13 +167,13 @@ function Projectile:update(dt)
     )
 
     if items then
-        for item, _ in next, items do
-            ---@type JM.Physics.Collide
-            local item = item
-            ---@type Kid|nil
-            local kid = item.holder
+        local Kid_class = package.loaded["lib.object.kid"]
 
-            if kid and kid.is_kid then
+        for item, _ in next, items do
+            local kid = item.holder --[[@as Kid|nil]]
+
+            if kid and kid:type_of(Kid_class)
+            then
                 local kbd = kid.body2
 
                 if bd:check_collision(kbd.x, kbd:bottom() - 16, kbd.w, 16)
