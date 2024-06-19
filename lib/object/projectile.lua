@@ -192,7 +192,7 @@ function Projectile:update(dt)
         for item, _ in next, items do
             local kid = item.holder --[[@as Kid|nil]]
 
-            if kid and kid:type_of(Kid_class)
+            if kid and kid:is_an(Kid_class)
             then
                 local kbd = kid.body2
 
