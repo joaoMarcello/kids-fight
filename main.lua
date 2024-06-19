@@ -219,8 +219,20 @@ end
 
 function love.touchpressed(id, x, y, dx, dy, pressure)
     if not _G.USE_VPAD then
+        do
+            local scene = JM.SceneManager.scene
+            if scene and (not scene.is_splash_screen)
+            -- and scene ~= package.loaded["lib.gamestate.howToPlay"]
+            then
+                scene.use_vpad = true
+            end
+            local P1 = JM.ControllerManager.P1
+            P1:set_vpad(JM.Vpad)
+            P1:set_state(P1.State.vpad)
+        end
         _G.USE_VPAD = true
-        JM.Vpad:resize(love.graphics.getDimensions())
+        JM:to_fullscreen()
+        return JM.Vpad:resize(love.graphics.getDimensions())
     end
     return JM:touchpressed(id, x, y, dx, dy, pressure)
 end
