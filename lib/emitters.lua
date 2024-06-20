@@ -59,9 +59,9 @@ Emitters.FallDust = function(self, obj)
     return e
 end
 
-Emitters.Paft = function(self, x, y)
+Emitters.Paft = function(self, x, y, tp)
     local e = PS.Emitter:new(x, 1000, 16, 16, nil, 2)
-    local p = Particles.Paft:new(x, y)
+    local p = Particles.Paft:new(x, y, tp)
     e:add_particle(p)
     e.update_order = 1000
     e.lifetime = -1000
