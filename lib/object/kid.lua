@@ -52,72 +52,6 @@ local random = love.math.random
 local sin = math.sin
 
 ---@param self Kid
-local function check_parry(self)
-    if self.time_parry ~= 0 then return false end
-    if self.is_enemy then
-        return false
-    end
-
-    local kbd = self.body2
-
-    local x, y, w, h = kbd:rect()
-    x = x - 16
-    w = w + 32
-    y = y - 8
-    h = h + 16
-    local items = self.world:get_items_in_cell_obj(x, y, w, h, kbd.empty_table())
-
-    if items then
-        local success = false
-
-        for item, _ in next, items do
-            local obj = item.holder --[[@as Projectile|nil]]
-
-            if obj and obj:is_an(Projectile)
-                and not obj.__remove
-                and not obj:on_ground()
-                and obj.direction ~= self.direction
-                and obj.body:check_collision(x, y, w, h)
-            then
-                local obd = obj.body
-                local cx = obd.x + obd.w * 0.5
-
-                local cond =
-                    (obj.direction < 0 and cx > kbd.x + kbd.w * 0.5)
-                    or (obj.direction > 0 and cx < kbd.x + kbd.w * 0.5)
-
-                if cond then
-                    local kshadow = self.body
-                    local pshadow = obj.body2
-
-                    local kcy = kshadow.y + kshadow.h * 0.5
-                    local pcy = pshadow.y + pshadow.h * 0.5
-
-                    cond = math.abs(kcy - pcy) <= 16
-                end
-                -- cond = cond and math.abs(self:get_shadow():bottom()
-                --     - obj.body2.y) <= 16
-
-                if cond then
-                    obj:parry()
-                    success = true
-                end
-            end
-        end
-
-        return success
-    end
-
-    return false
-    -- for i = 1, self.group.N do
-    --     local obj = list[i] --[[@as Projectile]]
-    --     if obj.is_projectile then
-
-    --     end
-    -- end
-end
-
----@param self Kid
 local function throw_stone(self)
     local control = self.controller
 
@@ -515,6 +449,8 @@ function Kid:keypressed(key)
         or P1:pressed(Button.R, key)
     then
         self:attack()
+    elseif P1:pressed(Button.Y, key) then
+        self:check_parry()
     end
 
     P1:set_state(last)
@@ -632,8 +568,83 @@ function Kid:add_stone()
     return false
 end
 
+---@private
+function Kid:check_parry()
+    if self.time_parry ~= 0 then return false end
+    -- if self.is_enemy then
+    --     return false
+    -- end
+
+    self.time_parry = 0.15
+
+    local kbd = self.body2
+
+    local x, y, w, h = kbd:rect()
+    x = x - 16
+    w = w + 32
+    y = y - 8
+    h = h + 16
+    local items = self.world:get_items_in_cell_obj(x, y, w, h, kbd.empty_table())
+
+    if items then
+        local success = false
+
+        for item, _ in next, items do
+            local obj = item.holder --[[@as Projectile|nil]]
+
+            if obj and obj:is_an(Projectile)
+                and not obj.__remove
+                and not obj:on_ground()
+                and obj.direction ~= self.direction
+                and obj.body:check_collision(x, y, w, h)
+            then
+                local obd = obj.body
+                local cx = obd.x + obd.w * 0.5
+
+                local cond =
+                    (obj.direction < 0 and cx > kbd.x + kbd.w * 0.5)
+                    or (obj.direction > 0 and cx < kbd.x + kbd.w * 0.5)
+
+                if cond then
+                    local kshadow = self.body
+                    local pshadow = obj.body2
+
+                    local kcy = kshadow.y + kshadow.h * 0.5
+                    local pcy = pshadow.y + pshadow.h * 0.5
+
+                    cond = math.abs(kcy - pcy) <= 16
+                end
+                -- cond = cond and math.abs(self:get_shadow():bottom()
+                --     - obj.body2.y) <= 16
+
+                if cond then
+                    obj:parry()
+                    success = true
+                end
+            end
+        end
+
+        if success then
+            self.time_parry = 0.0
+            if not self.is_enemy then
+                self.gamestate:pause(0.15, pause_action, self)
+            end
+        end
+        return success
+    end
+
+    return false
+    -- for i = 1, self.group.N do
+    --     local obj = list[i] --[[@as Projectile]]
+    --     if obj.is_projectile then
+
+    --     end
+    -- end
+end
+
 function Kid:attack()
     if self:is_dead() then return false end
+    if self.time_parry ~= 0 then return false end
 
     do
         local state = self.state
@@ -648,10 +659,10 @@ function Kid:attack()
     end
     local success = false
 
-    success = check_parry(self)
+    success = self.is_enemy and self:check_parry()
     if success then
-        self.time_parry = 0.15
-        self.gamestate:pause(0.15, pause_action, self)
+        -- self.time_parry = 0.15
+        -- self.gamestate:pause(0.15, pause_action, self)
         return
     end
 
