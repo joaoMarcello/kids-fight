@@ -120,6 +120,9 @@ function Projectile:parry()
     -- bd.speed_y = 0.0
     -- bd.dacc_y = 0.0
     -- bd.force_y = 0.0
+
+    local e = Emitters:Paft(bd.x + bd.w * 0.5, bd.y + bd.h * 0.5, 2)
+    self:add_object(e)
 end
 
 function Projectile:on_ground()
@@ -194,12 +197,24 @@ function Projectile:update(dt)
 
             if kid and kid:is_an(Kid_class)
             then
-                local kbd = kid.body2
+                local kbd = kid.body2 -- kids's body
+                local kshadow = kid:get_shadow()
 
-                if bd:check_collision(kbd.x, kbd:bottom() - 16, kbd.w, 16)
-                    and kid:distance() <= 8
+                -- if bd:check_collision(kbd.x, kbd:bottom() - 16, kbd.w, 16)
+                --     and kid:distance() <= 8
+                -- then
+
+
+                -- if kshadow:check_collision(
+                --         bd.x - 8, bd.y - 14, bd.w + 16, bd.h + 14)
+                --     and kid:distance() <= 8
+                -- then
+                if JM.Physics.collision_rect(
+                        kbd.x - 8, kbd.y + kbd.h * 0.75 - 8, kbd.w + 16, kbd.h * 0.25 + 16,
+                        bd.x, bd.y, bd.w, bd.h
+                    )
                 then
-                    if self:on_ground() then
+                    if self:on_ground() and (not kid:is_dead()) then
                         local success = kid:add_stone()
 
                         if success then
@@ -216,7 +231,6 @@ function Projectile:update(dt)
                     and bd:check_collision(kbd:rect())
                 then
                     if self.direction ~= kid.direction then
-                        local kshadow = kid:get_shadow()
                         local pshadow = self.body2
 
                         local kcy = kshadow.y + kshadow.h * 0.5
