@@ -14,8 +14,8 @@ function love.load()
     _G.WEB = true
     _G.SUBPIXEL = 4
     _G.TILE = 16
-    _G.CANVAS_FILTER = "nearest"
-    _G.SCALE_TYPE = "pixel perfect"
+    _G.CANVAS_FILTER = "linear"
+    _G.SCALE_TYPE = "keep proportions"
     _G.SCENE_COLOR = { 0.1, 0.1, 0.1, 1 }
     _G.TARGET = love.system.getOS()
     _G.USE_VPAD = false
@@ -75,6 +75,7 @@ function love.load()
     P1.button_to_key[P1.Button.B] = { 'escape', 'backspace' }
     P1.button_to_key[P1.Button.R] = { 'f', 'rshift' }
     P1.button_to_key[P1.Button.L] = { 'f', 'lshift' }
+    P1.button_to_key[P1.Button.Y] = { 'v', 'h', 'tab' }
     P1:set_vpad(JM.Vpad)
     do
         local pad = JM.Vpad
