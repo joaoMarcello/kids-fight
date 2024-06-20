@@ -53,6 +53,7 @@ local sin = math.sin
 
 ---@param self Kid
 local function check_parry(self)
+    if self.time_parry ~= 0 then return false end
     if self.is_enemy then
         return false
     end
@@ -78,8 +79,25 @@ local function check_parry(self)
                 and obj.direction ~= self.direction
                 and obj.body:check_collision(x, y, w, h)
             then
-                local cond = math.abs(self:get_shadow():bottom()
-                    - obj.body2.y) <= 16
+                local obd = obj.body
+                local cx = obd.x + obd.w * 0.5
+
+                local cond =
+                    (obj.direction < 0 and cx > kbd.x + kbd.w * 0.5)
+                    or (obj.direction > 0 and cx < kbd.x + kbd.w * 0.5)
+
+                if cond then
+                    local kshadow = self.body
+                    local pshadow = obj.body2
+
+                    local kcy = kshadow.y + kshadow.h * 0.5
+                    local pcy = pshadow.y + pshadow.h * 0.5
+
+                    cond = math.abs(kcy - pcy) <= 16
+                end
+                -- cond = cond and math.abs(self:get_shadow():bottom()
+                --     - obj.body2.y) <= 16
+
                 if cond then
                     obj:parry()
                     success = true
@@ -234,6 +252,8 @@ function Kid:__constructor__(gender, direction, is_enemy, move_type, ID)
         self.move_x_value = 28
         self.move_y_value = 40
         self.move_delay = 0.5
+
+        self.time_parry = 0.0
         -- self:update(0)
     end
 
@@ -630,6 +650,7 @@ function Kid:attack()
 
     success = check_parry(self)
     if success then
+        self.time_parry = 0.15
         self.gamestate:pause(0.15, pause_action, self)
         return
     end
@@ -973,6 +994,13 @@ function Kid:update(dt)
         else
             self.is_visible = false
             return
+        end
+    end
+
+    if self.time_parry ~= 0 then
+        self.time_parry = self.time_parry - dt
+        if self.time_parry <= 0 then
+            self.time_parry = 0
         end
     end
 
