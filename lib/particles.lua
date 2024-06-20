@@ -41,8 +41,14 @@ local FallDust = {
 }
 
 local Paft = {
-    new = function(self, x, y)
-        local p = PS.Particle:new(IMG, x, y, 16, 16, 0, 0, 16, 16)
+    new = function(self, x, y, tp)
+        tp = tp or 1
+        local p
+        if tp == 1 then
+            p = PS.Particle:new(IMG, x, y, 16, 16, 0, 0, 16, 16)
+        else
+            p = PS.Particle:new(IMG, x, y, 16, 16, 16, 16, 16, 16)
+        end
         p.lifetime = 0.1
         p.draw = self.draw
         return p
