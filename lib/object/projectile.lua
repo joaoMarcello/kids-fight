@@ -216,8 +216,16 @@ function Projectile:update(dt)
                     and bd:check_collision(kbd:rect())
                 then
                     if self.direction ~= kid.direction then
-                        local cond = math.abs(kid:get_shadow():bottom()
-                            - bd2.y) <= 14
+                        local kshadow = kid:get_shadow()
+                        local pshadow = self.body2
+
+                        local kcy = kshadow.y + kshadow.h * 0.5
+                        local pcy = pshadow.y + pshadow.h * 0.5
+
+                        local cond = math.abs(kcy - pcy) <= 16
+
+                        -- local cond = math.abs(kid:get_shadow():bottom()
+                        --     - bd2.y) <= 14
 
                         local success = cond and kid:damage(1, self)
 
