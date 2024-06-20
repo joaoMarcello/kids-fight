@@ -695,7 +695,7 @@ local __draw__ = {
                 "©2024, `#334266`Limoeiro Fight</color no-space>, por `#000000`JM`#-`.",
                 0,
                 math.max(py + 16, 16 * 6),
-                SCREEN_WIDTH, "center")
+                SCREEN_WIDTH, "center", true)
 
             if py < 16 * 4.25 then
                 local P1 = JM.ControllerManager.P1
