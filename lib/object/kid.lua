@@ -570,6 +570,10 @@ end
 
 ---@private
 function Kid:check_parry()
+    do
+        return false
+    end
+
     if self.time_parry ~= 0 then return false end
     -- if self.is_enemy then
     --     return false
