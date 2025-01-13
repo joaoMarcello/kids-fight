@@ -19,6 +19,7 @@ function love.load()
     _G.SCENE_COLOR = { 0.1, 0.1, 0.1, 1 }
     _G.TARGET = love.system.getOS()
     _G.USE_VPAD = false
+    JM:set_default_dpi(1)
 
     if WEB then
         JM.Sound:set_song_mode("static")
