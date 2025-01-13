@@ -22,6 +22,9 @@ function love.conf(t)
     -- t.window.width = 975  --320 * 2.5 -- The window width (number)
     -- t.window.height = 450 -- The window height (number)
 
+    -- t.window.width = 948
+    -- t.window.height = 533
+
     t.window.width = 320 * 3  -- The window width (number)
     t.window.height = 180 * 3 -- The window height (number)
 
