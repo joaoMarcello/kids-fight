@@ -165,7 +165,7 @@ end
 
 ---@param self JM.GUI.Component
 local gained_focus = function(self)
-    self:apply_effect("earthquake", { range_y = 0, duration_x = 0.3, range_x = 5 })
+    self:apply_effect("earthquake", { range_y = 0, duration_x = 0.3, range_x = 5 }, true)
 end
 
 ---@param self JM.GUI.Component
