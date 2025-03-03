@@ -214,7 +214,9 @@ function Projectile:update(dt)
                         bd.x, bd.y, bd.w, bd.h
                     )
                 then
-                    if self:on_ground() and (not kid:is_dead()) then
+                    if self:on_ground() and (not kid:is_dead())
+                        and (not kid.is_jump)
+                    then
                         local success = kid:add_stone()
 
                         if success then
