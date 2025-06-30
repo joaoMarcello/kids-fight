@@ -6,7 +6,7 @@ function love.load()
     lgx.setBackgroundColor(0.1, 0.1, 0.1, 1)
     lgx.setDefaultFilter("nearest", "nearest")
     lgx.setLineStyle("rough")
-    love.mouse.setVisible(true)
+    love.mouse.setVisible(false)
 
     _G.SCREEN_WIDTH = 320 --398
     _G.SCREEN_HEIGHT = 180
@@ -19,7 +19,12 @@ function love.load()
     _G.SCENE_COLOR = { 0.1, 0.1, 0.1, 1 }
     _G.TARGET = love.system.getOS()
     _G.USE_VPAD = false
-    JM:set_default_dpi(1)
+    -- JM:set_default_dpi(1)
+
+    JM:set_global_config{
+        dpi = 1,
+        subpixel = 4,
+    }
 
     if WEB then
         JM.Sound:set_song_mode("static")
@@ -159,7 +164,7 @@ function love.load()
     end)
 
     if WEB then
-        JM:show_fullscreen_button()
+        -- JM:show_fullscreen_button()
     end
     return JM:load_initial_state("lib.gamestate.title", true, true)
 end
