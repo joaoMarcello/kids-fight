@@ -28,9 +28,10 @@ function love.conf(t)
     t.window.width = 320 * 3  -- The window width (number)
     t.window.height = 180 * 3 -- The window height (number)
 
-    -- t.window.width = 800
-    -- t.window.height = 600
-    t.window.x = 32
+    t.window.width = 1280
+    t.window.height = 720
+
+    t.window.x = 0
     t.window.y = 32
     t.window.fullscreen = false                  -- Enable fullscreen (boolean)
     t.window.fullscreentype = _G.FULLSCREEN_TYPE -- "desktop" / "exclusive"
